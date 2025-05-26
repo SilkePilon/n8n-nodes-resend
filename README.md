@@ -1,3 +1,9 @@
+<h1 align="center">
+  <br>
+  <a href="/"><img src=".github/media/resend_logo.png" alt="..." width="900"></a>
+  <br>
+</h1>
+
 # Resend Nodes for n8n
 
 ## Overview
