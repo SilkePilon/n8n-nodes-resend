@@ -11,7 +11,7 @@ export class Resend implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Resend',
 		name: 'resend',
-		icon: 'file:Resendv2.svg',
+		icon: 'file:Resend.svg',
 		group: ['output'],
 		version: 1,
 		description: 'Interact with Resend API for emails, domains, API keys, broadcasts, audiences, and contacts',
@@ -352,6 +352,20 @@ export class Resend implements INodeType {
 				},
 				description: 'The ID of the email to retrieve, update, or cancel',
 			},
+			{
+				displayName: 'Scheduled At',
+				name: 'scheduled_at',
+				type: 'string',
+				default: '',
+				placeholder: '2024-08-05T11:52:01.858Z',
+				displayOptions: {
+					show: {
+						resource: ['email'],
+						operation: ['update'],
+					},
+				},
+				description: 'Schedule email to be sent later. The date should be in ISO 8601 format (e.g., 2024-08-05T11:52:01.858Z).',
+			},
 
 			// DOMAIN PROPERTIES
 			{
@@ -419,6 +433,46 @@ export class Resend implements INodeType {
 					},
 				],
 			},
+			{
+				displayName: 'Domain Update Options',
+				name: 'domainUpdateOptions',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['domains'],
+						operation: ['update'],
+					},
+				},
+				options: [
+					{
+						displayName: 'Click Tracking',
+						name: 'click_tracking',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to track clicks within the body of each HTML email',
+					},
+					{
+						displayName: 'Open Tracking',
+						name: 'open_tracking',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to track the open rate of each email',
+					},
+					{
+						displayName: 'TLS',
+						name: 'tls',
+						type: 'options',
+						options: [
+							{ name: 'Opportunistic', value: 'opportunistic' },
+							{ name: 'Enforced', value: 'enforced' },
+						],
+						default: 'opportunistic',
+						description: 'TLS setting for email delivery. Opportunistic attempts secure connection but falls back to unencrypted if needed. Enforced requires TLS and will not send if unavailable.',
+					},
+				],
+			},
 
 			// API KEY PROPERTIES
 			{
@@ -470,6 +524,21 @@ export class Resend implements INodeType {
 				},
 				description: 'The permission level for the API key',
 			},
+			{
+				displayName: 'Domain ID',
+				name: 'domainId',
+				type: 'string',
+				default: '',
+				placeholder: '4dd369bc-aa82-4ff3-97de-514ae3000ee0',
+				displayOptions: {
+					show: {
+						resource: ['apiKeys'],
+						operation: ['create'],
+						permission: ['sending_access'],
+					},
+				},
+				description: 'Restrict an API key to send emails only from a specific domain. This is only used when the permission is set to sending access.',
+			},
 
 			// BROADCAST PROPERTIES
 			{
@@ -516,6 +585,84 @@ export class Resend implements INodeType {
 					},
 				},
 				description: 'The ID of the audience for this broadcast',
+			},
+			{
+				displayName: 'Broadcast Content',
+				name: 'broadcastContent',
+				type: 'collection',
+				placeholder: 'Add Content',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['broadcasts'],
+						operation: ['create', 'update'],
+					},
+				},				options: [
+					{
+						displayName: 'Audience ID',
+						name: 'audience_id',
+						type: 'string',
+						default: '',
+						placeholder: 'aud_123456',
+						displayOptions: {
+							show: {
+								'/operation': ['update'],							},
+						},
+						description: 'The ID of the audience you want to send to (for update operation)',
+					},
+					{
+						displayName: 'From',
+						name: 'from',
+						type: 'string',
+						default: '',
+						placeholder: 'you@example.com',
+						description: 'Sender email address. To include a friendly name, use the format &quot;Your Name &lt;sender@domain.com&gt;&quot;.',
+					},
+					{
+						displayName: 'HTML Content',
+						name: 'html',
+						type: 'string',
+						default: '',
+						typeOptions: {
+							multiline: true,
+						},
+						placeholder: '<p>Your HTML content here with {{{FIRST_NAME|there}}} and {{{RESEND_UNSUBSCRIBE_URL}}}</p>',
+						description: 'The HTML version of the message. You can use variables like {{{FIRST_NAME|fallback}}} and {{{RESEND_UNSUBSCRIBE_URL}}}.',
+					},
+					{
+						displayName: 'Name',
+						name: 'name',
+						type: 'string',
+						default: '',
+						placeholder: 'Internal broadcast name',
+						description: 'The friendly name of the broadcast. Only used for internal reference.',
+					},
+					{
+						displayName: 'Reply To',
+						name: 'reply_to',
+						type: 'string',
+						default: '',
+						placeholder: 'noreply@example.com',
+						description: 'Reply-to email address. For multiple addresses, use comma-separated values.',
+					},
+					{
+						displayName: 'Subject',
+						name: 'subject',
+						type: 'string',						default: '',
+						placeholder: 'Newsletter Subject',
+						description: 'Email subject',
+					},
+					{
+						displayName: 'Text Content',
+						name: 'text',
+						type: 'string',
+						default: '',
+						typeOptions: {
+							multiline: true,						},
+						placeholder: 'Your plain text content here',
+						description: 'The plain text version of the message',
+					},
+				],
 			},
 
 			// AUDIENCE PROPERTIES
@@ -567,6 +714,23 @@ export class Resend implements INodeType {
 				description: 'The email address of the contact',
 			},
 			{
+				displayName: 'Update By',
+				name: 'updateBy',
+				type: 'options',
+				options: [
+					{ name: 'Contact ID', value: 'id' },
+					{ name: 'Email Address', value: 'email' },
+				],
+				default: 'id',
+				displayOptions: {
+					show: {
+						resource: ['contacts'],
+						operation: ['update'],
+					},
+				},
+				description: 'Choose whether to update the contact by ID or email address',
+			},
+			{
 				displayName: 'Contact ID',
 				name: 'contactId',
 				type: 'string',
@@ -576,10 +740,42 @@ export class Resend implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['contacts'],
-						operation: ['get', 'update', 'delete'],
+						operation: ['get', 'delete'],
 					},
 				},
 				description: 'The ID of the contact',
+			},
+			{
+				displayName: 'Contact ID',
+				name: 'contactId',
+				type: 'string',
+				required: true,
+				default: '',
+				placeholder: 'con_123456',
+				displayOptions: {
+					show: {
+						resource: ['contacts'],
+						operation: ['update'],
+						updateBy: ['id'],
+					},
+				},
+				description: 'The ID of the contact to update',
+			},
+			{
+				displayName: 'Contact Email',
+				name: 'contactEmail',
+				type: 'string',
+				required: true,
+				default: '',
+				placeholder: 'contact@example.com',
+				displayOptions: {
+					show: {
+						resource: ['contacts'],
+						operation: ['update'],
+						updateBy: ['email'],
+					},
+				},
+				description: 'The email address of the contact to update',
 			},
 			{
 				displayName: 'Audience ID',
@@ -591,13 +787,13 @@ export class Resend implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['contacts'],
-						operation: ['create', 'list'],
+						operation: ['create', 'list', 'update'],
 					},
 				},
 				description: 'The ID of the audience',
 			},
 			{
-				displayName: 'Additional Contact Fields',
+				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
 				placeholder: 'Add Field',
@@ -614,21 +810,21 @@ export class Resend implements INodeType {
 						name: 'first_name',
 						type: 'string',
 						default: '',
-						description: 'First name of the contact',
+						description: 'The first name of the contact',
 					},
 					{
 						displayName: 'Last Name',
 						name: 'last_name',
 						type: 'string',
 						default: '',
-						description: 'Last name of the contact',
+						description: 'The last name of the contact',
 					},
 					{
 						displayName: 'Unsubscribed',
 						name: 'unsubscribed',
 						type: 'boolean',
 						default: false,
-						description: 'Whether the contact is unsubscribed',
+						description: 'Whether the contact is unsubscribed from emails',
 					},
 				],
 			},
@@ -954,10 +1150,12 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 							},
 							json: true,
-						});
-
-					} else if (operation === 'update') {
+						});					} else if (operation === 'update') {
 						const emailId = this.getNodeParameter('emailId', i) as string;
+						const scheduledAt = this.getNodeParameter('scheduled_at', i) as string;
+
+						const requestBody: any = {};
+						if (scheduledAt) requestBody.scheduled_at = scheduledAt;
 
 						response = await this.helpers.httpRequest({
 							url: `https://api.resend.com/emails/${emailId}`,
@@ -966,7 +1164,7 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 								'Content-Type': 'application/json',
 							},
-							body: {},
+							body: requestBody,
 							json: true,
 						});
 
@@ -1030,10 +1228,14 @@ export class Resend implements INodeType {
 							},
 							body: {},
 							json: true,
-						});
-
-					} else if (operation === 'update') {
+						});					} else if (operation === 'update') {
 						const domainId = this.getNodeParameter('domainId', i) as string;
+						const domainUpdateOptions = this.getNodeParameter('domainUpdateOptions', i, {}) as any;
+
+						const requestBody: any = {};
+						if (domainUpdateOptions.click_tracking !== undefined) requestBody.click_tracking = domainUpdateOptions.click_tracking;
+						if (domainUpdateOptions.open_tracking !== undefined) requestBody.open_tracking = domainUpdateOptions.open_tracking;
+						if (domainUpdateOptions.tls) requestBody.tls = domainUpdateOptions.tls;
 
 						response = await this.helpers.httpRequest({
 							url: `https://api.resend.com/domains/${domainId}`,
@@ -1042,7 +1244,7 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 								'Content-Type': 'application/json',
 							},
-							body: {},
+							body: requestBody,
 							json: true,
 						});
 
@@ -1070,10 +1272,19 @@ export class Resend implements INodeType {
 					}
 
 				// API KEY OPERATIONS
-				} else if (resource === 'apiKeys') {
-					if (operation === 'create') {
+				} else if (resource === 'apiKeys') {					if (operation === 'create') {
 						const apiKeyName = this.getNodeParameter('apiKeyName', i) as string;
 						const permission = this.getNodeParameter('permission', i) as string;
+						const domainId = this.getNodeParameter('domainId', i, '') as string;
+
+						const requestBody: any = {
+							name: apiKeyName,
+							permission,
+						};
+
+						if (permission === 'sending_access' && domainId) {
+							requestBody.domain_id = domainId;
+						}
 
 						response = await this.helpers.httpRequest({
 							url: 'https://api.resend.com/api-keys',
@@ -1082,10 +1293,7 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 								'Content-Type': 'application/json',
 							},
-							body: {
-								name: apiKeyName,
-								permission,
-							},
+							body: requestBody,
 							json: true,
 						});
 
@@ -1113,10 +1321,23 @@ export class Resend implements INodeType {
 					}
 
 				// BROADCAST OPERATIONS
-				} else if (resource === 'broadcasts') {
-					if (operation === 'create') {
+				} else if (resource === 'broadcasts') {					if (operation === 'create') {
 						const broadcastName = this.getNodeParameter('broadcastName', i) as string;
 						const audienceId = this.getNodeParameter('audienceId', i) as string;
+						const broadcastContent = this.getNodeParameter('broadcastContent', i, {}) as any;
+
+						const requestBody: any = {
+							name: broadcastName,
+							audience_id: audienceId,
+						};
+
+						// Add optional content fields for create operation
+						if (broadcastContent.from) requestBody.from = broadcastContent.from;
+						if (broadcastContent.subject) requestBody.subject = broadcastContent.subject;
+						if (broadcastContent.reply_to) requestBody.reply_to = broadcastContent.reply_to;
+						if (broadcastContent.html) requestBody.html = broadcastContent.html;
+						if (broadcastContent.text) requestBody.text = broadcastContent.text;
+						if (broadcastContent.name) requestBody.name = broadcastContent.name;
 
 						response = await this.helpers.httpRequest({
 							url: 'https://api.resend.com/broadcasts',
@@ -1125,10 +1346,7 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 								'Content-Type': 'application/json',
 							},
-							body: {
-								name: broadcastName,
-								audience_id: audienceId,
-							},
+							body: requestBody,
 							json: true,
 						});
 
@@ -1142,10 +1360,18 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 							},
 							json: true,
-						});
-
-					} else if (operation === 'update') {
+						});					} else if (operation === 'update') {
 						const broadcastId = this.getNodeParameter('broadcastId', i) as string;
+						const broadcastContent = this.getNodeParameter('broadcastContent', i, {}) as any;
+
+						const requestBody: any = {};
+						if (broadcastContent.audience_id) requestBody.audience_id = broadcastContent.audience_id;
+						if (broadcastContent.from) requestBody.from = broadcastContent.from;
+						if (broadcastContent.subject) requestBody.subject = broadcastContent.subject;
+						if (broadcastContent.reply_to) requestBody.reply_to = broadcastContent.reply_to;
+						if (broadcastContent.html) requestBody.html = broadcastContent.html;
+						if (broadcastContent.text) requestBody.text = broadcastContent.text;
+						if (broadcastContent.name) requestBody.name = broadcastContent.name;
 
 						response = await this.helpers.httpRequest({
 							url: `https://api.resend.com/broadcasts/${broadcastId}`,
@@ -1154,7 +1380,7 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 								'Content-Type': 'application/json',
 							},
-							body: {},
+							body: requestBody,
 							json: true,
 						});
 
@@ -1285,10 +1511,9 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 							},
 							json: true,
-						});
-
-					} else if (operation === 'update') {
-						const contactId = this.getNodeParameter('contactId', i) as string;
+						});					} else if (operation === 'update') {
+						const audienceId = this.getNodeParameter('audienceId', i) as string;
+						const updateBy = this.getNodeParameter('updateBy', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;
 
 						const requestBody: any = {};
@@ -1296,8 +1521,15 @@ export class Resend implements INodeType {
 						if (additionalFields.last_name) requestBody.last_name = additionalFields.last_name;
 						if (additionalFields.unsubscribed !== undefined) requestBody.unsubscribed = additionalFields.unsubscribed;
 
+						let contactIdentifier: string;
+						if (updateBy === 'id') {
+							contactIdentifier = this.getNodeParameter('contactId', i) as string;
+						} else {
+							contactIdentifier = this.getNodeParameter('contactEmail', i) as string;
+						}
+
 						response = await this.helpers.httpRequest({
-							url: `https://api.resend.com/contacts/${contactId}`,
+							url: `https://api.resend.com/audiences/${audienceId}/contacts/${contactIdentifier}`,
 							method: 'PATCH',
 							headers: {
 								Authorization: `Bearer ${apiKey}`,

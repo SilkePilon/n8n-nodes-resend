@@ -12,7 +12,7 @@ import { Webhook } from 'svix';
 export class ResendTrigger implements INodeType {	description: INodeTypeDescription = {
 		displayName: 'Resend Trigger',
 		name: 'resendTrigger',
-		icon: 'file:Resendv2.svg',
+		icon: 'file:Resend.svg',
 		group: ['trigger'],
 		version: 1,
 		description: 'Handles Resend webhooks for various email events',
