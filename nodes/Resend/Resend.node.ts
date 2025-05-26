@@ -11,7 +11,7 @@ export class Resend implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Resend',
 		name: 'resend',
-		icon: 'file:Resend.svg',
+		icon: 'file:Resendv2.svg',
 		group: ['output'],
 		version: 1,
 		description: 'Interact with Resend API for emails, domains, API keys, broadcasts, audiences, and contacts',
@@ -110,8 +110,7 @@ export class Resend implements INodeType {
 					},
 				],
 				default: 'send',
-			},
-			{
+			},			{
 				displayName: 'Email Format',
 				name: 'emailFormat',
 				type: 'options',
@@ -126,19 +125,15 @@ export class Resend implements INodeType {
 						value: 'text',
 						description: 'Send email with plain text content',
 					},
-					{
-						name: 'Both',
-						value: 'both',
-						description: 'Send email with both HTML and text content',
-					},
 				],
 				default: 'html',
 				displayOptions: {
 					show: {
-						operation: ['sendEmail'],
+						resource: ['email'],
+						operation: ['send', 'sendBatch'],
 					},
 				},
-				description: 'Choose the format for your email content. HTML allows rich formatting, text is simple and universally compatible, both provides maximum compatibility.',
+				description: 'Choose the format for your email content. HTML allows rich formatting, text is simple and universally compatible.',
 			},
 			// Properties for "Send Email" operation
 			{
@@ -185,8 +180,7 @@ export class Resend implements INodeType {
 					},
 				},
 				description: 'Email subject line',
-			},
-			{
+			},			{
 				displayName: 'HTML Content',
 				name: 'html',
 				type: 'string',
@@ -199,6 +193,7 @@ export class Resend implements INodeType {
 					show: {
 						resource: ['email'],
 						operation: ['send'],
+						emailFormat: ['html'],
 					},
 				},
 				description: 'HTML version of the email content',
@@ -216,6 +211,7 @@ export class Resend implements INodeType {
 					show: {
 						resource: ['email'],
 						operation: ['send'],
+						emailFormat: ['text'],
 					},
 				},
 				description: 'Plain text version of the email content',
@@ -280,52 +276,60 @@ export class Resend implements INodeType {
 						operation: ['sendBatch'],
 					},
 				},
-				description: 'Array of emails to send (max 100)',
-				options: [
-					{
+				description: 'Array of emails to send (max 100)',				options: [					{
 						name: 'emails',
 						displayName: 'Email',
 						values: [
 							{
-						displayName: 'From',
-						name: 'from',
-						type: 'string',
-							required:	true,
-						default: '',
-						placeholder: 'you@example.com',
-						description: 'Sender email address',
+								displayName: 'From',
+								name: 'from',
+								type: 'string',
+								required: true,
+								default: '',
+								placeholder: 'you@example.com',
+								description: 'Sender email address',
 							},
 							{
-						displayName: 'HTML Content',
-						name: 'html',
-						type: 'string',
-						default: '',
-						description: 'HTML content of the email',
+								displayName: 'HTML Content',
+								name: 'html',
+								type: 'string',
+								default: '',
+								description: 'HTML content of the email',
+								displayOptions: {
+									show: {
+										'/emailFormat': ['html'],
+									},
+								},
 							},
 							{
-						displayName: 'Subject',
-						name: 'subject',
-						type: 'string',
-							required:	true,
-						default: '',
-						placeholder: 'Hello from n8n!',
-						description: 'Email subject',
+								displayName: 'Subject',
+								name: 'subject',
+								type: 'string',
+								required: true,
+								default: '',
+								placeholder: 'Hello from n8n!',
+								description: 'Email subject',
 							},
 							{
-						displayName: 'Text Content',
-						name: 'text',
-						type: 'string',
-						default: '',
-						description: 'Plain text content of the email',
+								displayName: 'Text Content',
+								name: 'text',
+								type: 'string',
+								default: '',
+								description: 'Plain text content of the email',
+								displayOptions: {
+									show: {
+										'/emailFormat': ['text'],
+									},
+								},
 							},
 							{
-						displayName: 'To',
-						name: 'to',
-						type: 'string',
-							required:	true,
-						default: '',
-						placeholder: 'user@example.com',
-						description: 'Recipient email address (comma-separated for multiple)',
+								displayName: 'To',
+								name: 'to',
+								type: 'string',
+								required: true,
+								default: '',
+								placeholder: 'user@example.com',
+								description: 'Recipient email address (comma-separated for multiple)',
 							},
 						],
 					},
@@ -628,6 +632,230 @@ export class Resend implements INodeType {
 					},
 				],
 			},
+
+			// DOMAIN OPERATIONS
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['domains'],
+					},
+				},
+				options: [
+					{
+						name: 'Create',
+						value: 'create',
+						description: 'Create a new domain',
+						action: 'Create a domain',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+						description: 'Delete a domain',
+						action: 'Delete a domain',
+					},
+					{
+						name: 'Get',
+						value: 'get',
+						description: 'Get a domain by ID',
+						action: 'Get a domain',
+					},
+					{
+						name: 'List',
+						value: 'list',
+						description: 'List all domains',
+						action: 'List domains',
+					},
+					{
+						name: 'Update',
+						value: 'update',
+						description: 'Update a domain',
+						action: 'Update a domain',
+					},
+					{
+						name: 'Verify',
+						value: 'verify',
+						description: 'Verify a domain',
+						action: 'Verify a domain',
+					},
+				],
+				default: 'list',
+			},
+
+			// API KEY OPERATIONS
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['apiKeys'],
+					},
+				},
+				options: [
+					{
+						name: 'Create',
+						value: 'create',
+						description: 'Create a new API key',
+						action: 'Create an API key',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+						description: 'Delete an API key',
+						action: 'Delete an API key',
+					},
+					{
+						name: 'List',
+						value: 'list',
+						description: 'List all API keys',
+						action: 'List API keys',
+					},
+				],
+				default: 'list',
+			},
+
+			// BROADCAST OPERATIONS
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['broadcasts'],
+					},
+				},
+				options: [
+					{
+						name: 'Create',
+						value: 'create',
+						description: 'Create a new broadcast',
+						action: 'Create a broadcast',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+						description: 'Delete a broadcast',
+						action: 'Delete a broadcast',
+					},
+					{
+						name: 'Get',
+						value: 'get',
+						description: 'Get a broadcast by ID',
+						action: 'Get a broadcast',
+					},
+					{
+						name: 'List',
+						value: 'list',
+						description: 'List all broadcasts',
+						action: 'List broadcasts',
+					},
+					{
+						name: 'Send',
+						value: 'send',
+						description: 'Send a broadcast',
+						action: 'Send a broadcast',
+					},
+					{
+						name: 'Update',
+						value: 'update',
+						description: 'Update a broadcast',
+						action: 'Update a broadcast',
+					},
+				],
+				default: 'list',
+			},
+
+			// AUDIENCE OPERATIONS
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['audiences'],
+					},
+				},
+				options: [
+					{
+						name: 'Create',
+						value: 'create',
+						description: 'Create a new audience',
+						action: 'Create an audience',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+						description: 'Delete an audience',
+						action: 'Delete an audience',
+					},
+					{
+						name: 'Get',
+						value: 'get',
+						description: 'Get an audience by ID',
+						action: 'Get an audience',
+					},
+					{
+						name: 'List',
+						value: 'list',
+						description: 'List all audiences',
+						action: 'List audiences',
+					},
+				],
+				default: 'list',
+			},
+
+			// CONTACT OPERATIONS
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['contacts'],
+					},
+				},
+				options: [
+					{
+						name: 'Create',
+						value: 'create',
+						description: 'Create a new contact',
+						action: 'Create a contact',
+					},
+					{
+						name: 'Delete',
+						value: 'delete',
+						description: 'Delete a contact',
+						action: 'Delete a contact',
+					},
+					{
+						name: 'Get',
+						value: 'get',
+						description: 'Get a contact by ID',
+						action: 'Get a contact',
+					},
+					{
+						name: 'List',
+						value: 'list',
+						description: 'List contacts in an audience',
+						action: 'List contacts',
+					},
+					{
+						name: 'Update',
+						value: 'update',
+						description: 'Update a contact',
+						action: 'Update a contact',
+					},
+				],
+				default: 'list',
+			},
 		],
 	};
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -645,13 +873,11 @@ export class Resend implements INodeType {
 				let response: any;
 
 				// EMAIL OPERATIONS
-				if (resource === 'email') {
-					if (operation === 'send') {
+				if (resource === 'email') {					if (operation === 'send') {
 						const from = this.getNodeParameter('from', i) as string;
 						const to = this.getNodeParameter('to', i) as string;
 						const subject = this.getNodeParameter('subject', i) as string;
-						const html = this.getNodeParameter('html', i) as string;
-						const text = this.getNodeParameter('text', i) as string;
+						const emailFormat = this.getNodeParameter('emailFormat', i) as string;
 						const additionalOptions = this.getNodeParameter('additionalOptions', i, {}) as any;
 
 						const requestBody: any = {
@@ -660,8 +886,14 @@ export class Resend implements INodeType {
 							subject,
 						};
 
-						if (html) requestBody.html = html;
-						if (text) requestBody.text = text;
+						// Add content based on selected format
+						if (emailFormat === 'html') {
+							const html = this.getNodeParameter('html', i) as string;
+							if (html) requestBody.html = html;
+						} else if (emailFormat === 'text') {
+							const text = this.getNodeParameter('text', i) as string;
+							if (text) requestBody.text = text;
+						}
 						if (additionalOptions.cc) {
 							requestBody.cc = additionalOptions.cc.split(',').map((email: string) => email.trim());
 						}
@@ -680,17 +912,26 @@ export class Resend implements INodeType {
 							},
 							body: requestBody,
 							json: true,
-						});
-
-					} else if (operation === 'sendBatch') {
+						});					} else if (operation === 'sendBatch') {
 						const emailsData = this.getNodeParameter('emails', i) as any;
-						const emails = emailsData.emails.map((email: any) => ({
-							from: email.from,
-							to: email.to.split(',').map((e: string) => e.trim()).filter((e: string) => e),
-							subject: email.subject,
-							...(email.html && { html: email.html }),
-							...(email.text && { text: email.text }),
-						}));
+						const emailFormat = this.getNodeParameter('emailFormat', i) as string;
+						
+						const emails = emailsData.emails.map((email: any) => {
+							const emailObj: any = {
+								from: email.from,
+								to: email.to.split(',').map((e: string) => e.trim()).filter((e: string) => e),
+								subject: email.subject,
+							};
+							
+							// Add content based on selected format
+							if (emailFormat === 'html' && email.html) {
+								emailObj.html = email.html;
+							} else if (emailFormat === 'text' && email.text) {
+								emailObj.text = email.text;
+							}
+							
+							return emailObj;
+						});
 
 						response = await this.helpers.httpRequest({
 							url: 'https://api.resend.com/emails/batch',

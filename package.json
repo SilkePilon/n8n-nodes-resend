@@ -1,7 +1,8 @@
 {
   "name": "n8n-nodes-resend",
-  "version": "1.0.4",
-  "description": "Resend n8n node",  "keywords": [
+  "version": "1.0.6",
+  "description": "Resend n8n node",
+  "keywords": [
     "n8n-community-node-package",
     "resend",
     "email",
