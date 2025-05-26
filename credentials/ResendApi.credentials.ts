@@ -1,7 +1,7 @@
 import {
 	ICredentialType,
 	INodeProperties,
-	IAuthData,
+	IAuthenticateGeneric,
 } from 'n8n-workflow';
 
 export class ResendApi implements ICredentialType {
@@ -17,11 +17,12 @@ export class ResendApi implements ICredentialType {
 			required: true,
 		},
 	];
-	// Use IAuthData for authentication
-	authenticate: IAuthData = {
-		type: 'apiToken',
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
 		properties: {
-			token: '={{$credentials.apiKey}}'
-		}
+			headers: {
+				Authorization: '={{"Bearer " + $credentials.apiKey}}',
+			},
+		},
 	};
 }

@@ -6,6 +6,7 @@ import {
 	INodeTypeDescription,
 	NodeApiError,
 	INodeExecutionData,
+	NodeConnectionType,
 } from 'n8n-workflow';
 import { Webhook } from 'svix';
 
@@ -22,7 +23,7 @@ export class ResendTrigger implements INodeType {
 			color: '#000000',
 		},
 		inputs: [],
-		outputs: ['main'],
+		outputs: ['main' as NodeConnectionType],
 		properties: [
 			{
 				displayName: 'Webhook Signing Secret',
@@ -91,46 +92,45 @@ export class ResendTrigger implements INodeType {
 		}
 	}
 
-	webhookMethods = {
-		default: {
-			async resendSignature(this: IHookFunctions): Promise<boolean> {
-				const req = this.getRequestObject();
-				const secret = this.getNodeParameter('webhookSigningSecret') as string;
+	public webhookMethods = {
+		resendSignature: { // Name must match webhookVerificationMethod
+			async run(this: IHookFunctions): Promise<boolean> {
+				const webhookSigningSecret = this.getNodeParameter('webhookSigningSecret') as string;
+				if (!webhookSigningSecret) {
+					throw new NodeApiError(this.getNode(), { message: 'Webhook signing secret is not configured.' });
+				}
 
-				if (!secret.startsWith('whsec_')) {
+				if (!webhookSigningSecret.startsWith('whsec_')) {
 					// Basic check for Resend's Svix signing secret format
 					throw new NodeApiError(
 						this.getNode(),
 						{ message: 'Invalid Webhook Signing Secret format. It should start with "whsec_".' },
-						{ statusCode: 400 },
 					);
 				}
 
-				const svixId = req.headers['svix-id'] as string;
-				const svixTimestamp = req.headers['svix-timestamp'] as string;
-				const svixSignature = req.headers['svix-signature'] as string;
+				const headers = this.getHeaderData();
+				const svixId = headers['svix-id'] as string | undefined;
+				const svixTimestamp = headers['svix-timestamp'] as string | undefined;
+				const svixSignature = headers['svix-signature'] as string | undefined;
 
 				if (!svixId || !svixTimestamp || !svixSignature) {
-					throw new NodeApiError(
-						this.getNode(),
-						{ message: 'Request missing Svix headers' },
-						{ statusCode: 400 },
-					);
+					throw new NodeApiError(this.getNode(), { message: 'Missing Svix headers for webhook verification.' });
 				}
 
-				const payload = this.getRequestBody(); // Raw body
+				const rawBody = this.getRawBody(); // Use getRawBody for verification
+				const wh = new Webhook(webhookSigningSecret);
 
 				try {
-					const wh = new Webhook(secret);
-					wh.verify(payload, {
+					wh.verify(rawBody, {
 						'svix-id': svixId,
 						'svix-timestamp': svixTimestamp,
 						'svix-signature': svixSignature,
 					});
-					return true;
+					return true; // Verification successful
 				} catch (err: any) {
-					const errorMessage = err instanceof Error ? err.message : 'Signature verification failed.';
-					throw new NodeApiError(this.getNode(), { message: `Webhook signature verification failed: ${errorMessage}` }, { statusCode: 401 });
+					// Log the error for debugging, but throw a generic NodeApiError for security
+					console.error('Svix verification error:', err.message);
+					throw new NodeApiError(this.getNode(), { message: `Webhook signature verification failed.` });
 				}
 			},
 		},

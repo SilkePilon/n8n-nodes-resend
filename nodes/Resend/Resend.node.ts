@@ -4,6 +4,7 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	NodeOperationError,
+	NodeConnectionType,
 } from 'n8n-workflow';
 
 export class Resend implements INodeType {
@@ -24,8 +25,8 @@ export class Resend implements INodeType {
 				required: true,
 			},
 		],
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: ['main' as NodeConnectionType],
+		outputs: ['main' as NodeConnectionType],
 		properties: [
 			{
 				displayName: 'Operation',
@@ -161,9 +162,6 @@ export class Resend implements INodeType {
 				displayName: 'Tags',
 				name: 'tags',
 				type: 'fixedCollection',
-				typeOptions: {
-					multipleValues: true,
-				},
 				default: {},
 				placeholder: 'Add Tag',
 				displayOptions: {
@@ -171,26 +169,31 @@ export class Resend implements INodeType {
 						operation: ['sendEmail'],
 					},
 				},
-				properties: [
-					{
-						name: 'tag',
-						displayName: 'Tag',
-						values: [
-							{
-								displayName: 'Name',
-								name: 'name',
-								type: 'string',
-								default: '',
-							},
-							{
-								displayName: 'Value',
-								name: 'value',
-								type: 'string',
-								default: '',
-							},
-						],
-					},
-				],
+				typeOptions: {
+					multipleValues: true,
+					properties: [
+						{
+							name: 'tag',
+							displayName: 'Tag',
+							values: [
+								{
+									displayName: 'Name',
+									name: 'name',
+									type: 'string',
+									default: '',
+									description: 'Name of the tag',
+								},
+								{
+									displayName: 'Value',
+									name: 'value',
+									type: 'string',
+									default: '',
+									description: 'Value of the tag',
+								},
+							],
+						},
+					],
+				},
 				description: 'Tags to categorize the email',
 			},
 		],
