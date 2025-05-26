@@ -1,46 +1,104 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# Resend Nodes for n8n
 
-# n8n-nodes-starter
+## Overview
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+This package provides n8n nodes to interact with the Resend email platform. It allows you to:
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+*   Send emails using the Resend API.
+*   Receive and process webhook events from Resend for various email activities.
 
-## Prerequisites
+This integration uses the official [Resend API](https://resend.com/docs/api-reference/introduction).
 
-You need the following installed on your development machine:
+## Prerequisites/Setup
 
-* [git](https://git-scm.com/downloads)
-* Node.js and pnpm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  npm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+*   You need a Resend account. If you don't have one, you can sign up at [resend.com](https://resend.com/).
+*   For detailed information about the Resend API, refer to the official [API Documentation](https://resend.com/docs/api-reference/introduction).
 
-## Using this starter
+## Credentials Setup (`ResendApi`)
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+To use these nodes, you need to configure the "Resend API" credentials in n8n:
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm lint` to check for errors or `npm lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+1.  In your n8n workspace, go to **Credentials** and click **Add credential**.
+2.  Search for "Resend API" and select it.
+3.  Fill in the required field:
+    *   **API Key**: Your Resend API key.
+4.  You can find your API Key in your Resend dashboard under **API Keys** ([https://resend.com/api-keys](https://resend.com/api-keys)). Create a new API key if you haven't already, ensuring it has the necessary permissions (e.g., "Full access" for sending emails).
+5.  Save the credential.
 
-## More information
+## Nodes
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+### Resend Action Node
+
+*   **Name:** `Resend`
+*   **Description:** Allows sending emails and performing other Resend actions (currently, only sending email is implemented).
+
+#### Operations
+
+##### Send Email
+
+*   **Description:** Sends an email using the Resend API.
+*   **Parameters:**
+    *   `From`: (String, Required) The sender's email address (e.g., `you@yourdomain.com`). Must be a verified domain in Resend.
+    *   `To`: (String, Required) Comma-separated list of recipient email addresses (e.g., `user1@example.com, user2@example.com`).
+    *   `Subject`: (String, Required) The subject line of the email.
+    *   `HTML Body`: (String, Required) The HTML content of the email.
+    *   `Text Body`: (String, Optional) The plain text content of the email. It's recommended to include this for email clients that don't support HTML.
+    *   `CC`: (String, Optional) Comma-separated list of CC recipient email addresses.
+    *   `BCC`: (String, Optional) Comma-separated list of BCC recipient email addresses.
+    *   `Reply To`: (String, Optional) An email address to set as the reply-to address.
+    *   `Tags`: (Collection, Optional) A list of tags (name/value pairs) to categorize the email (e.g., `[{ "name": "category", "value": "transactional" }]`).
+
+### Resend Trigger Node
+
+*   **Name:** `Resend Trigger`
+*   **Description:** Receives and processes webhook events from Resend for various email activities.
+
+#### Setup
+
+1.  **Add the `Resend Trigger` node** to your n8n workflow.
+2.  Open the node's parameters. You will see a **Webhook URL**. Copy this URL.
+3.  In your Resend dashboard, navigate to **API** -> **Webhooks** ([https://resend.com/webhooks](https://resend.com/webhooks)).
+4.  Click **Add webhook** (or similar button).
+5.  Paste the copied n8n Webhook URL into the "Webhook URL" field in Resend.
+6.  **Events to send:** Select the specific email events you want Resend to send to your n8n trigger.
+7.  After saving the webhook in Resend, it will display a **Webhook Signing Secret**. This is a crucial security token (usually starts with `whsec_`). Copy this secret.
+8.  Go back to your n8n `Resend Trigger` node and paste this secret into the **Webhook Signing Secret** parameter.
+9.  In the `Resend Trigger` node, select the same **Events** that you configured in the Resend webhook settings. The available event types include:
+    *   `email.sent`
+    *   `email.delivered`
+    *   `email.delivery_delayed`
+    *   `email.complained` (spam complaint)
+    *   `email.bounced`
+    *   `email.opened`
+    *   `email.clicked`
+    *   `contact.created`
+    *   `contact.updated`
+    *   `contact.deleted`
+    *   `domain.created`
+    *   `domain.updated`
+    *   `domain.deleted`
+
+#### Output
+
+The trigger node will output the JSON payload sent by Resend for the configured event. This payload contains detailed information about the event, such as the email ID, recipient, timestamp, and event-specific data.
+
+## Example Usage
+
+*   **Resend Action Node:**
+    *   _Scenario:_ When a new user signs up in your application (e.g., via a webhook from your backend or a database trigger), use the `Resend` node to send them a personalized welcome email.
+*   **Resend Trigger Node:**
+    *   _Scenario:_ When an `email.bounced` event is received, you could have a workflow that:
+        1.  Parses the bounced email address from the trigger output.
+        2.  Updates a contact record in your CRM to mark the email as invalid.
+        3.  Notifies your support team about the bounce.
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+MIT
+
+## Contribution & Issues
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, please feel free to:
+
+*   Raise an issue on the GitHub repository.
+*   Fork the repository and submit a pull request.
