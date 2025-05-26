@@ -1,3 +1,191 @@
-<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M186 447.471V154H318.062C336.788 154 353.697 158.053 368.79 166.158C384.163 174.263 396.181 185.443 404.845 199.698C413.51 213.672 417.842 229.604 417.842 247.491C417.842 265.938 413.51 282.568 404.845 297.381C396.181 311.915 384.302 323.375 369.209 331.759C354.117 340.144 337.067 344.337 318.062 344.337H253.917V447.471H186ZM348.667 447.471L274.041 314.99L346.99 304.509L430 447.471H348.667ZM253.917 289.835H311.773C319.04 289.835 325.329 288.298 330.639 285.223C336.229 281.869 340.421 277.258 343.216 271.388C346.291 265.519 347.828 258.811 347.828 251.265C347.828 243.718 346.151 237.15 342.797 231.56C339.443 225.691 334.552 221.219 328.124 218.144C321.975 215.07 314.428 213.533 305.484 213.533H253.917V289.835Z" fill="black"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+    width="1080" height="1080" viewBox="0 0 1080 1080" xml:space="preserve">
+<desc>Created with Fabric.js 5.2.4</desc>
+<defs>
+</defs>
+<g transform="matrix(1 0 0 1 540 540)" id="e7f9f52d-e810-4c5e-8ed7-1012da08ad64"  >
+<rect style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1; visibility: hidden;" vector-effect="non-scaling-stroke"  x="-540" y="-540" rx="0" ry="0" width="1080" height="1080" />
+</g>
+<g transform="matrix(1 0 0 1 540 540)" id="4672ab13-7acd-44c8-81b0-ab5b017f9d42"  >
+</g>
+<g transform="matrix(13.5 0 0 13.5 540 540)"  >
+<g style=""   >
+		<g transform="matrix(1 0 0 1 0 0)" id="status-icon" clip-path="url(#CLIPPATH_30)"  >
+<clipPath id="CLIPPATH_30" >
+	<rect transform="matrix(1 0 0 1 0 0)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<rect style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</g>
+		<g transform="matrix(1 0 0 1 0 0)" id="status-icon" clip-path="url(#CLIPPATH_31)"  >
+<linearGradient id="SVGID_28" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 1 -40 -40)"  x1="40" y1="0" x2="40" y2="80">
+<stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity: 0.3"/>
+<stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity: 0"/>
+</linearGradient>
+<clipPath id="CLIPPATH_31" >
+	<rect transform="matrix(1 0 0 1 0 0)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<rect style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: url(#SVGID_28); fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</g>
+		<g transform="matrix(1 0 0 1 -25.5 -32)" clip-path="url(#CLIPPATH_32)"  >
+<clipPath id="CLIPPATH_32" >
+	<rect transform="matrix(1 0 0 1 25.5 32)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-14.5, -8)" d="M 1.5 1.5 L 14.5 1.5 L 14.5 14.5 L 1.5 14.5 z M 14.5 1.5 L 27.5 1.5 L 27.5 14.5 L 14.5 14.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -6 -32)" clip-path="url(#CLIPPATH_33)"  >
+<clipPath id="CLIPPATH_33" >
+	<rect transform="matrix(1 0 0 1 6 32)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.1; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-34, -8)" d="M 28 2 L 40 2 L 40 14 L 28 14 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 7 -32)" clip-path="url(#CLIPPATH_34)"  >
+<clipPath id="CLIPPATH_34" >
+	<rect transform="matrix(1 0 0 1 -7 32)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-47, -8)" d="M 27.5 1.5 L 40.5 1.5 L 40.5 14.5 L 27.5 14.5 z M 40.5 1.5 L 53.5 1.5 L 53.5 14.5 L 40.5 14.5 z M 53.5 1.5 L 66.5 1.5 L 66.5 14.5 L 53.5 14.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 33 -32)" clip-path="url(#CLIPPATH_35)"  >
+<clipPath id="CLIPPATH_35" >
+	<rect transform="matrix(1 0 0 1 -33 32)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.1; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-73, -8)" d="M 67 2 L 79 2 L 79 14 L 67 14 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 0.5 -25.5)" clip-path="url(#CLIPPATH_36)"  >
+<clipPath id="CLIPPATH_36" >
+	<rect transform="matrix(1 0 0 1 -0.5 25.5)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-40.5, -14.5)" d="M 66.5 1.5 L 79.5 1.5 L 79.5 14.5 L 66.5 14.5 z M 1.5 14.5 L 14.5 14.5 L 14.5 27.5 L 1.5 27.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -19 -19)" clip-path="url(#CLIPPATH_37)"  >
+<clipPath id="CLIPPATH_37" >
+	<rect transform="matrix(1 0 0 1 19 19)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.06; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-21, -21)" d="M 15 15 L 27 15 L 27 27 L 15 27 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -12.5 -19)" clip-path="url(#CLIPPATH_38)"  >
+<clipPath id="CLIPPATH_38" >
+	<rect transform="matrix(1 0 0 1 12.5 19)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-27.5, -21)" d="M 14.5 14.5 L 27.5 14.5 L 27.5 27.5 L 14.5 27.5 z M 27.5 14.5 L 40.5 14.5 L 40.5 27.5 L 27.5 27.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 7 -19)" clip-path="url(#CLIPPATH_39)"  >
+<clipPath id="CLIPPATH_39" >
+	<rect transform="matrix(1 0 0 1 -7 19)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.06; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-47, -21)" d="M 41 15 L 53 15 L 53 27 L 41 27 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 20 -19)" clip-path="url(#CLIPPATH_40)"  >
+<clipPath id="CLIPPATH_40" >
+	<rect transform="matrix(1 0 0 1 -20 19)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-60, -21)" d="M 40.5 14.5 L 53.5 14.5 L 53.5 27.5 L 40.5 27.5 z M 53.5 14.5 L 66.5 14.5 L 66.5 27.5 L 53.5 27.5 z M 66.5 14.5 L 79.5 14.5 L 79.5 27.5 L 66.5 27.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -32 -6)" clip-path="url(#CLIPPATH_41)"  >
+<clipPath id="CLIPPATH_41" >
+	<rect transform="matrix(1 0 0 1 32 6)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.1; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-8, -34)" d="M 2 28 L 14 28 L 14 40 L 2 40 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -12.5 -6)" clip-path="url(#CLIPPATH_42)"  >
+<clipPath id="CLIPPATH_42" >
+	<rect transform="matrix(1 0 0 1 12.5 6)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-27.5, -34)" d="M 1.5 27.5 L 14.5 27.5 L 14.5 40.5 L 1.5 40.5 z M 14.5 27.5 L 27.5 27.5 L 27.5 40.5 L 14.5 40.5 z M 27.5 27.5 L 40.5 27.5 L 40.5 40.5 L 27.5 40.5 z M 40.5 27.5 L 53.5 27.5 L 53.5 40.5 L 40.5 40.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 20 -6)" clip-path="url(#CLIPPATH_43)"  >
+<clipPath id="CLIPPATH_43" >
+	<rect transform="matrix(1 0 0 1 -20 6)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.06; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-60, -34)" d="M 54 28 L 66 28 L 66 40 L 54 40 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 0.5 0.5)" clip-path="url(#CLIPPATH_44)"  >
+<clipPath id="CLIPPATH_44" >
+	<rect transform="matrix(1 0 0 1 -0.5 -0.5)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-40.5, -40.5)" d="M 53.5 27.5 L 66.5 27.5 L 66.5 40.5 L 53.5 40.5 z M 66.5 27.5 L 79.5 27.5 L 79.5 40.5 L 66.5 40.5 z M 1.5 40.5 L 14.5 40.5 L 14.5 53.5 L 1.5 53.5 z M 14.5 40.5 L 27.5 40.5 L 27.5 53.5 L 14.5 53.5 z M 27.5 40.5 L 40.5 40.5 L 40.5 53.5 L 27.5 53.5 z M 40.5 40.5 L 53.5 40.5 L 53.5 53.5 L 40.5 53.5 z M 53.5 40.5 L 66.5 40.5 L 66.5 53.5 L 53.5 53.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 33 7)" clip-path="url(#CLIPPATH_45)"  >
+<clipPath id="CLIPPATH_45" >
+	<rect transform="matrix(1 0 0 1 -33 -7)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.1; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-73, -47)" d="M 67 41 L 79 41 L 79 53 L 67 53 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 0.5 13.5)" clip-path="url(#CLIPPATH_46)"  >
+<clipPath id="CLIPPATH_46" >
+	<rect transform="matrix(1 0 0 1 -0.5 -13.5)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-40.5, -53.5)" d="M 66.5 40.5 L 79.5 40.5 L 79.5 53.5 L 66.5 53.5 z M 1.5 53.5 L 14.5 53.5 L 14.5 66.5 L 1.5 66.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -19 20)" clip-path="url(#CLIPPATH_47)"  >
+<clipPath id="CLIPPATH_47" >
+	<rect transform="matrix(1 0 0 1 19 -20)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.06; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-21, -60)" d="M 15 54 L 27 54 L 27 66 L 15 66 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -6 20)" clip-path="url(#CLIPPATH_48)"  >
+<clipPath id="CLIPPATH_48" >
+	<rect transform="matrix(1 0 0 1 6 -20)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-34, -60)" d="M 14.5 53.5 L 27.5 53.5 L 27.5 66.5 L 14.5 66.5 z M 27.5 53.5 L 40.5 53.5 L 40.5 66.5 L 27.5 66.5 z M 40.5 53.5 L 53.5 53.5 L 53.5 66.5 L 40.5 66.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 20 20)" clip-path="url(#CLIPPATH_49)"  >
+<clipPath id="CLIPPATH_49" >
+	<rect transform="matrix(1 0 0 1 -20 -20)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.06; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-60, -60)" d="M 54 54 L 66 54 L 66 66 L 54 66 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 0.5 26.5)" clip-path="url(#CLIPPATH_50)"  >
+<clipPath id="CLIPPATH_50" >
+	<rect transform="matrix(1 0 0 1 -0.5 -26.5)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-40.5, -66.5)" d="M 53.5 53.5 L 66.5 53.5 L 66.5 66.5 L 53.5 66.5 z M 66.5 53.5 L 79.5 53.5 L 79.5 66.5 L 66.5 66.5 z M 1.5 66.5 L 14.5 66.5 L 14.5 79.5 L 1.5 79.5 z M 14.5 66.5 L 27.5 66.5 L 27.5 79.5 L 14.5 79.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -6 33)" clip-path="url(#CLIPPATH_51)"  >
+<clipPath id="CLIPPATH_51" >
+	<rect transform="matrix(1 0 0 1 6 -33)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-opacity: 0.1; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-34, -73)" d="M 28 67 L 40 67 L 40 79 L 28 79 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 13.5 33)" clip-path="url(#CLIPPATH_52)"  >
+<clipPath id="CLIPPATH_52" >
+	<rect transform="matrix(1 0 0 1 -13.5 -33)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<path style="stroke: rgb(255,255,255); stroke-opacity: 0.07; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-53.5, -73)" d="M 27.5 66.5 L 40.5 66.5 L 40.5 79.5 L 27.5 79.5 z M 40.5 66.5 L 53.5 66.5 L 53.5 79.5 L 40.5 79.5 z M 53.5 66.5 L 66.5 66.5 L 66.5 79.5 L 53.5 79.5 z M 66.5 66.5 L 79.5 66.5 L 79.5 79.5 L 66.5 79.5 z" stroke-linecap="round" />
+</g>
+		<g transform="matrix(1 0 0 1 -0.5 -0.5)" id="status-icon" clip-path="url(#CLIPPATH_53)"  >
+<clipPath id="CLIPPATH_53" >
+	<rect transform="matrix(1 0 0 1 0.5 0.5)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<circle style="stroke: rgb(0,0,0); stroke-opacity: 0; stroke-width: 5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  cx="0" cy="0" r="14" />
+</g>
+		<g transform="matrix(1 0 0 1 -0.5 -0.5)" id="status-icon" clip-path="url(#CLIPPATH_54)"  >
+<clipPath id="CLIPPATH_54" >
+	<rect transform="matrix(1 0 0 1 0.5 0.5)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<circle style="stroke: rgb(0,0,0); stroke-opacity: 0; stroke-width: 5; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  cx="0" cy="0" r="14" />
+</g>
+		<g transform="matrix(1 0 0 1 0 0)" id="status-icon" clip-path="url(#CLIPPATH_55)"  >
+<clipPath id="CLIPPATH_55" >
+	<rect transform="matrix(1 0 0 1 0 0)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<rect style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-opacity: 0.05; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  x="-37" y="-37" rx="15" ry="15" width="74" height="74" />
+</g>
+		<g transform="matrix(1 0 0 1 0 0)" id="status-icon" clip-path="url(#CLIPPATH_56)"  >
+<clipPath id="CLIPPATH_56" >
+	<rect transform="matrix(1 0 0 1 0 0)" id="a" x="-40" y="-40" rx="18" ry="18" width="80" height="80" />
+</clipPath>
+<rect style="stroke: rgb(0,0,0); stroke-width: 6; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  x="-37" y="-37" rx="15" ry="15" width="74" height="74" />
+</g>
+		<g transform="matrix(1 0 0 1 0 0)" id="status-icon"  >
+<linearGradient id="SVGID_29" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 1 -40 -40)"  x1="40" y1="0" x2="40" y2="80">
+<stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity: 0.6"/>
+<stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity: 0.3"/>
+</linearGradient>
+<rect style="stroke: url(#SVGID_29); stroke-width: 2; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: none; fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  x="-39" y="-39" rx="17" ry="17" width="78" height="78" />
+</g>
+</g>
+</g>
+<g transform="matrix(1.91 0 0 1.91 540 540)"  >
+<path style="stroke: rgb(0,0,0); stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(214,214,214); fill-rule: nonzero; opacity: 1;" vector-effect="non-scaling-stroke"  transform=" translate(-308, -300.74)" d="M 186 447.471 L 186 154 L 318.062 154 C 336.788 154 353.697 158.053 368.79 166.158 C 384.163 174.263 396.181 185.443 404.845 199.698 C 413.51 213.672 417.842 229.604 417.842 247.491 C 417.842 265.938 413.51 282.568 404.845 297.381 C 396.181 311.915 384.302 323.375 369.209 331.759 C 354.117 340.144 337.067 344.337 318.062 344.337 L 253.917 344.337 L 253.917 447.471 L 186 447.471 Z M 348.667 447.471 L 274.041 314.99 L 346.99 304.509 L 430 447.471 L 348.667 447.471 Z M 253.917 289.835 L 311.773 289.835 C 319.04 289.835 325.329 288.298 330.639 285.223 C 336.229 281.869 340.421 277.258 343.216 271.388 C 346.291 265.519 347.828 258.811 347.828 251.265 C 347.828 243.718 346.151 237.15 342.797 231.56 C 339.443 225.691 334.552 221.219 328.124 218.144 C 321.975 215.07 314.428 213.533 305.484 213.533 L 253.917 213.533 L 253.917 289.835 Z" stroke-linecap="round" />
+</g>
 </svg>
