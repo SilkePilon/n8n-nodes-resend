@@ -4,366 +4,399 @@
   <br>
 </h1>
 
-# Resend Nodes for n8n
+# 📧 Resend Nodes for n8n
 
-## Overview
+[![npm version](https://badge.fury.io/js/n8n-nodes-resend.svg)](https://badge.fury.io/js/n8n-nodes-resend)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This package provides comprehensive n8n nodes to interact with the Resend email platform. It allows you to:
+> **Powerful email automation for n8n using the Resend API** 🚀
 
-*   **Email Operations:** Send, get, update, and cancel emails
-*   **Contact Management:** Create, get, update, and delete contacts in audiences
-*   **Audience Management:** Create, get, update, and delete audiences
-*   **Domain Management:** Create, get, update, verify, and delete domains
-*   **API Key Management:** Create and delete API keys
-*   **Broadcast Management:** Create, get, and update email broadcasts
-*   **Webhook Processing:** Receive and process webhook events from Resend
+Transform your email workflows with comprehensive Resend integration for n8n. Send emails, manage contacts, handle domains, and automate email campaigns with ease.
 
-This integration uses the official [Resend API](https://resend.com/docs/api-reference/introduction) and provides full coverage of all available endpoints.
+---
 
-## Prerequisites/Setup
+## 🎯 Features
 
-*   You need a Resend account. If you don't have one, you can sign up at [resend.com](https://resend.com/).
-*   For detailed information about the Resend API, refer to the official [API Documentation](https://resend.com/docs/api-reference/introduction).
+- **📤 Email Operations** - Send single emails, batch emails, schedule delivery
+- **📎 File Attachments** - Support for binary data and remote URL attachments
+- **👥 Contact Management** - Create, update, delete contacts and audiences
+- **🌐 Domain Management** - Verify domains, configure DNS settings
+- **🔑 API Key Management** - Create and manage API keys programmatically
+- **📢 Broadcasts** - Send newsletter campaigns to audiences
+- **🎣 Webhook Support** - Receive real-time email events
 
-## Credentials Setup (`ResendApi`)
+---
 
-To use these nodes, you need to configure the "Resend API" credentials in n8n:
+## 🚀 Installation
 
-1.  In your n8n workspace, go to **Credentials** and click **Add credential**.
-2.  Search for "Resend API" and select it.
-3.  Fill in the required field:
-    *   **API Key**: Your Resend API key.
-4.  You can find your API Key in your Resend dashboard under **API Keys** ([https://resend.com/api-keys](https://resend.com/api-keys)). Create a new API key if you haven't already, ensuring it has the necessary permissions (e.g., "Full access" for sending emails).
-5.  Save the credential.
+### Method 1: Via n8n Community Nodes (Recommended)
 
-## Nodes
+<details>
+<summary>📋 Step-by-step installation guide</summary>
 
-### Resend Action Node
+1. **Open n8n Settings**
+   - Navigate to **Settings** → **Community Nodes**
 
-*   **Name:** `Resend`
-*   **Description:** Comprehensive Resend API integration supporting all major operations including emails, contacts, audiences, domains, API keys, and broadcasts.
+2. **Install the Package**
+   - Click **Install a community node**
+   - Enter: `n8n-nodes-resend`
+   - Click **Install**
 
-#### Resources and Operations
+3. **Restart n8n**
+   - Restart your n8n instance to load the new nodes
 
-##### Email Operations
+4. **Verify Installation**
+   - The **Resend** and **Resend Trigger** nodes should appear in your node palette
 
-###### Send Email
-*   **Description:** Sends an email using the Resend API.
-*   **Parameters:**
-    *   **Email Format**: Choose between HTML, Text, or Both formats for your email content.
-    *   **From**: (String, Required) The sender's email address (e.g., `you@yourdomain.com`). Must be a verified domain in Resend.
-    *   **To**: (String, Required) Comma-separated list of recipient email addresses (e.g., `user1@example.com, user2@example.com`).
-    *   **Subject**: (String, Required) The subject line of the email.
-    *   **HTML Content**: (String, Required for HTML/Both formats) The HTML content of the email.
-    *   **Text Content**: (String, Required for Text/Both formats) The plain text content of the email.    *   **Additional Options**: (Collection, Optional) Contains optional email parameters:
-        *   **CC**: Comma-separated list of CC recipient email addresses.
-        *   **BCC**: Comma-separated list of BCC recipient email addresses.
-        *   **Reply To**: An email address to set as the reply-to address.
-        *   **Scheduled At**: Schedule email to be sent later (e.g., "in 1 min" or ISO 8601 format).
-        *   **Attachments**: (Collection, Optional) Email attachments. Each attachment can be:
-            *   **Binary Data**: Use binary data from a previous node (specify the binary property name)
-            *   **Remote URL**: Use a URL to a remote file (specify the file URL)
-            *   **File Name**: Required name for the attached file
-            
-    **Note**: Attachments are not supported with scheduled emails or batch emails due to Resend API limitations.
+</details>
 
-###### Get Email
-*   **Description:** Retrieves information about a specific email by ID.
-*   **Parameters:**
-    *   **Email ID**: (String, Required) The unique identifier of the email to retrieve.
+### Method 2: Manual Installation
 
-###### Update Email
-*   **Description:** Updates an email (e.g., to schedule it for later delivery).
-*   **Parameters:**
-    *   **Email ID**: (String, Required) The unique identifier of the email to update.
-    *   **Scheduled At**: (String, Optional) Schedule email to be sent later in ISO 8601 format.
+<details>
+<summary>🔧 For self-hosted n8n instances</summary>
 
-###### Cancel Email
-*   **Description:** Cancels a scheduled email before it's sent.
-*   **Parameters:**
-    *   **Email ID**: (String, Required) The unique identifier of the email to cancel.
+```bash
+# Navigate to your n8n installation directory
+cd ~/.n8n
 
-##### Contact Operations
+# Install the package
+npm install n8n-nodes-resend
 
-###### Create Contact
-*   **Description:** Creates a new contact in an audience.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The audience to add the contact to.
-    *   **Email**: (String, Required) The contact's email address.
-    *   **Additional Fields**: (Collection, Optional) Additional contact information:
-        *   **First Name**: Contact's first name.
-        *   **Last Name**: Contact's last name.
-        *   **Unsubscribed**: Whether the contact is unsubscribed.
+# Restart n8n
+# If using PM2: pm2 restart n8n
+# If using Docker: docker restart n8n
+# If running directly: restart your n8n process
+```
 
-###### Get Contact
-*   **Description:** Retrieves information about a specific contact.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The audience containing the contact.
-    *   **Contact ID**: (String, Required) The unique identifier of the contact.
+</details>
 
-###### Update Contact
-*   **Description:** Updates an existing contact's information.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The audience containing the contact.
-    *   **Update By**: (Options, Required) Whether to update by Contact ID or Email address.
-    *   **Contact Identifier**: (String, Required) Either the contact ID or email address.
-    *   **Additional Fields**: (Collection, Optional) Fields to update:
-        *   **First Name**: Updated first name.
-        *   **Last Name**: Updated last name.
-        *   **Unsubscribed**: Updated subscription status.
+### Method 3: Docker Installation
 
-###### Delete Contact
-*   **Description:** Removes a contact from an audience.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The audience containing the contact.
-    *   **Contact ID**: (String, Required) The unique identifier of the contact to delete.
+<details>
+<summary>🐳 For Docker users</summary>
 
-###### List Contacts
-*   **Description:** Retrieves all contacts in an audience.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The audience to list contacts from.
+Add this to your `docker-compose.yml`:
 
-##### Audience Operations
+```yaml
+version: '3.8'
+services:
+  n8n:
+    image: n8nio/n8n
+    environment:
+      - N8N_NODES_INCLUDE=n8n-nodes-resend
+    # ... other configuration
+```
 
-###### Create Audience
-*   **Description:** Creates a new audience for organizing contacts.
-*   **Parameters:**
-    *   **Audience Name**: (String, Required) The name of the audience.
+Or use environment variable:
+```bash
+docker run -it --rm \
+  -p 5678:5678 \
+  -e N8N_NODES_INCLUDE=n8n-nodes-resend \
+  n8nio/n8n
+```
 
-###### Get Audience
-*   **Description:** Retrieves information about a specific audience.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The unique identifier of the audience.
+</details>
 
-###### List Audiences
-*   **Description:** Retrieves all audiences in your account.
+---
 
-###### Delete Audience
-*   **Description:** Deletes an audience and all its contacts.
-*   **Parameters:**
-    *   **Audience ID**: (String, Required) The unique identifier of the audience to delete.
+## 🔐 Credentials Setup
 
-##### Domain Operations
+> [!IMPORTANT]  
+> You need a Resend account and API key to use these nodes.
 
-###### Create Domain
-*   **Description:** Adds a new domain to your Resend account.
-*   **Parameters:**
-    *   **Domain Name**: (String, Required) The domain name to add (e.g., `example.com`).
-    *   **Region**: (Options, Optional) The region for the domain (us-east-1, eu-west-1, etc.).
+<details>
+<summary>🔑 Configure Resend API Credentials</summary>
 
-###### Get Domain
-*   **Description:** Retrieves information about a specific domain.
-*   **Parameters:**
-    *   **Domain ID**: (String, Required) The unique identifier of the domain.
+1. **Get Your API Key**
+   - Visit [Resend Dashboard](https://resend.com/api-keys)
+   - Create a new API key with appropriate permissions
+   - Copy the API key (starts with `re_`)
 
-###### Update Domain
-*   **Description:** Updates domain configuration settings.
-*   **Parameters:**
-    *   **Domain ID**: (String, Required) The unique identifier of the domain.
-    *   **Domain Update Options**: (Collection, Optional) Settings to update:
-        *   **Click Tracking**: Whether to track clicks in emails.
-        *   **Open Tracking**: Whether to track email opens.
-        *   **TLS**: TLS enforcement setting (Opportunistic or Enforced).
+2. **Add Credentials in n8n**
+   - Go to **Credentials** → **Add credential**
+   - Search for **"Resend API"**
+   - Paste your API key
+   - Test the connection
+   - Save the credential
 
-###### Verify Domain
-*   **Description:** Initiates domain verification process.
-*   **Parameters:**
-    *   **Domain ID**: (String, Required) The unique identifier of the domain to verify.
+> [!TIP]
+> Use different API keys for development and production environments
 
-###### List Domains
-*   **Description:** Retrieves all domains in your account.
+</details>
 
-###### Delete Domain
-*   **Description:** Removes a domain from your account.
-*   **Parameters:**
-    *   **Domain ID**: (String, Required) The unique identifier of the domain to delete.
+---
 
-##### API Key Operations
+## 📚 Available Nodes
 
-###### Create API Key
-*   **Description:** Creates a new API key with specified permissions.
-*   **Parameters:**
-    *   **API Key Name**: (String, Required) The name for the new API key.
-    *   **Permission**: (Options, Required) The permission level (full_access or sending_access).
-    *   **Domain ID**: (String, Optional) Required when permission is sending_access - restricts the key to a specific domain.
+### 🎬 Resend Action Node
 
-###### Delete API Key
-*   **Description:** Revokes an existing API key.
-*   **Parameters:**
-    *   **API Key ID**: (String, Required) The unique identifier of the API key to delete.
+The main node for performing Resend operations.
 
-##### Broadcast Operations
+<details>
+<summary>📧 Email Operations</summary>
 
-###### Create Broadcast
-*   **Description:** Creates a new email broadcast campaign.
-*   **Parameters:**
-    *   **Broadcast Content**: (Collection, Required) The broadcast content and settings:
-        *   **Audience ID**: The audience to send the broadcast to.
-        *   **From**: Sender email address.
-        *   **HTML Content**: HTML version of the email.
-        *   **Name**: Internal name for the broadcast.
-        *   **Reply To**: Reply-to email address.
-        *   **Subject**: Email subject line.
-        *   **Text Content**: Plain text version of the email.
+#### Send Email
+Send individual emails with rich content and attachments.
 
-###### Get Broadcast
-*   **Description:** Retrieves information about a specific broadcast.
-*   **Parameters:**
-    *   **Broadcast ID**: (String, Required) The unique identifier of the broadcast.
+**Key Features:**
+- ✅ HTML and plain text content
+- ✅ File attachments (binary data or URLs)
+- ✅ CC/BCC recipients
+- ✅ Custom reply-to addresses
+- ✅ Email scheduling
 
-###### Update Broadcast
-*   **Description:** Updates an existing broadcast.
-*   **Parameters:**
-    *   **Broadcast ID**: (String, Required) The unique identifier of the broadcast.
-    *   **Broadcast Content**: (Collection, Optional) Fields to update (same as create operation).
+**Example Use Cases:**
+- Welcome emails for new users
+- Invoice delivery with PDF attachments
+- Password reset notifications
+- Marketing campaigns
 
-### Resend Trigger Node
+#### Send Batch Emails
+Send up to 100 emails in a single API call for better performance.
 
-*   **Name:** `Resend Trigger`
-*   **Description:** Receives and processes webhook events from Resend for various email activities.
+**Key Features:**
+- ✅ Bulk email sending
+- ✅ Individual customization per email
+- ✅ Better rate limiting
+- ⚠️ No attachment support (API limitation)
 
-#### Setup
+#### Email Management
+- **Retrieve Email** - Get email details and status
+- **Cancel Email** - Cancel scheduled emails
+- **Update Email** - Modify scheduled emails
 
-1.  **Add the `Resend Trigger` node** to your n8n workflow.
-2.  **Configure the node parameters:**
-    *   **Webhook Signing Secret**: Enter your Resend webhook signing secret (starts with `whsec_`). You'll get this from step 4 below.
-    *   **Events**: Select the specific email events you want Resend to send to your n8n trigger.
-3.  **Copy the webhook URL**: In the trigger node, you'll see a webhook URL displayed. Copy this URL (use the test URL while building your workflow, and the production URL when the workflow is activated).
-4.  **Configure webhook in Resend dashboard:**
-    *   Navigate to **API** -> **Webhooks** in your Resend dashboard ([https://resend.com/webhooks](https://resend.com/webhooks)).
-    *   Click **Add webhook**.
-    *   Paste the copied n8n webhook URL into the "Webhook URL" field.
-    *   Select the same events that you configured in your n8n trigger node.
-    *   Save the webhook configuration.
-    *   Copy the **Webhook Signing Secret** that Resend displays (starts with `whsec_`).
-5.  **Add the signing secret**: Go back to your n8n `Resend Trigger` node and paste the signing secret into the **Webhook Signing Secret** parameter.
+</details>
 
-#### Supported Events
+<details>
+<summary>👥 Contact & Audience Management</summary>
 
-The trigger node supports all Resend webhook event types:
+#### Contacts
+- **Create Contact** - Add new contacts to audiences
+- **Get Contact** - Retrieve contact information
+- **Update Contact** - Modify contact details
+- **Delete Contact** - Remove contacts from audiences
+- **List Contacts** - Get all contacts in an audience
 
-*   **Email Events:**
-    *   `email.sent` - Email was sent successfully
-    *   `email.delivered` - Email was delivered to the recipient
-    *   `email.delivery_delayed` - Email delivery was delayed
-    *   `email.complained` - Recipient marked email as spam
-    *   `email.bounced` - Email bounced (recipient address invalid)
-    *   `email.opened` - Recipient opened the email
-    *   `email.clicked` - Recipient clicked a link in the email
-*   **Contact Events:**
-    *   `contact.created` - New contact was created
-    *   `contact.updated` - Contact information was updated
-    *   `contact.deleted` - Contact was deleted
-*   **Domain Events:**
-    *   `domain.created` - New domain was added
-    *   `domain.updated` - Domain configuration was updated
-    *   `domain.deleted` - Domain was removed
+#### Audiences
+- **Create Audience** - Set up new email lists
+- **Get Audience** - Retrieve audience details
+- **List Audiences** - Get all your audiences
+- **Delete Audience** - Remove email lists
 
-#### Security
+</details>
 
-The trigger node automatically verifies webhook signatures using the Svix library to ensure webhooks are coming from Resend. This prevents unauthorized webhook calls to your n8n workflow.
-
-#### Output
-
-The trigger node outputs the complete JSON payload sent by Resend for the configured event. This payload contains detailed information about the event, such as:
-*   Email ID and message details
-*   Recipient information
-*   Timestamp of the event
-*   Event-specific data (e.g., bounce reason, click data)
-
-## Example Usage
-
-### Resend Action Node Examples
-
-#### Email Operations
-*   **Send Welcome Email:** When a new user signs up, send a personalized welcome email with HTML formatting and tracking.
-*   **Send Email with Attachments:** Send emails with file attachments using binary data from previous nodes (e.g., invoices, reports) or remote file URLs.
-*   **Schedule Marketing Email:** Create and schedule promotional emails to be sent at optimal times.
-*   **Cancel Scheduled Email:** Cancel emails that are no longer relevant before they're sent.
-
-#### Contact Management
-*   **Newsletter Signup:** When users subscribe to your newsletter, create contacts in your audience with their preferences.
-*   **Update Contact Preferences:** Update contact information when users modify their profile or preferences.
-*   **Clean Contact Lists:** Remove bounced or unsubscribed contacts to maintain list hygiene.
-
-#### Audience Segmentation
-*   **Create Targeted Audiences:** Organize contacts into specific audiences based on behavior, location, or preferences.
-*   **Manage Multiple Lists:** Maintain separate audiences for different product lines or customer segments.
+<details>
+<summary>🌐 Domain & Infrastructure</summary>
 
 #### Domain Management
-*   **Add New Domains:** Set up new sending domains when expanding to new brands or regions.
-*   **Configure Tracking:** Enable click and open tracking to measure email engagement.
-*   **Domain Verification:** Automate domain verification workflows for new domains.
+- **Add Domain** - Register new sending domains
+- **Verify Domain** - Check domain verification status
+- **Get Domain** - Retrieve domain configuration
+- **Update Domain** - Modify domain settings
+- **Delete Domain** - Remove domains
 
-#### API Key Management
-*   **Provision Access:** Create limited API keys for third-party integrations or team members.
-*   **Rotate Keys:** Regularly delete and recreate API keys for security compliance.
+#### API Keys
+- **Create API Key** - Generate new API keys
+- **List API Keys** - View existing keys
+- **Delete API Key** - Revoke access keys
 
-#### Broadcast Campaigns
-*   **Newsletter Campaigns:** Create and send newsletters to your entire audience.
-*   **Product Announcements:** Send targeted broadcasts about new features or products.
-*   **Event Invitations:** Create and manage event invitation campaigns.
+</details>
 
-### Resend Trigger Node Examples
-### Resend Trigger Node Examples
+<details>
+<summary>📢 Broadcast Campaigns</summary>
 
-#### Email Event Automation
-*   **Bounce Handling:** When an `email.bounced` event is received:
-    1. Parse the bounced email address from the trigger output
-    2. Update the contact record in your CRM to mark the email as invalid
-    3. Move the contact to a "bounced" audience
-    4. Notify your support team about the bounce
+- **Create Broadcast** - Set up email campaigns
+- **Get Broadcast** - Retrieve campaign details
+- **Send Broadcast** - Launch email campaigns
+- **Update Broadcast** - Modify campaign settings
 
-*   **Engagement Tracking:** When `email.opened` or `email.clicked` events occur:
-    1. Update customer engagement scores in your database
-    2. Trigger follow-up email sequences based on engagement
-    3. Add engaged contacts to VIP audiences
+</details>
 
-*   **Delivery Monitoring:** When `email.delivery_delayed` events happen:
-    1. Log delivery issues for monitoring
-    2. Retry sending through alternative channels if needed
-    3. Alert administrators about potential delivery problems
+### 🎯 Resend Trigger Node
 
-#### Contact Event Automation
-*   **Contact Lifecycle Management:** When `contact.created`, `contact.updated`, or `contact.deleted` events occur:
-    1. Sync contact changes with your CRM or database
-    2. Update customer profiles in your application
-    3. Trigger welcome sequences for new contacts
+Real-time webhook processing for email events.
 
-#### Domain Event Automation
-*   **Domain Management:** When `domain.created`, `domain.updated`, or `domain.deleted` events happen:
-    1. Update your internal domain registry
-    2. Configure DNS settings automatically
-    3. Notify team members about domain changes
+<details>
+<summary>📡 Supported Events</summary>
 
-## Advanced Features
+- **`email.sent`** - Email successfully sent
+- **`email.delivered`** - Email delivered to recipient
+- **`email.opened`** - Recipient opened the email
+- **`email.clicked`** - Link clicked in email
+- **`email.bounced`** - Email bounced
+- **`email.complained`** - Spam complaint received
+- **`contact.created`** - New contact added
+- **`contact.updated`** - Contact information changed
+- **`contact.deleted`** - Contact removed
 
-### Variable Support in Broadcasts
-Broadcasts support dynamic content using variables like:
-*   `{{{FIRST_NAME|there}}}` - Personalize with first name, fallback to "there"
-*   `{{{RESEND_UNSUBSCRIBE_URL}}}` - Automatic unsubscribe link
-*   `{{{COMPANY_NAME}}}` - Company name from contact data
+</details>
 
-### Error Handling
-All operations include comprehensive error handling with descriptive messages for common issues like:
-*   Invalid email addresses
-*   Missing required fields
-*   API rate limits
-*   Authentication failures
-*   Domain verification issues
+---
 
-### Security Features
-*   **Webhook Signature Verification:** All webhooks are verified using Svix for security
-*   **API Key Scoping:** Create limited-scope API keys for specific domains or operations
-*   **TLS Enforcement:** Configure domains with enforced TLS for secure email delivery
+## 💡 Usage Examples
 
-## License
+<details>
+<summary>📧 Email with Attachments Example</summary>
 
-MIT
+```yaml
+# Example workflow: Send invoice email with PDF attachment
+Workflow:
+  1. HTTP Request Node (trigger)
+  2. Code Node (generate invoice data)
+  3. HTML/CSS to PDF Node (create PDF)
+  4. Resend Node (send email with attachment)
 
-## Contribution & Issues
+Resend Node Configuration:
+  - Resource: Email
+  - Operation: Send
+  - From: billing@yourcompany.com
+  - To: {{ $json.customerEmail }}
+  - Subject: Your Invoice #{{ $json.invoiceNumber }}
+  - Attachments:
+    - Type: Binary Data
+    - Binary Property: data
+    - Filename: invoice-{{ $json.invoiceNumber }}.pdf
+```
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please feel free to:
+</details>
 
-*   Raise an issue on the GitHub repository.
-*   Fork the repository and submit a pull request.
+<details>
+<summary>🔄 Automated Email Campaigns</summary>
+
+```yaml
+# Example: Weekly newsletter automation
+Workflow:
+  1. Cron Trigger (weekly)
+  2. Database Node (fetch newsletter content)
+  3. Resend Node (create broadcast)
+  4. Resend Node (send to audience)
+
+Benefits:
+  - Automated scheduling
+  - Audience segmentation
+  - Performance tracking
+```
+
+</details>
+
+<details>
+<summary>📊 Email Event Processing</summary>
+
+```yaml
+# Example: Handle bounced emails
+Trigger: Resend Trigger Node
+  - Event: email.bounced
+  
+Actions:
+  1. Database Node (log bounce)
+  2. Resend Node (remove from audience)
+  3. Slack Node (notify team)
+```
+
+</details>
+
+---
+
+## ⚠️ Important Notes
+
+> [!WARNING]  
+> **Attachment Limitations:**
+> - Maximum email size: **40MB** (including attachments)
+> - Attachments **not supported** with scheduled emails or batch operations
+> - Some file types may be blocked by email providers
+
+> [!NOTE]  
+> **Rate Limits:** Respect Resend's API rate limits. Use batch emails for better efficiency.
+
+<details>
+<summary>📋 API Limitations & Best Practices</summary>
+
+### Best Practices
+- ✅ Always verify your sending domains
+- ✅ Use appropriate API key permissions
+- ✅ Handle webhook events for better deliverability
+- ✅ Implement proper error handling
+- ✅ Monitor email metrics and bounce rates
+
+### Rate Limits
+- **Single emails**: Standard Resend rate limits apply
+- **Batch emails**: More efficient for bulk sending
+- **API calls**: Respect Resend's rate limiting
+
+</details>
+
+---
+
+## 🔧 Development
+
+<details>
+<summary>🛠️ Contributing & Development Setup</summary>
+
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/n8n-nodes-resend.git
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Run linting
+npm run lint
+
+# Run tests
+npm test
+```
+
+### Project Structure
+```
+├── credentials/
+│   └── ResendApi.credentials.ts
+├── nodes/
+│   └── Resend/
+│       ├── Resend.node.ts
+│       ├── ResendTrigger.node.ts
+│       └── icons/
+└── package.json
+```
+
+</details>
+
+---
+
+## 🤝 Support
+
+<details>
+<summary>❓ Getting Help</summary>
+
+- **Documentation**: [Resend API Docs](https://resend.com/docs)
+- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
+- **n8n Community**: [n8n Community Forum](https://community.n8n.io)
+- **Discord**: [n8n Discord Server](https://discord.gg/n8n)
+
+</details>
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built for the amazing [n8n](https://n8n.io) workflow automation platform
+- Powered by [Resend](https://resend.com) email infrastructure
+- Inspired by the n8n community
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the n8n community**
+
+[⭐ Star this repo](https://github.com/your-repo/n8n-nodes-resend) | [🐛 Report Issues](https://github.com/your-repo/issues) | [💡 Request Features](https://github.com/your-repo/issues/new)
+
+</div>
