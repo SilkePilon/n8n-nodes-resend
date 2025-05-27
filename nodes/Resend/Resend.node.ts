@@ -229,14 +229,75 @@ export class Resend implements INodeType {
 						resource: ['email'],
 						operation: ['send'],
 					},
-				},
-				options: [
+				},				options: [
 					{
-						displayName: 'CC',
-						name: 'cc',
-						type: 'string',
-						default: '',
-						description: 'CC recipient email addresses (comma-separated)',
+						displayName: 'Attachments',
+						name: 'attachments',
+						type: 'fixedCollection',
+						default: { attachments: [] },
+						typeOptions: {
+							multipleValues: true,
+						},
+						description: 'Email attachments (not supported with scheduled emails or batch emails)',
+						options: [
+							{
+								name: 'attachments',
+								displayName: 'Attachment',
+								values: [
+									{
+										displayName: 'Attachment Type',
+										name: 'attachmentType',
+										type: 'options',
+										default: 'binaryData',
+										options: [
+											{
+												name: 'Binary Data',
+												value: 'binaryData',
+												description: 'Use binary data from previous node',
+											},
+											{
+												name: 'Remote URL',
+												value: 'url',
+												description: 'Use a URL to a remote file',
+											},
+										],
+									},
+									{
+										displayName: 'Binary Property',
+										name: 'binaryPropertyName',
+										type: 'string',
+										default: 'data',
+										placeholder: 'data',
+										description: 'Name of the binary property which contains the file data',
+										displayOptions: {
+											show: {
+												attachmentType: ['binaryData'],
+											},
+										},
+									},
+									{
+										displayName: 'File URL',
+										name: 'fileUrl',
+										type: 'string',
+										default: '',
+										placeholder: 'https://example.com/file.pdf',
+										description: 'URL to the remote file',
+										displayOptions: {
+											show: {
+												attachmentType: ['url'],
+											},
+										},
+									},									{
+										displayName: 'File Name',
+										name: 'filename',
+										type: 'string',
+										default: '',
+										placeholder: 'document.pdf',
+										description: 'Name for the attached file (required for both binary data and URL)',
+									},
+								],
+							},
+						],
 					},
 					{
 						displayName: 'BCC',
@@ -244,6 +305,13 @@ export class Resend implements INodeType {
 						type: 'string',
 						default: '',
 						description: 'BCC recipient email addresses (comma-separated)',
+					},
+					{
+						displayName: 'CC',
+						name: 'cc',
+						type: 'string',
+						default: '',
+						description: 'CC recipient email addresses (comma-separated)',
 					},
 					{
 						displayName: 'Reply To',
@@ -278,7 +346,7 @@ export class Resend implements INodeType {
 						operation: ['sendBatch'],
 					},
 				},
-				description: 'Array of emails to send (max 100)', options: [{
+				description: 'Array of emails to send (max 100). Note: Attachments are not supported with batch emails.', options: [{
 					name: 'emails',
 					displayName: 'Email',
 					values: [
@@ -1108,9 +1176,38 @@ export class Resend implements INodeType {
 						}
 						if (additionalOptions.bcc) {
 							requestBody.bcc = additionalOptions.bcc.split(',').map((email: string) => email.trim());
-						}
-						if (additionalOptions.reply_to) requestBody.reply_to = additionalOptions.reply_to;
+						}						if (additionalOptions.reply_to) requestBody.reply_to = additionalOptions.reply_to;
 						if (additionalOptions.scheduled_at) requestBody.scheduled_at = additionalOptions.scheduled_at;
+						
+						// Validate that attachments aren't used with scheduled emails
+						if (additionalOptions.attachments && additionalOptions.attachments.attachments && additionalOptions.attachments.attachments.length > 0 && additionalOptions.scheduled_at) {
+							throw new NodeOperationError(this.getNode(), 'Attachments cannot be used with scheduled emails. Please remove either the attachments or the scheduled time.', { itemIndex: i });
+						}
+
+						// Handle attachments
+						if (additionalOptions.attachments && additionalOptions.attachments.attachments && additionalOptions.attachments.attachments.length > 0) {
+							requestBody.attachments = additionalOptions.attachments.attachments.map((attachment: any) => {
+								if (attachment.attachmentType === 'binaryData') {
+									// Get binary data from the current item
+									const binaryPropertyName = attachment.binaryPropertyName || 'data';
+									const binaryData = items[i].binary?.[binaryPropertyName];
+											if (!binaryData) {
+										throw new NodeOperationError(this.getNode(), `Binary property "${binaryPropertyName}" not found in item ${i}`, { itemIndex: i });
+									}
+									
+									return {
+										filename: attachment.filename,
+										content: binaryData.data, // This should be base64 content
+									};
+								} else if (attachment.attachmentType === 'url') {
+									return {
+										filename: attachment.filename,
+										path: attachment.fileUrl,
+									};
+								}
+								return null;
+							}).filter((attachment: any) => attachment !== null);
+						}
 
 						response = await this.helpers.httpRequest({
 							url: 'https://api.resend.com/emails',

@@ -55,13 +55,17 @@ To use these nodes, you need to configure the "Resend API" credentials in n8n:
     *   **To**: (String, Required) Comma-separated list of recipient email addresses (e.g., `user1@example.com, user2@example.com`).
     *   **Subject**: (String, Required) The subject line of the email.
     *   **HTML Content**: (String, Required for HTML/Both formats) The HTML content of the email.
-    *   **Text Content**: (String, Required for Text/Both formats) The plain text content of the email.
-    *   **Additional Options**: (Collection, Optional) Contains optional email parameters:
+    *   **Text Content**: (String, Required for Text/Both formats) The plain text content of the email.    *   **Additional Options**: (Collection, Optional) Contains optional email parameters:
         *   **CC**: Comma-separated list of CC recipient email addresses.
         *   **BCC**: Comma-separated list of BCC recipient email addresses.
         *   **Reply To**: An email address to set as the reply-to address.
-        *   **Text Content (Fallback)**: Plain text version for HTML-only emails (recommended for better deliverability).
-    *   **Tags**: (Collection, Optional) A list of tags (name/value pairs) to categorize the email (e.g., `[{ "name": "category", "value": "transactional" }]`).
+        *   **Scheduled At**: Schedule email to be sent later (e.g., "in 1 min" or ISO 8601 format).
+        *   **Attachments**: (Collection, Optional) Email attachments. Each attachment can be:
+            *   **Binary Data**: Use binary data from a previous node (specify the binary property name)
+            *   **Remote URL**: Use a URL to a remote file (specify the file URL)
+            *   **File Name**: Required name for the attached file
+            
+    **Note**: Attachments are not supported with scheduled emails or batch emails due to Resend API limitations.
 
 ###### Get Email
 *   **Description:** Retrieves information about a specific email by ID.
@@ -273,6 +277,7 @@ The trigger node outputs the complete JSON payload sent by Resend for the config
 
 #### Email Operations
 *   **Send Welcome Email:** When a new user signs up, send a personalized welcome email with HTML formatting and tracking.
+*   **Send Email with Attachments:** Send emails with file attachments using binary data from previous nodes (e.g., invoices, reports) or remote file URLs.
 *   **Schedule Marketing Email:** Create and schedule promotional emails to be sent at optimal times.
 *   **Cancel Scheduled Email:** Cancel emails that are no longer relevant before they're sent.
 
