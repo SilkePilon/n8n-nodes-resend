@@ -1494,23 +1494,20 @@ export class Resend implements INodeType {
 					}
 
 					// CONTACT OPERATIONS
-				} else if (resource === 'contacts') {
-					if (operation === 'create') {
+				} else if (resource === 'contacts') {					if (operation === 'create') {
 						const email = this.getNodeParameter('email', i) as string;
 						const audienceId = this.getNodeParameter('audienceId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;
-
-						const requestBody: any = {
+						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;						const requestBody: any = {
 							email,
-							audience_id: audienceId,
+							audienceId,
 						};
 
-						if (additionalFields.first_name) requestBody.first_name = additionalFields.first_name;
-						if (additionalFields.last_name) requestBody.last_name = additionalFields.last_name;
+						if (additionalFields.first_name) requestBody.firstName = additionalFields.first_name;
+						if (additionalFields.last_name) requestBody.lastName = additionalFields.last_name;
 						if (additionalFields.unsubscribed !== undefined) requestBody.unsubscribed = additionalFields.unsubscribed;
 
 						response = await this.helpers.httpRequest({
-							url: 'https://api.resend.com/contacts',
+							url: `https://api.resend.com/audiences/${audienceId}/contacts`,
 							method: 'POST',
 							headers: {
 								Authorization: `Bearer ${apiKey}`,
