@@ -104,7 +104,7 @@ export class ResendTrigger implements INodeType {
 			typeOptions: { password: true },
 
 			default: '',
-			description: 'Found in your Resend webhook configuration page (whsec_... value)',
+			description: 'Found in your Resend webhook configuration page (whsec_... value).',
 		},
 		{
 			displayName: 'Events',
