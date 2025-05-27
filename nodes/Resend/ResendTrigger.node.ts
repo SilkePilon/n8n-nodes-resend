@@ -99,10 +99,12 @@ export class ResendTrigger implements INodeType {
 			displayName: 'Webhook Signing Secret',
 			name: 'webhookSigningSecret',
 			type: 'string',
+			placeholder: 'whsec_...',
+			required: true,
 			typeOptions: { password: true },
 
 			default: '',
-			description: 'Found in your Resend webhook configuration page (whsec_... value). Leave empty to disable signature verification (not recommended for production).',
+			description: 'Found in your Resend webhook configuration page (whsec_... value)',
 		},
 		{
 			displayName: 'Events',
