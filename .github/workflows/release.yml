@@ -1,0 +1,183 @@
+name: 🚀 Release & Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.2.0)'
+        required: true
+        type: string
+
+jobs:
+  validate-release:
+    name: 🔍 Validate Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔨 Build Project
+        run: npm run build
+        
+      - name: 🧹 Run Full Lint
+        run: npm run lint
+        
+      - name: 🔍 Community Package Scan
+        run: npx @n8n/scan-community-package n8n-nodes-resend
+        
+      - name: 🧪 Pre-publish Validation
+        run: |
+          echo "🔍 Running pre-publish checks..."
+          npm run prepublishOnly
+          
+      - name: 📋 Version Check
+        run: |
+          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          echo "📦 Package version: $PACKAGE_VERSION"
+          
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "$PACKAGE_VERSION" != "${{ github.event.inputs.version }}" ]]; then
+              echo "❌ Package version ($PACKAGE_VERSION) doesn't match input version (${{ github.event.inputs.version }})"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ Version validation passed"
+
+  publish-npm:
+    name: 📤 Publish to NPM
+    runs-on: ubuntu-latest
+    needs: validate-release
+    environment: production
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔨 Build for Production
+        run: npm run build
+        
+      - name: 📤 Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: 📊 Post-Publish Verification
+        run: |
+          PACKAGE_NAME=$(node -p 'require("./package.json").name')
+          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          
+          echo "⏳ Waiting for package to be available on NPM..."
+          sleep 30
+          
+          # Check if package is available
+          npm view $PACKAGE_NAME@$PACKAGE_VERSION version || {
+            echo "❌ Package not found on NPM registry"
+            exit 1
+          }
+          
+          echo "✅ Package successfully published to NPM"
+          echo "📦 $PACKAGE_NAME@$PACKAGE_VERSION is now available"
+
+  create-release-notes:
+    name: 📝 Generate Release Notes
+    runs-on: ubuntu-latest
+    needs: publish-npm
+    if: github.event_name == 'release'
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 📝 Generate Changelog
+        run: |
+          echo "# Release Notes for ${{ github.event.release.tag_name }}" > release-notes.md
+          echo "" >> release-notes.md
+          echo "## 🎉 What's New" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          # Extract changes from package.json or commit messages
+          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          echo "### Version $PACKAGE_VERSION" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          # Add installation instructions
+          echo "## 📦 Installation" >> release-notes.md
+          echo "" >> release-notes.md
+          echo '```bash' >> release-notes.md
+          echo "npm install n8n-nodes-resend@$PACKAGE_VERSION" >> release-notes.md
+          echo '```' >> release-notes.md
+          echo "" >> release-notes.md
+          
+          echo "Or install via n8n Community Nodes:" >> release-notes.md
+          echo "1. Go to Settings → Community Nodes" >> release-notes.md
+          echo "2. Install: \`n8n-nodes-resend\`" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          echo "## 🔗 Links" >> release-notes.md
+          echo "- [NPM Package](https://www.npmjs.com/package/n8n-nodes-resend)" >> release-notes.md
+          echo "- [Documentation](https://github.com/${{ github.repository }}/blob/main/docs.md)" >> release-notes.md
+          echo "- [Resend API](https://resend.com/docs)" >> release-notes.md
+          
+          cat release-notes.md
+          
+      - name: 📤 Update Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const releaseNotes = fs.readFileSync('release-notes.md', 'utf8');
+            
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ github.event.release.id }},
+              body: releaseNotes
+            });
+
+  notify-community:
+    name: 📢 Community Notification
+    runs-on: ubuntu-latest
+    needs: [publish-npm, create-release-notes]
+    if: github.event_name == 'release'
+    
+    steps:
+      - name: 📊 Release Summary
+        run: |
+          echo "🎉 Successfully released n8n-nodes-resend!"
+          echo "========================================"
+          echo "Tag: ${{ github.event.release.tag_name }}"
+          echo "Version: $(echo '${{ github.event.release.tag_name }}' | sed 's/v//')"
+          echo "Release URL: ${{ github.event.release.html_url }}"
+          echo "NPM: https://www.npmjs.com/package/n8n-nodes-resend"
+          echo ""
+          echo "🔧 Users can now install via:"
+          echo "- npm install n8n-nodes-resend"
+          echo "- n8n Community Nodes interface"
+          echo ""
+          echo "📚 Documentation: https://github.com/${{ github.repository }}/blob/main/docs.md"

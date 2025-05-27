@@ -1,0 +1,282 @@
+name: 🔄 Maintenance & Updates
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      update_type:
+        description: 'Type of update to perform'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - all
+
+jobs:
+  dependency-audit:
+    name: 🔍 Dependency Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔍 Security Audit
+        run: |
+          echo "🔒 Running security audit..."
+          npm audit --audit-level=moderate
+          
+      - name: 📊 Outdated Packages Check
+        run: |
+          echo "📦 Checking for outdated packages..."
+          npm outdated || true
+          
+      - name: 🧪 Test Current Setup
+        run: |
+          npm run build
+          npm run lint
+          npx @n8n/scan-community-package n8n-nodes-resend
+
+  update-dependencies:
+    name: 🔄 Update Dependencies
+    runs-on: ubuntu-latest
+    needs: dependency-audit
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔄 Update Dependencies
+        run: |
+          case "${{ github.event.inputs.update_type }}" in
+            patch)
+              echo "🔧 Updating patch versions..."
+              npm update --save
+              ;;
+            minor)
+              echo "🔧 Updating minor versions..."
+              npx npm-check-updates -u --target minor
+              npm install
+              ;;
+            major)
+              echo "🔧 Updating major versions (careful!)..."
+              npx npm-check-updates -u --target latest
+              npm install
+              ;;
+            all)
+              echo "🔧 Updating all dependencies to latest..."
+              npx npm-check-updates -u
+              npm install
+              ;;
+          esac
+          
+      - name: 🧪 Test After Updates
+        run: |
+          npm run build
+          npm run lint
+          npx @n8n/scan-community-package n8n-nodes-resend
+          
+      - name: 📝 Generate Update Report
+        run: |
+          echo "# Dependency Update Report" > update-report.md
+          echo "Generated on: $(date)" >> update-report.md
+          echo "" >> update-report.md
+          echo "## Update Type: ${{ github.event.inputs.update_type }}" >> update-report.md
+          echo "" >> update-report.md
+          echo "## Changes Made:" >> update-report.md
+          git diff --name-only HEAD || echo "No changes detected" >> update-report.md
+          echo "" >> update-report.md
+          echo "## Current Dependencies:" >> update-report.md
+          echo '```json' >> update-report.md
+          cat package.json | jq '.dependencies // {}' >> update-report.md
+          echo '```' >> update-report.md
+          echo "" >> update-report.md
+          echo "## Current Dev Dependencies:" >> update-report.md
+          echo '```json' >> update-report.md
+          cat package.json | jq '.devDependencies // {}' >> update-report.md
+          echo '```' >> update-report.md
+          
+      - name: 📤 Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: '🔄 Update dependencies (${{ github.event.inputs.update_type }})'
+          title: '🔄 Dependency Update: ${{ github.event.inputs.update_type }}'
+          body-path: update-report.md
+          branch: dependency-update-${{ github.event.inputs.update_type }}-${{ github.run_id }}
+          delete-branch: true
+
+  compatibility-check:
+    name: 🧪 n8n Compatibility Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        n8n-version: ['latest', '1.0.0', '0.230.0']
+        node-version: ['20.x', '22.x']
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔨 Build Project
+        run: npm run build
+        
+      - name: 📦 Install n8n ${{ matrix.n8n-version }}
+        run: |
+          if [ "${{ matrix.n8n-version }}" = "latest" ]; then
+            npm install -g n8n@latest
+          else
+            npm install -g n8n@${{ matrix.n8n-version }}
+          fi
+          
+      - name: 🧪 Test Compatibility
+        run: |
+          echo "🔍 Testing compatibility with n8n ${{ matrix.n8n-version }} on Node ${{ matrix.node-version }}"
+          
+          # Check if nodes can be loaded (basic compatibility test)
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Test node files exist and are valid
+            const nodeFiles = [
+              'dist/nodes/Resend/Resend.node.js',
+              'dist/nodes/Resend/ResendTrigger.node.js',
+              'dist/credentials/ResendApi.credentials.js'
+            ];
+            
+            for (const file of nodeFiles) {
+              if (!fs.existsSync(file)) {
+                throw new Error(\`Missing file: \${file}\`);
+              }
+              
+              try {
+                require(path.resolve(file));
+                console.log(\`✅ \${file} loads successfully\`);
+              } catch (error) {
+                throw new Error(\`Failed to load \${file}: \${error.message}\`);
+              }
+            }
+            
+            console.log('🎉 All compatibility checks passed!');
+          "
+
+  cleanup-old-builds:
+    name: 🧹 Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🗑️ Delete Old Workflow Runs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              per_page: 100
+            });
+            
+            // Keep last 50 runs, delete older ones
+            const runsToDelete = runs.data.workflow_runs.slice(50);
+            
+            for (const run of runsToDelete) {
+              if (run.status === 'completed') {
+                try {
+                  await github.rest.actions.deleteWorkflowRun({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    run_id: run.id
+                  });
+                  console.log(`Deleted workflow run ${run.id}`);
+                } catch (error) {
+                  console.log(`Failed to delete run ${run.id}: ${error.message}`);
+                }
+              }
+            }
+
+  health-check:
+    name: 🩺 Project Health Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🩺 Repository Health Check
+        run: |
+          echo "🩺 Project Health Report"
+          echo "========================"
+          echo ""
+          
+          # Check file sizes
+          echo "📊 Project Statistics:"
+          echo "- Total files: $(find . -type f | wc -l)"
+          echo "- TypeScript files: $(find . -name '*.ts' | wc -l)"
+          echo "- JavaScript files: $(find . -name '*.js' | wc -l)"
+          echo "- JSON files: $(find . -name '*.json' | wc -l)"
+          echo ""
+          
+          # Check documentation
+          echo "📚 Documentation:"
+          if [ -f "README.md" ]; then
+            echo "- README.md: $(wc -l < README.md) lines"
+          fi
+          if [ -f "docs.md" ]; then
+            echo "- docs.md: $(wc -l < docs.md) lines"
+          fi
+          echo ""
+          
+          # Check package.json health
+          echo "📦 Package Health:"
+          node -e "
+            const pkg = require('./package.json');
+            console.log(\`- Name: \${pkg.name}\`);
+            console.log(\`- Version: \${pkg.version}\`);
+            console.log(\`- License: \${pkg.license}\`);
+            console.log(\`- Dependencies: \${Object.keys(pkg.dependencies || {}).length}\`);
+            console.log(\`- Dev Dependencies: \${Object.keys(pkg.devDependencies || {}).length}\`);
+            console.log(\`- Scripts: \${Object.keys(pkg.scripts || {}).length}\`);
+          "
+          echo ""
+          
+          # Check git status
+          echo "🔄 Git Status:"
+          echo "- Current branch: $(git branch --show-current)"
+          echo "- Last commit: $(git log -1 --pretty=format:'%h %s (%an, %ar)')"
+          echo "- Total commits: $(git rev-list --count HEAD)"

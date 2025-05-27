@@ -1,0 +1,228 @@
+name: 🔍 Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-scan:
+    name: 🛠️ Lint & Security Scan
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔨 Build Project
+        run: npm run build
+        
+      - name: 🧹 Run ESLint
+        run: npm run lint
+        
+      - name: 🔍 Scan Community Package
+        run: npx @n8n/scan-community-package n8n-nodes-resend
+        
+      - name: ✅ Validate Package Structure
+        run: |
+          echo "🔍 Checking package.json structure..."
+          node -e "
+            const pkg = require('./package.json');
+            if (!pkg.n8n) throw new Error('Missing n8n configuration');
+            if (!pkg.n8n.nodes || pkg.n8n.nodes.length === 0) throw new Error('No nodes defined');
+            if (!pkg.n8n.credentials || pkg.n8n.credentials.length === 0) throw new Error('No credentials defined');
+            console.log('✅ Package structure is valid');
+          "
+          
+      - name: 📊 Check Build Output
+        run: |
+          echo "🔍 Verifying build artifacts..."
+          ls -la dist/
+          if [ ! -f "dist/nodes/Resend/Resend.node.js" ]; then
+            echo "❌ Missing Resend.node.js"
+            exit 1
+          fi
+          if [ ! -f "dist/nodes/Resend/ResendTrigger.node.js" ]; then
+            echo "❌ Missing ResendTrigger.node.js"
+            exit 1
+          fi
+          if [ ! -f "dist/credentials/ResendApi.credentials.js" ]; then
+            echo "❌ Missing ResendApi.credentials.js"
+            exit 1
+          fi
+          echo "✅ All build artifacts present"
+
+  test-compatibility:
+    name: 🧪 n8n Compatibility Test
+    runs-on: ubuntu-latest
+    needs: lint-and-scan
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🔨 Build Project
+        run: npm run build
+        
+      - name: 🧪 Test Package Installation
+        run: |
+          echo "🔍 Testing package installation simulation..."
+          npm pack --dry-run
+          
+      - name: 📋 Generate Package Report
+        run: |
+          echo "📊 Package Information:" > package-report.txt
+          echo "===================" >> package-report.txt
+          echo "Package Name: $(node -p 'require("./package.json").name')" >> package-report.txt
+          echo "Version: $(node -p 'require("./package.json").version')" >> package-report.txt
+          echo "Node Engine: $(node -p 'require("./package.json").engines.node')" >> package-report.txt
+          echo "n8n API Version: $(node -p 'require("./package.json").n8n.n8nNodesApiVersion')" >> package-report.txt
+          echo "" >> package-report.txt
+          echo "📁 File Structure:" >> package-report.txt
+          echo "==================" >> package-report.txt
+          find dist/ -type f -name "*.js" | sort >> package-report.txt
+          echo "" >> package-report.txt
+          echo "📦 Package Size:" >> package-report.txt
+          echo "===============" >> package-report.txt
+          du -sh dist/ >> package-report.txt
+          cat package-report.txt
+          
+      - name: 📤 Upload Package Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-report-${{ github.sha }}
+          path: package-report.txt
+          retention-days: 30
+
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    needs: lint-and-scan
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: 🔍 Run npm audit
+        run: |
+          npm audit --audit-level=moderate
+          
+      - name: 🛡️ Check for known vulnerabilities
+        run: |
+          echo "🔍 Checking for security issues in dependencies..."
+          npm ls --depth=0
+          
+      - name: 📊 License Check
+        run: |
+          echo "📋 Verifying license compatibility..."
+          node -e "
+            const pkg = require('./package.json');
+            if (pkg.license !== 'MIT') {
+              console.warn('⚠️ License is not MIT');
+            } else {
+              console.log('✅ MIT license confirmed');
+            }
+          "
+
+  format-check:
+    name: 🎨 Format & Style Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🚀 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🎨 Check Code Formatting
+        run: |
+          echo "🔍 Checking code formatting with Prettier..."
+          npx prettier --check nodes credentials package.json || {
+            echo "❌ Code formatting issues found!"
+            echo "💡 Run 'npm run format' to fix formatting issues"
+            exit 1
+          }
+          echo "✅ Code formatting is correct"
+          
+      - name: 📝 Check Documentation
+        run: |
+          echo "🔍 Checking documentation files..."
+          if [ ! -f "README.md" ]; then
+            echo "❌ Missing README.md"
+            exit 1
+          fi
+          if [ ! -f "docs.md" ]; then
+            echo "❌ Missing docs.md"
+            exit 1
+          fi
+          echo "✅ Documentation files present"
+          
+          # Check README content
+          if ! grep -q "n8n-nodes-resend" README.md; then
+            echo "⚠️ README might not contain package name"
+          fi
+          
+          echo "📊 Documentation stats:"
+          wc -l README.md docs.md
+
+  notify-status:
+    name: 📢 Workflow Status
+    runs-on: ubuntu-latest
+    needs: [lint-and-scan, test-compatibility, security-audit, format-check]
+    if: always()
+    
+    steps:
+      - name: 📊 Report Results
+        run: |
+          echo "🎯 CI Pipeline Results"
+          echo "====================="
+          echo "Lint & Scan: ${{ needs.lint-and-scan.result }}"
+          echo "Compatibility: ${{ needs.test-compatibility.result }}"
+          echo "Security: ${{ needs.security-audit.result }}"
+          echo "Format: ${{ needs.format-check.result }}"
+          
+          if [[ "${{ needs.lint-and-scan.result }}" == "success" && 
+                "${{ needs.test-compatibility.result }}" == "success" && 
+                "${{ needs.security-audit.result }}" == "success" && 
+                "${{ needs.format-check.result }}" == "success" ]]; then
+            echo "✅ All checks passed! Ready for deployment 🚀"
+          else
+            echo "❌ Some checks failed. Please review the logs above."
+            exit 1
+          fi
