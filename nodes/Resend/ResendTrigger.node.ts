@@ -5,9 +5,52 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	NodeConnectionType,
+	NodeOperationError,
 } from 'n8n-workflow';
 
-import { Webhook } from 'svix';
+import { createHmac, timingSafeEqual } from 'crypto';
+
+function verifySvixSignature(
+	payload: string,
+	svixId: string,
+	svixTimestamp: string,
+	svixSignature: string,
+	webhookSigningSecret: string,
+): void {
+	// Remove the "whsec_" prefix from the secret
+	const secret = webhookSigningSecret.replace(/^whsec_/, '');
+	
+	// Decode the base64 secret
+	const secretBytes = Buffer.from(secret, 'base64');
+	
+	// Create the signed payload: "id.timestamp.payload"
+	const signedPayload = `${svixId}.${svixTimestamp}.${payload}`;
+	
+	// Create HMAC-SHA256 signature
+	const expectedSignature = createHmac('sha256', secretBytes)
+		.update(signedPayload, 'utf8')
+		.digest('base64');
+	
+	// Parse signatures from the header (format: "v1,signature1 v1,signature2")
+	const signatures = svixSignature.split(' ');
+	
+	for (const sig of signatures) {
+		const [version, signature] = sig.split(',');
+		if (version === 'v1') {
+			// Use timing-safe comparison to prevent timing attacks
+			const signatureBuffer = Buffer.from(signature, 'base64');
+			const expectedBuffer = Buffer.from(expectedSignature, 'base64');
+			
+			if (signatureBuffer.length === expectedBuffer.length && 
+				timingSafeEqual(signatureBuffer, expectedBuffer)) {
+				return; // Signature is valid
+			}		}
+	}
+		throw new NodeOperationError(
+		{} as any,
+		'Invalid webhook signature'
+	);
+}
 
 export class ResendTrigger implements INodeType {	description: INodeTypeDescription = {
 		displayName: 'Resend Trigger',
@@ -29,16 +72,24 @@ export class ResendTrigger implements INodeType {	description: INodeTypeDescript
 			activationHint: 'Once you\'ve finished building your workflow, activate it to use the production webhook URL in your Resend dashboard.',
 		},
 		inputs: [],
-		outputs: ['main' as NodeConnectionType],
-		webhooks: [
+		outputs: ['main' as NodeConnectionType],		webhooks: [
 			{
 				name: 'default',
 				httpMethod: 'POST',
 				responseMode: 'onReceived',
-				path: 'webhook',
+				path: '={{$parameter["path"]}}',
 			},
 		],
 		properties: [
+			{
+				displayName: 'Path',
+				name: 'path',
+				type: 'string',
+				default: 'webhook',
+				placeholder: 'webhook',
+				required: true,
+				description: 'The path to listen to. Dynamic values can be specified by using :, e.g. "webhook/:ID". If dynamic values are set, "webhookId" will be prepended to path.',
+			},
 			{
 				displayName: 'Webhook Signing Secret',
 				name: 'webhookSigningSecret',
@@ -77,10 +128,8 @@ export class ResendTrigger implements INodeType {	description: INodeTypeDescript
 		const subscribedEvents = this.getNodeParameter('events') as string[];
 		const webhookSigningSecret = this.getNodeParameter('webhookSigningSecret') as string;
 
-		// Verify webhook signature using Svix
+		// Verify webhook signature using built-in crypto
 		try {
-			const wh = new Webhook(webhookSigningSecret);
-			
 			// Get the raw body for signature verification
 			const payload = JSON.stringify(bodyData);
 			
@@ -97,16 +146,8 @@ export class ResendTrigger implements INodeType {	description: INodeTypeDescript
 				return {
 					workflowData: [[]],
 				};
-			}
-
-			const svixHeaders = {
-				'svix-id': svixId,
-				'svix-timestamp': svixTimestamp,
-				'svix-signature': svixSignature,
-			};
-
-			// Verify the webhook signature
-			wh.verify(payload, svixHeaders);
+			}			// Verify the webhook signature using built-in crypto
+			verifySvixSignature(payload, svixId, svixTimestamp, svixSignature, webhookSigningSecret);
 		} catch (error) {
 			// Signature verification failed
 			console.error('Resend webhook signature verification failed:', error);
@@ -137,7 +178,6 @@ export class ResendTrigger implements INodeType {	description: INodeTypeDescript
 			};
 		}
 	}
-
 	public webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
