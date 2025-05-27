@@ -11,7 +11,7 @@ export class Resend implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Resend',
 		name: 'resend',
-		icon: 'file:Resend.svg',
+		icon: 'file:resend-icon-white.svg',
 		group: ['output'],
 		version: 1,
 		description: 'Interact with Resend API for emails, domains, API keys, broadcasts, audiences, and contacts',
@@ -187,6 +187,7 @@ export class Resend implements INodeType {
 				default: '',
 				typeOptions: {
 					multiline: true,
+					rows: 4,
 				},
 				placeholder: '<p>Your HTML content here</p>',
 				displayOptions: {
@@ -205,6 +206,7 @@ export class Resend implements INodeType {
 				default: '',
 				typeOptions: {
 					multiline: true,
+					rows: 4,
 				},
 				placeholder: 'Your plain text content here',
 				displayOptions: {
