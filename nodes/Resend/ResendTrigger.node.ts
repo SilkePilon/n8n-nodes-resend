@@ -8,7 +8,7 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
-import { createHmac, timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 function verifySvixSignature(
 	payload: string,
