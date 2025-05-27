@@ -60,10 +60,9 @@ export class ResendTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Resend Trigger',
 		name: 'resendTrigger',
-		icon: 'file:resend-icon-white.svg',
-		group: ['trigger'],
+		icon: 'file:resend-icon-white.svg',		group: ['trigger'],
 		version: 1,
-		description: 'Handles Resend webhooks for various email events',
+		description: 'Triggers workflows when Resend email events occur, such as email sent, delivered, opened, clicked, bounced, or complained. Includes secure webhook signature verification.',
 		subtitle: '={{$parameter["events"].join(", ")}}',
 		defaults: {
 			name: 'Resend Trigger',
