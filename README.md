@@ -18,7 +18,8 @@ Transform your email workflows with comprehensive Resend integration for n8n. Se
 ## 🎯 Features
 
 - **📤 Email Operations** - Send single emails, batch emails, schedule delivery
-- **📎 File Attachments** - Support for binary data and remote URL attachments
+- **� Human-in-the-Loop** - Send emails with interactive buttons and wait for user responses
+- **�📎 File Attachments** - Support for binary data and remote URL attachments
 - **👥 Contact Management** - Create, update, delete contacts and audiences
 - **🌐 Domain Management** - Verify domains, configure DNS settings
 - **🔑 API Key Management** - Create and manage API keys programmatically
@@ -291,6 +292,38 @@ Actions:
   1. Database Node (log bounce)
   2. Resend Node (remove from audience)
   3. Slack Node (notify team)
+```
+
+</details>
+
+<details>
+<summary>🔄 Human-in-the-Loop Approval Workflow</summary>
+
+```yaml
+# Example: Document approval workflow with email buttons
+Workflow:
+  1. HTTP Request Node (trigger) - Document submission
+  2. Code Node (prepare approval data)
+  3. Resend Node (Send and Wait) - Send approval email to manager
+  
+Resend Node Configuration:
+  - Resource: Email
+  - Operation: Send and Wait
+  - From: workflow@yourcompany.com
+  - To: {{ $json.managerEmail }}
+  - Subject: Document Approval Required: {{ $json.documentName }}
+  - Message: Please review and approve the submitted document
+  - Buttons:
+    - Approve (Primary style, value: "approved")
+    - Reject (Danger style, value: "rejected")  
+    - Request Changes (Warning style, value: "changes")
+  - Wait Until: 48 hours from now
+  
+Benefits:
+  - Streamlined approval process
+  - Email-based decision making
+  - Automatic timeout handling
+  - Visual button styling
 ```
 
 </details>
