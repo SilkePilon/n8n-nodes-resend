@@ -225,28 +225,34 @@ jobs:
                 throw error;
               }
             }
-
   create-release-notes:
     name: 📝 Generate Release Notes
     runs-on: ubuntu-latest
     needs: publish-npm
-    if: github.event_name == 'release'
+    if: always() && needs.publish-npm.result == 'success'
     
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: 📝 Generate Changelog
+            - name: 📝 Generate Changelog
         run: |
-          echo "# Release Notes for ${{ github.event.release.tag_name }}" > release-notes.md
+          # Get version information
+          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            TAG_NAME="${{ github.event.release.tag_name }}"
+            echo "# Release Notes for $TAG_NAME" > release-notes.md
+          else
+            TAG_NAME="v$PACKAGE_VERSION"
+            echo "# Release Notes for $TAG_NAME" > release-notes.md
+          fi
+          
           echo "" >> release-notes.md
           echo "## 🎉 What's New" >> release-notes.md
           echo "" >> release-notes.md
           
-          # Extract changes from package.json or commit messages
-          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
           echo "### Version $PACKAGE_VERSION" >> release-notes.md
           echo "" >> release-notes.md
           
@@ -269,39 +275,57 @@ jobs:
           echo "- [Resend API](https://resend.com/docs)" >> release-notes.md
           
           cat release-notes.md
-          
-      - name: 📤 Update Release
+            - name: 📤 Update Release
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const releaseNotes = fs.readFileSync('release-notes.md', 'utf8');
             
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: ${{ github.event.release.id }},
-              body: releaseNotes
-            });
-
+            if (context.eventName === 'release') {
+              // Update existing release
+              await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: ${{ github.event.release.id || 'null' }},
+                body: releaseNotes
+              });
+              console.log('✅ Updated existing release with release notes');
+            } else {
+              // For workflow_dispatch, the release was already created in publish-npm job
+              console.log('ℹ️ Release notes generated for workflow_dispatch event');
+              console.log('📝 Release was already created in previous job with release notes');
+            }
   notify-community:
     name: 📢 Community Notification
     runs-on: ubuntu-latest
     needs: [publish-npm, create-release-notes]
-    if: github.event_name == 'release'
+    if: always() && needs.publish-npm.result == 'success'
     
     steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
       - name: 📊 Release Summary
         run: |
+          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          
           echo "🎉 Successfully released n8n-nodes-resend!"
           echo "========================================"
-          echo "Tag: ${{ github.event.release.tag_name }}"
-          echo "Version: $(echo '${{ github.event.release.tag_name }}' | sed 's/v//')"
-          echo "Release URL: ${{ github.event.release.html_url }}"
+          
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "Tag: ${{ github.event.release.tag_name }}"
+            echo "Release URL: ${{ github.event.release.html_url }}"
+          else
+            echo "Tag: v$PACKAGE_VERSION"
+            echo "Release URL: https://github.com/${{ github.repository }}/releases/tag/v$PACKAGE_VERSION"
+          fi
+          
+          echo "Version: $PACKAGE_VERSION"
           echo "NPM: https://www.npmjs.com/package/n8n-nodes-resend"
           echo ""
           echo "🔧 Users can now install via:"
-          echo "- npm install n8n-nodes-resend"
+          echo "- npm install n8n-nodes-resend@$PACKAGE_VERSION"
           echo "- n8n Community Nodes interface"
           echo ""
           echo "📚 Documentation: https://github.com/${{ github.repository }}/blob/main/docs.md"
