@@ -10,7 +10,8 @@ on:
         required: true
         type: string
 
-jobs:  validate-release:
+jobs:
+  validate-release:
     name: 🔍 Validate Release
     runs-on: ubuntu-latest
     
