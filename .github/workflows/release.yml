@@ -10,14 +10,15 @@ on:
         required: true
         type: string
 
-jobs:
-  validate-release:
+jobs:  validate-release:
     name: 🔍 Validate Release
     runs-on: ubuntu-latest
     
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
         
       - name: 🚀 Setup Node.js
         uses: actions/setup-node@v4
@@ -25,6 +26,32 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+          
+      - name: 🔄 Update Package Version
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
+        run: |
+          echo "🔄 Updating package.json version to ${{ github.event.inputs.version }}"
+          
+          # Validate version format (basic semver check)
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid version format: ${{ github.event.inputs.version }}"
+            echo "💡 Expected format: X.Y.Z (e.g., 1.2.3) or X.Y.Z-pre (e.g., 1.2.3-beta.1)"
+            exit 1
+          fi
+          
+          # Update package.json version
+          npm version "${{ github.event.inputs.version }}" --no-git-tag-version
+          
+          # Verify the change
+          NEW_VERSION=$(node -p 'require("./package.json").version')
+          echo "✅ Package version updated to: $NEW_VERSION"
+          
+          # Commit the version change
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json package-lock.json
+          git commit -m "🔖 Bump version to ${{ github.event.inputs.version }}" || echo "No changes to commit"
+          git push origin ${{ github.ref_name }}
           
       - name: 📦 Install Dependencies
         run: npm ci
@@ -43,20 +70,28 @@ jobs:
           echo "🔍 Running pre-publish checks..."
           npm run prepublishOnly
           
-      - name: 📋 Version Check
+      - name: 📋 Version Validation
         run: |
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
-          echo "📦 Package version: $PACKAGE_VERSION"
+          echo "📦 Current package version: $PACKAGE_VERSION"
           
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "$PACKAGE_VERSION" != "${{ github.event.inputs.version }}" ]]; then
               echo "❌ Package version ($PACKAGE_VERSION) doesn't match input version (${{ github.event.inputs.version }})"
+              echo "💡 This should not happen after the version update step"
               exit 1
+            fi
+            echo "✅ Package version matches input version: $PACKAGE_VERSION"
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            EXPECTED_VERSION="${RELEASE_TAG#v}"  # Remove 'v' prefix if present
+            if [[ "$PACKAGE_VERSION" != "$EXPECTED_VERSION" ]]; then
+              echo "⚠️ Package version ($PACKAGE_VERSION) doesn't match release tag ($EXPECTED_VERSION)"
+              echo "💡 Consider using workflow_dispatch to update the version first"
             fi
           fi
           
-          echo "✅ Version validation passed"
-
+          echo "✅ Version validation completed"
   publish-npm:
     name: 📤 Publish to NPM
     runs-on: ubuntu-latest
@@ -66,8 +101,15 @@ jobs:
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: � Pull Latest Changes
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git pull origin ${{ github.ref_name }}
         
-      - name: 🚀 Setup Node.js
+      - name: �🚀 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
@@ -79,6 +121,25 @@ jobs:
         
       - name: 🔨 Build for Production
         run: npm run build
+        
+      - name: 🏷️ Create Git Tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          TAG_NAME="v$PACKAGE_VERSION"
+          
+          echo "🏷️ Creating Git tag: $TAG_NAME"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if tag already exists
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "⚠️ Tag $TAG_NAME already exists, skipping tag creation"
+          else
+            git tag -a "$TAG_NAME" -m "Release version $PACKAGE_VERSION"
+            git push origin "$TAG_NAME"
+            echo "✅ Created and pushed tag: $TAG_NAME"
+          fi
         
       - name: 📤 Publish to NPM
         run: npm publish
@@ -101,6 +162,68 @@ jobs:
           
           echo "✅ Package successfully published to NPM"
           echo "📦 $PACKAGE_NAME@$PACKAGE_VERSION is now available"
+          
+      - name: 🎉 Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            const version = packageJson.version;
+            const tagName = `v${version}`;
+            
+            // Create release notes
+            const releaseBody = `# 🚀 Release ${version}
+            
+            ## 📦 Installation
+            
+            \`\`\`bash
+            npm install n8n-nodes-resend@${version}
+            \`\`\`
+            
+            Or install via n8n Community Nodes:
+            1. Go to **Settings** → **Community Nodes**
+            2. Install: \`n8n-nodes-resend\`
+            3. Restart n8n
+            
+            ## 🔗 Links
+            - [NPM Package](https://www.npmjs.com/package/n8n-nodes-resend)
+            - [Documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs.md)
+            - [Resend API Docs](https://resend.com/docs)
+            
+            ## ✨ Features
+            - 📧 Complete email operations (send, retrieve, update, cancel)
+            - 📎 File attachment support (binary data + remote URLs)
+            - 👥 Contact and audience management
+            - 🌐 Domain management and verification
+            - 🔑 API key management
+            - 📢 Broadcast campaigns
+            - 🎣 Real-time webhook events
+            
+            ---
+            
+            *Generated automatically by GitHub Actions*`;
+            
+            try {
+              const release = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+                name: `🚀 Release ${version}`,
+                body: releaseBody,
+                draft: false,
+                prerelease: version.includes('-')
+              });
+              
+              console.log(`✅ Created GitHub release: ${release.data.html_url}`);
+            } catch (error) {
+              if (error.status === 422) {
+                console.log(`⚠️ Release ${tagName} already exists`);
+              } else {
+                throw error;
+              }
+            }
 
   create-release-notes:
     name: 📝 Generate Release Notes
