@@ -10,7 +10,8 @@
 			"es2022.error"
 		],
 		"types": [
-			"node"
+			"node",
+			"jest"
 		],
 		"removeComments": true,
 		"useUnknownInCatchVariables": false,
