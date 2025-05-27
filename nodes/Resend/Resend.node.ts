@@ -95,11 +95,6 @@ export class Resend implements INodeType {
 						value: 'send',
 						description: 'Send an email',
 						action: 'Send an email',
-					},					{
-						name: 'Send and Wait',
-						value: 'sendAndWait',
-						description: 'Send an email and wait for user interaction (Human-in-the-Loop)',
-						action: 'Send email and wait for response',
 					},
 					{
 						name: 'Send Batch',
@@ -131,16 +126,18 @@ export class Resend implements INodeType {
 						description: 'Send email with plain text content',
 					},
 				],
-				default: 'html',				displayOptions: {
+				default: 'html',
+				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendBatch', 'sendAndWait'],
+						operation: ['send', 'sendBatch'],
 					},
 				},
 				description: 'Choose the format for your email content. HTML allows rich formatting, text is simple and universally compatible.',
 			},
 			// Properties for "Send Email" operation
-			{				displayName: 'From',
+			{
+				displayName: 'From',
 				name: 'from',
 				type: 'string',
 				required: true,
@@ -149,12 +146,13 @@ export class Resend implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendAndWait'],
+						operation: ['send'],
 					},
 				},
 				description: 'Sender email address. To include a friendly name, use the format "Your Name &lt;sender@domain.com&gt;".',
 			},
-			{				displayName: 'To',
+			{
+				displayName: 'To',
 				name: 'to',
 				type: 'string',
 				required: true,
@@ -163,7 +161,7 @@ export class Resend implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendAndWait'],
+						operation: ['send'],
 					},
 				},
 				description: 'Recipient email address. For multiple addresses, separate with commas (max 50).',
@@ -173,11 +171,12 @@ export class Resend implements INodeType {
 				name: 'subject',
 				type: 'string',
 				required: true,
-				default: '',				placeholder: 'Hello from n8n!',
+				default: '',
+				placeholder: 'Hello from n8n!',
 				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendAndWait'],
+						operation: ['send'],
 					},
 				},
 				description: 'Email subject line',
@@ -190,10 +189,11 @@ export class Resend implements INodeType {
 					multiline: true,
 					rows: 4,
 				},
-				placeholder: '<p>Your HTML content here</p>',				displayOptions: {
+				placeholder: '<p>Your HTML content here</p>',
+				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendAndWait'],
+						operation: ['send'],
 						emailFormat: ['html'],
 					},
 				},
@@ -208,10 +208,11 @@ export class Resend implements INodeType {
 					multiline: true,
 					rows: 4,
 				},
-				placeholder: 'Your plain text content here',				displayOptions: {
+				placeholder: 'Your plain text content here',
+				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendAndWait'],
+						operation: ['send'],
 						emailFormat: ['text'],
 					},
 				},
@@ -222,10 +223,11 @@ export class Resend implements INodeType {
 				name: 'additionalOptions',
 				type: 'collection',
 				placeholder: 'Add Option',
-				default: {},				displayOptions: {
+				default: {},
+				displayOptions: {
 					show: {
 						resource: ['email'],
-						operation: ['send', 'sendAndWait'],
+						operation: ['send'],
 					},
 				},				options: [
 					{
@@ -324,163 +326,6 @@ export class Resend implements INodeType {
 						type: 'string',
 						default: '',
 						description: 'Schedule email to be sent later (e.g., "in 1 min" or ISO 8601 format)',
-					},
-				],
-			},
-
-			// EMAIL PROPERTIES - Send and Wait operation
-			{
-				displayName: 'Wait Options',
-				name: 'waitOptions',
-				type: 'collection',
-				placeholder: 'Add Option',
-				default: {},
-				displayOptions: {
-					show: {
-						resource: ['email'],
-						operation: ['sendAndWait'],
-					},
-				},
-				description: 'Configure how the node should wait for user response',				options: [
-					{
-						displayName: 'Append Attribution',
-						name: 'appendAttribution',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to append "This email was sent automatically with n8n" to the email',
-					},
-					{
-						displayName: 'Buttons',
-						name: 'buttons',
-						type: 'fixedCollection',
-						typeOptions: {
-							multipleValues: true,
-						},
-						default: {
-							buttons: [
-								{
-									label: 'Approve',
-									value: 'approve',
-									style: 'primary',
-								},
-								{
-									label: 'Reject',
-									value: 'reject',
-									style: 'danger',
-								},
-							],
-						},
-						description: 'Buttons to show in the email for user interaction',
-						options: [
-							{
-								displayName: 'Button',
-								name: 'buttons',
-								values: [
-									{
-										displayName: 'Label',
-										name: 'label',
-										type: 'string',
-										default: '',
-										description: 'Text shown on the button',
-									},
-									{
-										displayName: 'Value',
-										name: 'value',
-										type: 'string',
-										default: '',
-										description: 'Value returned when button is clicked',
-									},
-									{
-										displayName: 'Style',
-										name: 'style',
-										type: 'options',
-										default: 'primary',
-										options: [
-											{
-												name: 'Primary',
-												value: 'primary',
-											},
-											{
-												name: 'Success',
-												value: 'success',
-											},
-											{
-												name: 'Danger',
-												value: 'danger',
-											},
-											{
-												name: 'Warning',
-												value: 'warning',
-											},
-										],
-										description: 'Visual style of the button',
-									},
-								],
-							},
-						],
-					},
-					{
-						displayName: 'Custom Template HTML',
-						name: 'customTemplate',
-						type: 'string',
-						typeOptions: {
-							multiline: true,
-							rows: 8,
-						},
-						default: `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>{{title}}</title>
-</head>
-<body>
-    <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
-        <h2>{{title}}</h2>
-        <div style="margin: 20px 0;">
-            {{message}}
-        </div>
-        <div style="margin: 30px 0;">
-            {{buttons}}
-        </div>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-        <p style="color: #888; font-size: 12px;">
-            This email was sent automatically by n8n workflow.
-        </p>
-    </div>
-</body>
-</html>`,
-						displayOptions: {
-							show: {
-								emailTemplate: ['custom'],
-							},
-						},
-						description: 'Custom HTML template. Use {{title}}, {{message}}, and {{buttons}} as placeholders.',
-					},
-					{
-						displayName: 'Email Template',
-						name: 'emailTemplate',
-						type: 'options',
-						default: 'default',
-						options: [
-							{
-								name: 'Default',
-								value: 'default',
-								description: 'Use the default n8n email template',
-							},
-							{
-								name: 'Custom',
-								value: 'custom',
-								description: 'Use custom HTML template with placeholders',
-							},
-						],
-						description: 'Choose email template style',
-					},
-					{
-						displayName: 'Wait Until',
-						name: 'waitUntil',
-						type: 'dateTime',
-						default: '',
-						description: 'Date and time until when the workflow should wait for a response. If not set, waits for 1 hour.',
 					},
 				],
 			},
@@ -1447,117 +1292,7 @@ export class Resend implements INodeType {
 							},
 							body: {},
 							json: true,
-						});					} else if (operation === 'sendAndWait') {
-						const from = this.getNodeParameter('from', i) as string;
-						const to = this.getNodeParameter('to', i) as string;
-						const subject = this.getNodeParameter('subject', i) as string;
-						const emailFormat = this.getNodeParameter('emailFormat', i) as string;
-						const additionalOptions = this.getNodeParameter('additionalOptions', i, {}) as any;
-						const waitOptions = this.getNodeParameter('waitOptions', i, {}) as any;
-
-						// Helper function to generate button HTML
-						const generateButtonHtml = (buttons: any[]) => {
-							return buttons.map((button: any) => {
-								const styleMap: { [key: string]: string } = {
-									primary: 'background-color: #007bff; color: white;',
-									success: 'background-color: #28a745; color: white;',
-									danger: 'background-color: #dc3545; color: white;',
-									warning: 'background-color: #ffc107; color: black;',
-									default: 'background-color: #6c757d; color: white;',
-								};
-								const buttonStyle = styleMap[button.style] || styleMap.default;
-								
-								// For now, use a placeholder URL - in a real implementation this would be a webhook
-								const responseUrl = `https://your-webhook-url.com/respond?value=${encodeURIComponent(button.value)}`;
-								
-								return `<a href="${responseUrl}" style="display: inline-block; padding: 10px 20px; margin: 5px; text-decoration: none; border-radius: 5px; ${buttonStyle}">${button.label}</a>`;
-							}).join(' ');
-						};
-
-						// Generate email content with buttons
-						let emailContent = '';
-						const buttons = waitOptions.buttons?.buttons || [];
-						const buttonHtml = generateButtonHtml(buttons);
-
-						if (waitOptions.emailTemplate === 'custom') {
-							// Use custom template with placeholders
-							const customTemplate = waitOptions.customTemplate || '';
-							const message = emailFormat === 'html' ? this.getNodeParameter('html', i) as string : this.getNodeParameter('text', i) as string;
-							emailContent = customTemplate
-								.replace(/\{\{title\}\}/g, subject)
-								.replace(/\{\{message\}\}/g, message)
-								.replace(/\{\{buttons\}\}/g, buttonHtml);
-						} else {
-							// Use default template
-							const message = emailFormat === 'html' ? this.getNodeParameter('html', i) as string : this.getNodeParameter('text', i) as string;
-							emailContent = `
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="UTF-8">
-	<title>${subject}</title>
-</head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-	<div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-		<h2 style="color: #333; margin-bottom: 20px;">${subject}</h2>
-		<div style="background-color: white; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
-			${message}
-		</div>
-		<div style="text-align: center; margin: 30px 0;">
-			${buttonHtml}
-		</div>
-		${waitOptions.appendAttribution !== false ? '<hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;"><p style="color: #888; font-size: 12px; text-align: center;">This email was sent automatically with n8n</p>' : ''}
-	</div>
-</body>
-</html>`;
-						}
-
-						// Prepare email request body
-						const requestBody: any = {
-							from,
-							to: to.split(',').map((email: string) => email.trim()).filter((email: string) => email),
-							subject,
-							html: emailContent,
-						};
-
-						// Add additional options if present
-						if (additionalOptions.cc) {
-							requestBody.cc = additionalOptions.cc.split(',').map((email: string) => email.trim());
-						}
-						if (additionalOptions.bcc) {
-							requestBody.bcc = additionalOptions.bcc.split(',').map((email: string) => email.trim());
-						}
-						if (additionalOptions.reply_to) requestBody.reply_to = additionalOptions.reply_to;
-
-						// Send the email
-						response = await this.helpers.httpRequest({
-							url: 'https://api.resend.com/emails',
-							method: 'POST',
-							headers: {
-								Authorization: `Bearer ${apiKey}`,
-								'Content-Type': 'application/json',
-							},
-							body: requestBody,
-							json: true,
 						});
-
-						// Calculate timeout for reference
-						const waitUntil = waitOptions.waitUntil ? new Date(waitOptions.waitUntil) : new Date(Date.now() + 1000 * 60 * 60 * 24); // Default 24 hours
-
-						// Add metadata to response for Human-in-the-Loop workflow
-						response.waitOptions = {
-							buttons: buttons,
-							waitUntil: waitUntil.toISOString(),
-							sentAt: new Date().toISOString(),
-							emailSent: true,
-						};
-
-						// Note: Full Human-in-the-Loop implementation would require:
-						// 1. Setting up webhook endpoints to receive button clicks
-						// 2. Using n8n's execution waiting mechanisms
-						// 3. Implementing response handling logic
-						// This basic implementation sends the email with interactive buttons
-						// but doesn't pause execution - that would require additional n8n infrastructure
 					}
 
 					// DOMAIN OPERATIONS
