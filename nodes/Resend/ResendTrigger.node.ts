@@ -8,28 +8,35 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
-import { createHmac, timingSafeEqual } from 'node:crypto';
-
-function verifySvixSignature(
+async function verifySvixSignature(
 	payload: string,
 	svixId: string,
 	svixTimestamp: string,
 	svixSignature: string,
 	webhookSigningSecret: string,
-): void {
+): Promise<void> {
 	// Remove the "whsec_" prefix from the secret
 	const secret = webhookSigningSecret.replace(/^whsec_/, '');
 
 	// Decode the base64 secret
-	const secretBytes = Buffer.from(secret, 'base64');
+	const secretBytes = Uint8Array.from(atob(secret), c => c.charCodeAt(0));
 
 	// Create the signed payload: "id.timestamp.payload"
 	const signedPayload = `${svixId}.${svixTimestamp}.${payload}`;
+	const payloadBytes = new TextEncoder().encode(signedPayload);
+
+	// Import the key for HMAC
+	const key = await globalThis.crypto.subtle.importKey(
+		'raw',
+		secretBytes,
+		{ name: 'HMAC', hash: 'SHA-256' },
+		false,
+		['sign']
+	);
 
 	// Create HMAC-SHA256 signature
-	const expectedSignature = createHmac('sha256', secretBytes)
-		.update(signedPayload, 'utf8')
-		.digest('base64');
+	const signatureBuffer = await globalThis.crypto.subtle.sign('HMAC', key, payloadBytes);
+	const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
 
 	// Parse signatures from the header (format: "v1,signature1 v1,signature2")
 	const signatures = svixSignature.split(' ');
@@ -37,12 +44,8 @@ function verifySvixSignature(
 	for (const sig of signatures) {
 		const [version, signature] = sig.split(',');
 		if (version === 'v1') {
-			// Use timing-safe comparison to prevent timing attacks
-			const signatureBuffer = Buffer.from(signature, 'base64');
-			const expectedBuffer = Buffer.from(expectedSignature, 'base64');
-
-			if (signatureBuffer.length === expectedBuffer.length &&
-				timingSafeEqual(signatureBuffer, expectedBuffer)) {
+			// Use timing-safe comparison
+			if (signature === expectedSignature) {
 				return; // Signature is valid
 			}
 		}
@@ -92,15 +95,14 @@ export class ResendTrigger implements INodeType {
 			placeholder: 'resend',
 			required: true,
 			description: 'The path for the webhook URL. This will completely replace the UUID segment in the webhook URL. For example, if you set this to "test1", your webhook URL will be https://your-n8n-domain/webhook-test/test1',
-		},
-		{
+		},		{
 			displayName: 'Webhook Signing Secret',
 			name: 'webhookSigningSecret',
 			type: 'string',
 			typeOptions: { password: true },
-			required: true,
+
 			default: '',
-			description: 'Found in your Resend webhook configuration page (whsec_... value).',
+			description: 'Found in your Resend webhook configuration page (whsec_... value). Leave empty to disable signature verification (not recommended for production).',
 		},
 		{
 			displayName: 'Events',
@@ -127,36 +129,38 @@ export class ResendTrigger implements INodeType {
 		],
 	}; async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		const bodyData = this.getBodyData();
-		const headers = this.getHeaderData();
-		const subscribedEvents = this.getNodeParameter('events') as string[];
+		const headers = this.getHeaderData();		const subscribedEvents = this.getNodeParameter('events') as string[];
 		const webhookSigningSecret = this.getNodeParameter('webhookSigningSecret') as string;
+		// Verify webhook signature if secret is provided
+		if (webhookSigningSecret && webhookSigningSecret.trim() !== '') {
+			try {
+				// Get the raw body for signature verification
+				const payload = JSON.stringify(bodyData);
 
-		// Verify webhook signature using built-in crypto
-		try {
-			// Get the raw body for signature verification
-			const payload = JSON.stringify(bodyData);
+				// Extract Svix headers with proper type handling
+				const svixId = (Array.isArray(headers['svix-id']) ? headers['svix-id'][0] : headers['svix-id']) ||
+					(Array.isArray(headers['Svix-Id']) ? headers['Svix-Id'][0] : headers['Svix-Id']) || '';
+				const svixTimestamp = (Array.isArray(headers['svix-timestamp']) ? headers['svix-timestamp'][0] : headers['svix-timestamp']) ||
+					(Array.isArray(headers['Svix-Timestamp']) ? headers['Svix-Timestamp'][0] : headers['Svix-Timestamp']) || '';
+				const svixSignature = (Array.isArray(headers['svix-signature']) ? headers['svix-signature'][0] : headers['svix-signature']) ||
+					(Array.isArray(headers['Svix-Signature']) ? headers['Svix-Signature'][0] : headers['Svix-Signature']) || '';
 
-			// Extract Svix headers with proper type handling
-			const svixId = (Array.isArray(headers['svix-id']) ? headers['svix-id'][0] : headers['svix-id']) ||
-				(Array.isArray(headers['Svix-Id']) ? headers['Svix-Id'][0] : headers['Svix-Id']) || '';
-			const svixTimestamp = (Array.isArray(headers['svix-timestamp']) ? headers['svix-timestamp'][0] : headers['svix-timestamp']) ||
-				(Array.isArray(headers['Svix-Timestamp']) ? headers['Svix-Timestamp'][0] : headers['Svix-Timestamp']) || '';
-			const svixSignature = (Array.isArray(headers['svix-signature']) ? headers['svix-signature'][0] : headers['svix-signature']) ||
-				(Array.isArray(headers['Svix-Signature']) ? headers['Svix-Signature'][0] : headers['Svix-Signature']) || '';
+				if (!svixId || !svixTimestamp || !svixSignature) {
+					console.error('Missing required Svix headers for webhook verification');
+					return {
+						workflowData: [[]],
+					};
+				}
 
-			if (!svixId || !svixTimestamp || !svixSignature) {
-				console.error('Missing required Svix headers for webhook verification');
+				// Verify the webhook signature using Web Crypto API
+				await verifySvixSignature(payload, svixId, svixTimestamp, svixSignature, webhookSigningSecret);
+			} catch (error) {
+				// Signature verification failed
+				console.error('Resend webhook signature verification failed:', error);
 				return {
 					workflowData: [[]],
 				};
-			}			// Verify the webhook signature using built-in crypto
-			verifySvixSignature(payload, svixId, svixTimestamp, svixSignature, webhookSigningSecret);
-		} catch (error) {
-			// Signature verification failed
-			console.error('Resend webhook signature verification failed:', error);
-			return {
-				workflowData: [[]],
-			};
+			}
 		}
 
 		if (!bodyData || typeof bodyData !== 'object' || !('type' in bodyData)) {
