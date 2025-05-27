@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-resend",
-  "version": "1.0.10",
+  "version": "1.1.0",
   "description": "Resend n8n node",
   "keywords": [
     "n8n-community-node-package",
@@ -10,7 +10,8 @@
     "n8n",
     "automation",
     "integration"
-  ],  "license": "MIT",
+  ],
+  "license": "MIT",
   "homepage": "https://github.com/SilkePilon/n8n-nodes-resend/",
   "author": {
     "name": "SilkePilon",
