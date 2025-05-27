@@ -2,6 +2,7 @@ import {
 	ICredentialType,
 	INodeProperties,
 	IAuthenticateGeneric,
+	ICredentialTestRequest,
 } from 'n8n-workflow';
 
 export class ResendApi implements ICredentialType {
@@ -17,13 +18,19 @@ export class ResendApi implements ICredentialType {
 			default: '',
 			required: true,
 		},
-	];
-	authenticate: IAuthenticateGeneric = {
+	];	authenticate: IAuthenticateGeneric = {
 		type: 'generic',
 		properties: {
 			headers: {
 				Authorization: '={{"Bearer " + $credentials.apiKey}}',
 			},
+		},
+	};
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.resend.com',
+			url: '/api-keys',
+			method: 'GET',
 		},
 	};
 }

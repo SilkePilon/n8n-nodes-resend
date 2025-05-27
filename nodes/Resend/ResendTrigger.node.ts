@@ -78,17 +78,17 @@ export class ResendTrigger implements INodeType {	description: INodeTypeDescript
 				httpMethod: 'POST',
 				responseMode: 'onReceived',
 				path: '={{$parameter["path"]}}',
+				isFullPath: true,
 			},
 		],
-		properties: [
-			{
+		properties: [			{
 				displayName: 'Path',
 				name: 'path',
 				type: 'string',
 				default: 'webhook',
 				placeholder: 'webhook',
 				required: true,
-				description: 'The path to listen to. Dynamic values can be specified by using :, e.g. "webhook/:ID". If dynamic values are set, "webhookId" will be prepended to path.',
+				description: 'The path for the webhook URL. This will completely replace the UUID segment in the webhook URL. For example, if you set this to "test1", your webhook URL will be https://your-n8n-domain/webhook-test/test1',
 			},
 			{
 				displayName: 'Webhook Signing Secret',
