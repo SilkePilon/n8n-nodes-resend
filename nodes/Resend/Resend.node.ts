@@ -297,6 +297,10 @@ export class Resend implements INodeType {
 							type: 'string',
 							default: '',
 							description: 'HTML content of the email',
+							placeholder: '<p>Your HTML content here</p>',
+							typeOptions: {
+								rows: 4
+							},
 							displayOptions: {
 								show: {
 									'/emailFormat': ['html'],
@@ -318,6 +322,10 @@ export class Resend implements INodeType {
 							type: 'string',
 							default: '',
 							description: 'Plain text content of the email',
+							typeOptions: {
+								rows: 4
+							},
+							placeholder: 'Your plain text content here',
 							displayOptions: {
 								show: {
 									'/emailFormat': ['text'],
