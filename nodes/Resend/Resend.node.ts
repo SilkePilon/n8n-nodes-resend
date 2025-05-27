@@ -32,7 +32,7 @@ export class Resend implements INodeType {
 				displayName: 'Resource',
 				name: 'resource',
 				type: 'options',
-				noDataExpression: true,				options: [
+				noDataExpression: true, options: [
 					{
 						name: 'API Key',
 						value: 'apiKeys',
@@ -77,7 +77,7 @@ export class Resend implements INodeType {
 					show: {
 						resource: ['email'],
 					},
-				},				options: [
+				}, options: [
 					{
 						name: 'Cancel',
 						value: 'cancel',
@@ -110,7 +110,7 @@ export class Resend implements INodeType {
 					},
 				],
 				default: 'send',
-			},			{
+			}, {
 				displayName: 'Email Format',
 				name: 'emailFormat',
 				type: 'options',
@@ -180,7 +180,7 @@ export class Resend implements INodeType {
 					},
 				},
 				description: 'Email subject line',
-			},			{
+			}, {
 				displayName: 'HTML Content',
 				name: 'html',
 				type: 'string',
@@ -276,63 +276,63 @@ export class Resend implements INodeType {
 						operation: ['sendBatch'],
 					},
 				},
-				description: 'Array of emails to send (max 100)',				options: [					{
-						name: 'emails',
-						displayName: 'Email',
-						values: [
-							{
-								displayName: 'From',
-								name: 'from',
-								type: 'string',
-								required: true,
-								default: '',
-								placeholder: 'you@example.com',
-								description: 'Sender email address',
-							},
-							{
-								displayName: 'HTML Content',
-								name: 'html',
-								type: 'string',
-								default: '',
-								description: 'HTML content of the email',
-								displayOptions: {
-									show: {
-										'/emailFormat': ['html'],
-									},
+				description: 'Array of emails to send (max 100)', options: [{
+					name: 'emails',
+					displayName: 'Email',
+					values: [
+						{
+							displayName: 'From',
+							name: 'from',
+							type: 'string',
+							required: true,
+							default: '',
+							placeholder: 'you@example.com',
+							description: 'Sender email address',
+						},
+						{
+							displayName: 'HTML Content',
+							name: 'html',
+							type: 'string',
+							default: '',
+							description: 'HTML content of the email',
+							displayOptions: {
+								show: {
+									'/emailFormat': ['html'],
 								},
 							},
-							{
-								displayName: 'Subject',
-								name: 'subject',
-								type: 'string',
-								required: true,
-								default: '',
-								placeholder: 'Hello from n8n!',
-								description: 'Email subject',
-							},
-							{
-								displayName: 'Text Content',
-								name: 'text',
-								type: 'string',
-								default: '',
-								description: 'Plain text content of the email',
-								displayOptions: {
-									show: {
-										'/emailFormat': ['text'],
-									},
+						},
+						{
+							displayName: 'Subject',
+							name: 'subject',
+							type: 'string',
+							required: true,
+							default: '',
+							placeholder: 'Hello from n8n!',
+							description: 'Email subject',
+						},
+						{
+							displayName: 'Text Content',
+							name: 'text',
+							type: 'string',
+							default: '',
+							description: 'Plain text content of the email',
+							displayOptions: {
+								show: {
+									'/emailFormat': ['text'],
 								},
 							},
-							{
-								displayName: 'To',
-								name: 'to',
-								type: 'string',
-								required: true,
-								default: '',
-								placeholder: 'user@example.com',
-								description: 'Recipient email address (comma-separated for multiple)',
-							},
-						],
-					},
+						},
+						{
+							displayName: 'To',
+							name: 'to',
+							type: 'string',
+							required: true,
+							default: '',
+							placeholder: 'user@example.com',
+							description: 'Recipient email address (comma-separated for multiple)',
+						},
+					],
+				},
 				],
 			},
 
@@ -597,7 +597,7 @@ export class Resend implements INodeType {
 						resource: ['broadcasts'],
 						operation: ['create', 'update'],
 					},
-				},				options: [
+				}, options: [
 					{
 						displayName: 'Audience ID',
 						name: 'audience_id',
@@ -606,7 +606,8 @@ export class Resend implements INodeType {
 						placeholder: 'aud_123456',
 						displayOptions: {
 							show: {
-								'/operation': ['update'],							},
+								'/operation': ['update'],
+							},
 						},
 						description: 'The ID of the audience you want to send to (for update operation)',
 					},
@@ -648,7 +649,7 @@ export class Resend implements INodeType {
 					{
 						displayName: 'Subject',
 						name: 'subject',
-						type: 'string',						default: '',
+						type: 'string', default: '',
 						placeholder: 'Newsletter Subject',
 						description: 'Email subject',
 					},
@@ -658,7 +659,8 @@ export class Resend implements INodeType {
 						type: 'string',
 						default: '',
 						typeOptions: {
-							multiline: true,						},
+							multiline: true,
+						},
 						placeholder: 'Your plain text content here',
 						description: 'The plain text version of the message',
 					},
@@ -1069,7 +1071,8 @@ export class Resend implements INodeType {
 				let response: any;
 
 				// EMAIL OPERATIONS
-				if (resource === 'email') {					if (operation === 'send') {
+				if (resource === 'email') {
+					if (operation === 'send') {
 						const from = this.getNodeParameter('from', i) as string;
 						const to = this.getNodeParameter('to', i) as string;
 						const subject = this.getNodeParameter('subject', i) as string;
@@ -1108,24 +1111,25 @@ export class Resend implements INodeType {
 							},
 							body: requestBody,
 							json: true,
-						});					} else if (operation === 'sendBatch') {
+						});
+					} else if (operation === 'sendBatch') {
 						const emailsData = this.getNodeParameter('emails', i) as any;
 						const emailFormat = this.getNodeParameter('emailFormat', i) as string;
-						
+
 						const emails = emailsData.emails.map((email: any) => {
 							const emailObj: any = {
 								from: email.from,
 								to: email.to.split(',').map((e: string) => e.trim()).filter((e: string) => e),
 								subject: email.subject,
 							};
-							
+
 							// Add content based on selected format
 							if (emailFormat === 'html' && email.html) {
 								emailObj.html = email.html;
 							} else if (emailFormat === 'text' && email.text) {
 								emailObj.text = email.text;
 							}
-							
+
 							return emailObj;
 						});
 
@@ -1150,7 +1154,8 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 							},
 							json: true,
-						});					} else if (operation === 'update') {
+						});
+					} else if (operation === 'update') {
 						const emailId = this.getNodeParameter('emailId', i) as string;
 						const scheduledAt = this.getNodeParameter('scheduled_at', i) as string;
 
@@ -1183,7 +1188,7 @@ export class Resend implements INodeType {
 						});
 					}
 
-				// DOMAIN OPERATIONS
+					// DOMAIN OPERATIONS
 				} else if (resource === 'domains') {
 					if (operation === 'create') {
 						const domainName = this.getNodeParameter('domainName', i) as string;
@@ -1228,7 +1233,8 @@ export class Resend implements INodeType {
 							},
 							body: {},
 							json: true,
-						});					} else if (operation === 'update') {
+						});
+					} else if (operation === 'update') {
 						const domainId = this.getNodeParameter('domainId', i) as string;
 						const domainUpdateOptions = this.getNodeParameter('domainUpdateOptions', i, {}) as any;
 
@@ -1271,8 +1277,9 @@ export class Resend implements INodeType {
 						});
 					}
 
-				// API KEY OPERATIONS
-				} else if (resource === 'apiKeys') {					if (operation === 'create') {
+					// API KEY OPERATIONS
+				} else if (resource === 'apiKeys') {
+					if (operation === 'create') {
 						const apiKeyName = this.getNodeParameter('apiKeyName', i) as string;
 						const permission = this.getNodeParameter('permission', i) as string;
 						const domainId = this.getNodeParameter('domainId', i, '') as string;
@@ -1320,8 +1327,9 @@ export class Resend implements INodeType {
 						});
 					}
 
-				// BROADCAST OPERATIONS
-				} else if (resource === 'broadcasts') {					if (operation === 'create') {
+					// BROADCAST OPERATIONS
+				} else if (resource === 'broadcasts') {
+					if (operation === 'create') {
 						const broadcastName = this.getNodeParameter('broadcastName', i) as string;
 						const audienceId = this.getNodeParameter('audienceId', i) as string;
 						const broadcastContent = this.getNodeParameter('broadcastContent', i, {}) as any;
@@ -1360,7 +1368,8 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 							},
 							json: true,
-						});					} else if (operation === 'update') {
+						});
+					} else if (operation === 'update') {
 						const broadcastId = this.getNodeParameter('broadcastId', i) as string;
 						const broadcastContent = this.getNodeParameter('broadcastContent', i, {}) as any;
 
@@ -1421,7 +1430,7 @@ export class Resend implements INodeType {
 						});
 					}
 
-				// AUDIENCE OPERATIONS
+					// AUDIENCE OPERATIONS
 				} else if (resource === 'audiences') {
 					if (operation === 'create') {
 						const audienceName = this.getNodeParameter('audienceName', i) as string;
@@ -1474,7 +1483,7 @@ export class Resend implements INodeType {
 						});
 					}
 
-				// CONTACT OPERATIONS
+					// CONTACT OPERATIONS
 				} else if (resource === 'contacts') {
 					if (operation === 'create') {
 						const email = this.getNodeParameter('email', i) as string;
@@ -1511,7 +1520,8 @@ export class Resend implements INodeType {
 								Authorization: `Bearer ${apiKey}`,
 							},
 							json: true,
-						});					} else if (operation === 'update') {
+						});
+					} else if (operation === 'update') {
 						const audienceId = this.getNodeParameter('audienceId', i) as string;
 						const updateBy = this.getNodeParameter('updateBy', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;
