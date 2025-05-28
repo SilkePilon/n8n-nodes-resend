@@ -4,7 +4,7 @@
   <br>
 </h1>
 
-# 📧 Resend Nodes for n8n
+# 📧 Resend Node for n8n
 
 [![npm version](https://badge.fury.io/js/n8n-nodes-resend.svg)](https://badge.fury.io/js/n8n-nodes-resend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
