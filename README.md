@@ -15,6 +15,9 @@ Transform your email workflows with comprehensive Resend integration for n8n. Se
 
 ---
 
+> [!NOTE]  
+> **ReadMe** This readme is subject to change with better docs in the upcomming week.
+
 ## 🎯 Features
 
 - **📤 Email Operations** - Send single emails, batch emails, schedule delivery
