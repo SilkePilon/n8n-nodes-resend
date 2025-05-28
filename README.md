@@ -31,8 +31,7 @@ Transform your email workflows with comprehensive Resend integration for n8n. Se
 
 ### Method 1: Via n8n Community Nodes (Recommended)
 
-<details>
-<summary>📋 Step-by-step installation guide</summary>
+(Detailed Instructions (with images)[https://dubble.so/guides/how-to-install-n8n-nodes-resend-cq9ccjeuuudykbuomw1a]
 
 1. **Open n8n Settings**
    - Navigate to **Settings** → **Community Nodes**
@@ -48,12 +47,8 @@ Transform your email workflows with comprehensive Resend integration for n8n. Se
 4. **Verify Installation**
    - The **Resend** and **Resend Trigger** nodes should appear in your node palette
 
-</details>
 
 ### Method 2: Manual Installation
-
-<details>
-<summary>🔧 For self-hosted n8n instances</summary>
 
 ```bash
 # Navigate to your n8n installation directory
@@ -68,12 +63,8 @@ npm install n8n-nodes-resend
 # If running directly: restart your n8n process
 ```
 
-</details>
-
 ### Method 3: Docker Installation
 
-<details>
-<summary>🐳 For Docker users</summary>
 
 Add this to your `docker-compose.yml`:
 
@@ -95,7 +86,6 @@ docker run -it --rm \
   n8nio/n8n
 ```
 
-</details>
 
 ---
 
