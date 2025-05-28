@@ -31,7 +31,7 @@ Transform your email workflows with comprehensive Resend integration for n8n. Se
 
 ### Method 1: Via n8n Community Nodes (Recommended)
 
-(Detailed Instructions (with images)[https://dubble.so/guides/how-to-install-n8n-nodes-resend-cq9ccjeuuudykbuomw1a]
+[Detailed Instructions (with images)](https://dubble.so/guides/how-to-install-n8n-nodes-resend-cq9ccjeuuudykbuomw1a)
 
 1. **Open n8n Settings**
    - Navigate to **Settings** → **Community Nodes**
