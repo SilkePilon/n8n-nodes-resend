@@ -1,6 +1,8 @@
 import {
 	IExecuteFunctions,
+	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodeListSearchResult,
 	INodeType,
 	INodeTypeDescription,
 	NodeOperationError,
@@ -121,6 +123,11 @@ export class Resend implements INodeType {
 						description: 'Send email with HTML content',
 					},
 					{
+						name: 'Template',
+						value: 'template',
+						description: 'Send email using a pre-built Resend template',
+					},
+					{
 						name: 'Text',
 						value: 'text',
 						description: 'Send email with plain text content',
@@ -133,7 +140,7 @@ export class Resend implements INodeType {
 						operation: ['send', 'sendBatch'],
 					},
 				},
-				description: 'Choose the format for your email content. HTML allows rich formatting, text is simple and universally compatible.',
+				description: 'Choose the format for your email content. HTML allows rich formatting, text is simple and universally compatible, template uses a pre-built Resend template.',
 			},
 			// Properties for "Send Email" operation
 			{
@@ -217,6 +224,56 @@ export class Resend implements INodeType {
 					},
 				},
 				description: 'Plain text version of the email content',
+			},
+			{
+				displayName: 'Template',
+				name: 'templateId',
+				type: 'resourceLocator',
+				default: { mode: 'list', value: '' },
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['email'],
+						operation: ['send'],
+						emailFormat: ['template'],
+					},
+				},
+				modes: [
+					{
+						displayName: 'From List',
+						name: 'list',
+						type: 'list',
+						typeOptions: {
+							searchListMethod: 'searchTemplates',
+							searchable: true,
+						},
+					},
+					{
+						displayName: 'By ID',
+						name: 'id',
+						type: 'string',
+						placeholder: 'e169aa45-1ecf-4183-9955-b1499d5701d3',
+					},
+				],
+				description: 'Select or enter the ID of a published template to use. Only published templates can be used for sending emails.',
+			},
+			{
+				displayName: 'Template Variables',
+				name: 'templateVariables',
+				type: 'json',
+				default: '{}',
+				typeOptions: {
+					rows: 5,
+				},
+				placeholder: '{\n  "name": "John",\n  "company": "Acme Inc"\n}',
+				displayOptions: {
+					show: {
+						resource: ['email'],
+						operation: ['send'],
+						emailFormat: ['template'],
+					},
+				},
+				description: 'Variables to pass to the template as key/value pairs in JSON format. Keys may only contain ASCII letters, numbers, and underscores. Reserved names: FIRST_NAME, LAST_NAME, EMAIL, UNSUBSCRIBE_URL.',
 			},
 			{
 				displayName: 'Additional Options',
@@ -366,14 +423,6 @@ export class Resend implements INodeType {
 							default: '',
 							description: 'HTML content of the email',
 							placeholder: '<p>Your HTML content here</p>',
-							typeOptions: {
-								rows: 4
-							},
-							displayOptions: {
-								show: {
-									'/emailFormat': ['html'],
-								},
-							},
 						},
 						{
 							displayName: 'Subject',
@@ -385,20 +434,28 @@ export class Resend implements INodeType {
 							description: 'Email subject',
 						},
 						{
+							displayName: 'Template ID',
+							name: 'templateId',
+							type: 'string',
+							default: '',
+							placeholder: 'e169aa45-1ecf-4183-9955-b1499d5701d3',
+							description: 'The ID of the published template to use',
+						},
+						{
+							displayName: 'Template Variables (JSON)',
+							name: 'templateVariables',
+							type: 'string',
+							default: '{}',
+							description: 'Variables to pass to the template as JSON object',
+							placeholder: '{\'name\': \'John\', \'company\': \'Acme Inc\'}',
+						},
+						{
 							displayName: 'Text Content',
 							name: 'text',
 							type: 'string',
 							default: '',
 							description: 'Plain text content of the email',
-							typeOptions: {
-								rows: 4
-							},
 							placeholder: 'Your plain text content here',
-							displayOptions: {
-								show: {
-									'/emailFormat': ['text'],
-								},
-							},
 						},
 						{
 							displayName: 'To',
@@ -1134,6 +1191,51 @@ export class Resend implements INodeType {
 			},
 		],
 	};
+
+	methods = {
+		listSearch: {
+			async searchTemplates(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
+				const credentials = await this.getCredentials('resendApi');
+				const apiKey = credentials.apiKey as string;
+
+				// Fetch all templates from Resend API
+				const response = await this.helpers.httpRequest({
+					url: 'https://api.resend.com/templates',
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${apiKey}`,
+					},
+					qs: {
+						limit: 100, // Get maximum templates
+					},
+					json: true,
+				});
+
+				const templates = response.data || [];
+
+				const filteredTemplates = templates.filter((template: any) => {
+					const isPublished = template.status === 'published';
+					if (!isPublished) return false;
+					if (!filter) return true;
+					const searchLower = filter.toLowerCase();
+					return (
+						template.name?.toLowerCase().includes(searchLower) ||
+						template.alias?.toLowerCase().includes(searchLower) ||
+						template.id?.toLowerCase().includes(searchLower)
+					);
+				});
+
+				return {
+					results: filteredTemplates.map((template: any) => ({
+						name: `${template.name}${template.alias ? ` (${template.alias})` : ''}`,
+						value: template.id,
+						url: `https://resend.com/templates/${template.id}`,
+					})),
+				};
+			},
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -1159,7 +1261,10 @@ export class Resend implements INodeType {
 
 						const requestBody: any = {
 							from,
-							to: to.split(',').map((email: string) => email.trim()).filter((email: string) => email),
+							to: to
+								.split(',')
+								.map((email: string) => email.trim())
+								.filter((email: string) => email),
 							subject,
 						};
 
@@ -1170,63 +1275,137 @@ export class Resend implements INodeType {
 						} else if (emailFormat === 'text') {
 							const text = this.getNodeParameter('text', i) as string;
 							if (text) requestBody.text = text;
+						} else if (emailFormat === 'template') {
+							const templateIdValue = this.getNodeParameter('templateId', i) as any;
+							const templateId =
+								typeof templateIdValue === 'object' ? templateIdValue.value : templateIdValue;
+							const templateVariablesRaw = this.getNodeParameter(
+								'templateVariables',
+								i,
+								'{}',
+							) as string;
+
+							let templateVariables: Record<string, any> = {};
+							if (
+								templateVariablesRaw &&
+								templateVariablesRaw.trim() !== '' &&
+								templateVariablesRaw.trim() !== '{}'
+							) {
+								try {
+									templateVariables = JSON.parse(templateVariablesRaw);
+								} catch (error) {
+									throw new NodeOperationError(
+										this.getNode(),
+										'Invalid JSON in Template Variables. Please provide valid JSON format.',
+										{ itemIndex: i },
+									);
+								}
+							}
+
+							const templateObj: any = {
+								id: templateId,
+							};
+							if (Object.keys(templateVariables).length > 0) {
+								templateObj.variables = templateVariables;
+							}
+
+							requestBody.template = templateObj;
 						}
 						if (additionalOptions.cc) {
 							requestBody.cc = additionalOptions.cc.split(',').map((email: string) => email.trim());
 						}
 						if (additionalOptions.bcc) {
-							requestBody.bcc = additionalOptions.bcc.split(',').map((email: string) => email.trim());
-						}						if (additionalOptions.reply_to) requestBody.reply_to = additionalOptions.reply_to;
-						if (additionalOptions.scheduled_at) requestBody.scheduled_at = additionalOptions.scheduled_at;
-						
+							requestBody.bcc = additionalOptions.bcc
+								.split(',')
+								.map((email: string) => email.trim());
+						}
+						if (additionalOptions.reply_to) requestBody.reply_to = additionalOptions.reply_to;
+						if (additionalOptions.scheduled_at)
+							requestBody.scheduled_at = additionalOptions.scheduled_at;
+
 						// Validate that attachments aren't used with scheduled emails
-						if (additionalOptions.attachments && additionalOptions.attachments.attachments && additionalOptions.attachments.attachments.length > 0 && additionalOptions.scheduled_at) {
-							throw new NodeOperationError(this.getNode(), 'Attachments cannot be used with scheduled emails. Please remove either the attachments or the scheduled time.', { itemIndex: i });
+						if (
+							additionalOptions.attachments &&
+							additionalOptions.attachments.attachments &&
+							additionalOptions.attachments.attachments.length > 0 &&
+							additionalOptions.scheduled_at
+						) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'Attachments cannot be used with scheduled emails. Please remove either the attachments or the scheduled time.',
+								{ itemIndex: i },
+							);
 						}
 
 						// Handle attachments
-						if (additionalOptions.attachments && additionalOptions.attachments.attachments && additionalOptions.attachments.attachments.length > 0) {
-							requestBody.attachments = additionalOptions.attachments.attachments.map((attachment: any) => {
-								if (attachment.attachmentType === 'binaryData') {
-									// Get binary data from the current item
-									const binaryPropertyName = attachment.binaryPropertyName || 'data';
-									const binaryData = items[i].binary?.[binaryPropertyName];
-											if (!binaryData) {
-										throw new NodeOperationError(this.getNode(), `Binary property "${binaryPropertyName}" not found in item ${i}`, { itemIndex: i });
+						if (
+							additionalOptions.attachments &&
+							additionalOptions.attachments.attachments &&
+							additionalOptions.attachments.attachments.length > 0
+						) {
+							requestBody.attachments = additionalOptions.attachments.attachments
+								.map((attachment: any) => {
+									if (attachment.attachmentType === 'binaryData') {
+										// Get binary data from the current item
+										const binaryPropertyName = attachment.binaryPropertyName || 'data';
+										const binaryData = items[i].binary?.[binaryPropertyName];
+										if (!binaryData) {
+											throw new NodeOperationError(
+												this.getNode(),
+												`Binary property "${binaryPropertyName}" not found in item ${i}`,
+												{ itemIndex: i },
+											);
+										}
+
+										return {
+											filename: attachment.filename,
+											content: binaryData.data, // This should be base64 content
+										};
+									} else if (attachment.attachmentType === 'url') {
+										return {
+											filename: attachment.filename,
+											path: attachment.fileUrl,
+										};
 									}
-									
-									return {
-										filename: attachment.filename,
-										content: binaryData.data, // This should be base64 content
-									};
-								} else if (attachment.attachmentType === 'url') {
-									return {
-										filename: attachment.filename,
-										path: attachment.fileUrl,
-									};
-								}
-								return null;
-							}).filter((attachment: any) => attachment !== null);
+									return null;
+								})
+								.filter((attachment: any) => attachment !== null);
 						}
 
-						response = await this.helpers.httpRequest({
-							url: 'https://api.resend.com/emails',
-							method: 'POST',
-							headers: {
-								Authorization: `Bearer ${apiKey}`,
-								'Content-Type': 'application/json',
-							},
-							body: requestBody,
-							json: true,
-						});
+						try {
+							response = await this.helpers.httpRequest({
+								url: 'https://api.resend.com/emails',
+								method: 'POST',
+								headers: {
+									Authorization: `Bearer ${apiKey}`,
+									'Content-Type': 'application/json',
+								},
+								body: requestBody,
+								json: true,
+							});
+						} catch (error: any) {
+							const errorMessage =
+								error?.response?.body?.message || error?.message || 'Unknown error';
+							const errorDetails = error?.response?.body
+								? JSON.stringify(error.response.body, null, 2)
+								: '';
+							throw new NodeOperationError(
+								this.getNode(),
+								`Failed to send email: ${errorMessage}${errorDetails ? '\n\nDetails:\n' + errorDetails : ''}`,
+								{ itemIndex: i },
+							);
+						}
 					} else if (operation === 'sendBatch') {
 						const emailsData = this.getNodeParameter('emails', i) as any;
 						const emailFormat = this.getNodeParameter('emailFormat', i) as string;
 
-						const emails = emailsData.emails.map((email: any) => {
+						const emails = emailsData.emails.map((email: any, index: number) => {
 							const emailObj: any = {
 								from: email.from,
-								to: email.to.split(',').map((e: string) => e.trim()).filter((e: string) => e),
+								to: email.to
+									.split(',')
+									.map((e: string) => e.trim())
+									.filter((e: string) => e),
 								subject: email.subject,
 							};
 
@@ -1235,6 +1414,34 @@ export class Resend implements INodeType {
 								emailObj.html = email.html;
 							} else if (emailFormat === 'text' && email.text) {
 								emailObj.text = email.text;
+							} else if (emailFormat === 'template' && email.templateId) {
+								let templateVariables: Record<string, any> = {};
+								if (
+									email.templateVariables &&
+									email.templateVariables.trim() !== '' &&
+									email.templateVariables.trim() !== '{}'
+								) {
+									try {
+										templateVariables = JSON.parse(email.templateVariables);
+									} catch (error) {
+										throw new NodeOperationError(
+											this.getNode(),
+											`Invalid JSON in Template Variables for batch email ${index + 1}. Please provide valid JSON format.`,
+											{ itemIndex: i },
+										);
+									}
+								}
+
+								const templateObj: any = {
+									id: email.templateId,
+								};
+
+								// Only add variables if there are any
+								if (Object.keys(templateVariables).length > 0) {
+									templateObj.variables = templateVariables;
+								}
+
+								emailObj.template = templateObj;
 							}
 
 							return emailObj;
@@ -1250,7 +1457,6 @@ export class Resend implements INodeType {
 							body: emails,
 							json: true,
 						});
-
 					} else if (operation === 'retrieve') {
 						const emailId = this.getNodeParameter('emailId', i) as string;
 
@@ -1279,7 +1485,6 @@ export class Resend implements INodeType {
 							body: requestBody,
 							json: true,
 						});
-
 					} else if (operation === 'cancel') {
 						const emailId = this.getNodeParameter('emailId', i) as string;
 
