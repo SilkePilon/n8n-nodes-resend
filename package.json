@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SilkePilon/n8n-nodes-resend/"
+    "url": "git+https://github.com/SilkePilon/n8n-nodes-resend.git"
   },
   "engines": {
     "node": ">=20.15"
