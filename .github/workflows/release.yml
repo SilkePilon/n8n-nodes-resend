@@ -186,47 +186,72 @@ jobs:
             const version = packageJson.version;
             const tagName = `v${version}`;
 
-            // Create release notes
-            const releaseBody = `# Release ${version}
+            // Generate automatic release notes with commits and contributors
+            let autoNotes = '';
+            try {
+              const { data: generatedNotes } = await github.rest.repos.generateReleaseNotes({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+              });
+              autoNotes = generatedNotes.body;
+            } catch (error) {
+              console.log('Could not generate automatic notes:', error.message);
+              autoNotes = '## What\'s Changed\n\nSee commit history for details.';
+            }
 
-            ## Installation
+            // Create enhanced release notes
+            const releaseBody = `## Installation
+
+            ### Via n8n Community Nodes (Recommended)
+
+            This is the easiest way to install this package:
+
+            1. Open n8n and go to **Settings** → **Community Nodes**
+            2. Select **Install** and enter: \`n8n-nodes-resend\`
+            3. Click **Install**
+            4. Restart n8n to activate the nodes
+
+            ### Manual Installation via npm
+
+            For manual installation or custom setups:
 
             \`\`\`bash
             npm install n8n-nodes-resend@${version}
             \`\`\`
 
-            Or install via n8n Community Nodes:
-            1. Go to **Settings** → **Community Nodes**
-            2. Install: \`n8n-nodes-resend\`
-            3. Restart n8n
+            ---
 
-            ## Links
-            - [NPM Package](https://www.npmjs.com/package/n8n-nodes-resend)
-            - [Documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs.md)
-            - [Resend API Docs](https://resend.com/docs)
-
-            ## Features
-            - Complete email operations (send, retrieve, update, cancel)
-            - File attachment support (binary data + remote URLs)
-            - Contact and segment management
-            - Domain management and verification
-            - API key management
-            - Broadcast campaigns
-            - Real-time webhook events
+            ${autoNotes}
 
             ---
 
-            *Generated automatically by GitHub Actions*`;
+            ## Resources
+
+            - **NPM Package**: https://www.npmjs.com/package/n8n-nodes-resend
+            - **Documentation**: https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs.md
+            - **Resend API Docs**: https://resend.com/docs
+            - **Report Issues**: https://github.com/${context.repo.owner}/${context.repo.repo}/issues
+
+            ## Available Nodes
+
+            - **Resend Node**: Complete email operations (send, retrieve, update, cancel), file attachments, contacts, segments, domains, API keys, broadcasts, templates, topics
+            - **Resend Trigger**: Real-time webhook events for email delivery tracking
+
+            ---
+
+            *This release includes build provenance and was published using GitHub Actions with OIDC trusted publishing.*`;
 
             try {
               const release = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag_name: tagName,
-                name: `Release ${version}`,
+                name: `v${version}`,
                 body: releaseBody,
                 draft: false,
-                prerelease: version.includes('-')
+                prerelease: version.includes('-'),
+                generate_release_notes: false  // We're creating custom notes
               });
 
               console.log(`Created GitHub release: ${release.data.html_url}`);
@@ -257,36 +282,37 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "release" ]]; then
             TAG_NAME="${{ github.event.release.tag_name }}"
-            echo "# Release Notes for $TAG_NAME" > release-notes.md
           else
             TAG_NAME="v$PACKAGE_VERSION"
-            echo "# Release Notes for $TAG_NAME" > release-notes.md
           fi
 
+          echo "## Installation" > release-notes.md
           echo "" >> release-notes.md
-          echo "## What's New" >> release-notes.md
+          echo "### Via n8n Community Nodes (Recommended)" >> release-notes.md
           echo "" >> release-notes.md
-
-          echo "### Version $PACKAGE_VERSION" >> release-notes.md
+          echo "This is the easiest way to install this package:" >> release-notes.md
           echo "" >> release-notes.md
-
-          # Add installation instructions
-          echo "## Installation" >> release-notes.md
+          echo "1. Open n8n and go to **Settings** → **Community Nodes**" >> release-notes.md
+          echo "2. Select **Install** and enter: \`n8n-nodes-resend\`" >> release-notes.md
+          echo "3. Click **Install**" >> release-notes.md
+          echo "4. Restart n8n to activate the nodes" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "### Manual Installation via npm" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "For manual installation or custom setups:" >> release-notes.md
           echo "" >> release-notes.md
           echo '```bash' >> release-notes.md
           echo "npm install n8n-nodes-resend@$PACKAGE_VERSION" >> release-notes.md
           echo '```' >> release-notes.md
           echo "" >> release-notes.md
-
-          echo "Or install via n8n Community Nodes:" >> release-notes.md
-          echo "1. Go to Settings → Community Nodes" >> release-notes.md
-          echo "2. Install: \`n8n-nodes-resend\`" >> release-notes.md
+          echo "---" >> release-notes.md
           echo "" >> release-notes.md
-
-          echo "## Links" >> release-notes.md
-          echo "- [NPM Package](https://www.npmjs.com/package/n8n-nodes-resend)" >> release-notes.md
-          echo "- [Documentation](https://github.com/${{ github.repository }}/blob/main/docs.md)" >> release-notes.md
-          echo "- [Resend API](https://resend.com/docs)" >> release-notes.md
+          echo "## Resources" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- **NPM Package**: https://www.npmjs.com/package/n8n-nodes-resend" >> release-notes.md
+          echo "- **Documentation**: https://github.com/${{ github.repository }}/blob/main/docs.md" >> release-notes.md
+          echo "- **Resend API Docs**: https://resend.com/docs" >> release-notes.md
+          echo "- **Report Issues**: https://github.com/${{ github.repository }}/issues" >> release-notes.md
 
           cat release-notes.md
 
@@ -340,8 +366,8 @@ jobs:
           echo "Version: $PACKAGE_VERSION"
           echo "NPM: https://www.npmjs.com/package/n8n-nodes-resend"
           echo ""
-          echo "Users can now install via:"
-          echo "- npm install n8n-nodes-resend@$PACKAGE_VERSION"
-          echo "- n8n Community Nodes interface"
+          echo "Installation Options:"
+          echo "1. n8n Community Nodes (Recommended): Settings → Community Nodes → Install 'n8n-nodes-resend'"
+          echo "2. Manual: npm install n8n-nodes-resend@$PACKAGE_VERSION"
           echo ""
           echo "Documentation: https://github.com/${{ github.repository }}/blob/main/docs.md"
