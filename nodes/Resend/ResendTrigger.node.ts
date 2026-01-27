@@ -69,7 +69,10 @@ export class ResendTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Resend Trigger',
 		name: 'resendTrigger',
-		icon: 'file:resend-icon-white.svg',
+		icon: {
+			light: 'file:resend-icon-black.svg',
+			dark: 'file:resend-icon-white.svg',
+		},
 		group: ['trigger'],
 		version: 1,
 		description:
