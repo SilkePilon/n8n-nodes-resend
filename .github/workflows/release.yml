@@ -40,19 +40,28 @@ jobs:
             exit 1
           fi
 
-          # Update package.json version
-          npm version "${{ github.event.inputs.version }}" --no-git-tag-version
+          # Check current version
+          CURRENT_VERSION=$(node -p 'require("./package.json").version')
+          TARGET_VERSION="${{ github.event.inputs.version }}"
 
-          # Verify the change
-          NEW_VERSION=$(node -p 'require("./package.json").version')
-          echo "Package version updated to: $NEW_VERSION"
+          if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" ]]; then
+            echo "Version is already set to $TARGET_VERSION - no update needed"
+          else
+            echo "Updating version from $CURRENT_VERSION to $TARGET_VERSION"
+            # Update package.json version
+            npm version "$TARGET_VERSION" --no-git-tag-version
 
-          # Commit the version change
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add package.json package-lock.json
-          git commit -m "Bump version to ${{ github.event.inputs.version }}" || echo "No changes to commit"
-          git push origin ${{ github.ref_name }}
+            # Verify the change
+            NEW_VERSION=$(node -p 'require("./package.json").version')
+            echo "Package version updated to: $NEW_VERSION"
+
+            # Commit the version change
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add package.json package-lock.json
+            git commit -m "Bump version to $TARGET_VERSION"
+            git push origin ${{ github.ref_name }}
+          fi
 
       - name: Install Dependencies
         run: npm ci
@@ -100,7 +109,7 @@ jobs:
     needs: validate-release
     environment: production
     permissions:
-      contents: read
+      contents: write # Required for creating tags and releases
       id-token: write # Required for npm provenance
 
     steps:
