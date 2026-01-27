@@ -5,6 +5,7 @@
 </h1>
 
 <p align="center">
+	
   ![NPM Version](https://img.shields.io/npm/v/n8n-nodes-resend)
   ![GitHub License](https://img.shields.io/github/license/SilkePilon/n8n-nodes-resend)
 	![NPM Downloads](https://img.shields.io/npm/dm/n8n-nodes-resend)
