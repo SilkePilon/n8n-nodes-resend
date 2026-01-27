@@ -1,15 +1,15 @@
-name: 🔄 Maintenance & Updates
+name: Maintenance & Updates
 
 on:
   schedule:
     # Run weekly on Mondays at 9 AM UTC
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   workflow_dispatch:
     inputs:
       update_type:
-        description: 'Type of update to perform'
+        description: "Type of update to perform"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
           - patch
@@ -19,90 +19,90 @@ on:
 
 jobs:
   dependency-audit:
-    name: 🔍 Dependency Audit
+    name: Dependency Audit
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        
-      - name: 🚀 Setup Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          
-      - name: 📦 Install Dependencies
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install Dependencies
         run: npm ci
-        
-      - name: 🔍 Security Audit
+
+      - name: Security Audit
         run: |
-          echo "🔒 Running security audit..."
+          echo "Running security audit..."
           npm audit --audit-level=moderate
-          
-      - name: 📊 Outdated Packages Check
+
+      - name: Outdated Packages Check
         run: |
-          echo "📦 Checking for outdated packages..."
+          echo "Checking for outdated packages..."
           npm outdated || true
-          
-      - name: 🧪 Test Current Setup
+
+      - name: Test Current Setup
         run: |
           npm run build
           npm run lint
           npx @n8n/scan-community-package n8n-nodes-resend
 
   update-dependencies:
-    name: 🔄 Update Dependencies
+    name: Update Dependencies
     runs-on: ubuntu-latest
     needs: dependency-audit
     if: github.event_name == 'workflow_dispatch'
-    
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: 🚀 Setup Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          
-      - name: 📦 Install Dependencies
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install Dependencies
         run: npm ci
-        
-      - name: 🔄 Update Dependencies
+
+      - name: Update Dependencies
         run: |
           case "${{ github.event.inputs.update_type }}" in
             patch)
-              echo "🔧 Updating patch versions..."
+              echo "Updating patch versions..."
               npm update --save
               ;;
             minor)
-              echo "🔧 Updating minor versions..."
+              echo "Updating minor versions..."
               npx npm-check-updates -u --target minor
               npm install
               ;;
             major)
-              echo "🔧 Updating major versions (careful!)..."
+              echo "Updating major versions (careful!)..."
               npx npm-check-updates -u --target latest
               npm install
               ;;
             all)
-              echo "🔧 Updating all dependencies to latest..."
+              echo "Updating all dependencies to latest..."
               npx npm-check-updates -u
               npm install
               ;;
           esac
-          
-      - name: 🧪 Test After Updates
+
+      - name: Test After Updates
         run: |
           npm run build
           npm run lint
           npx @n8n/scan-community-package n8n-nodes-resend
-          
-      - name: 📝 Generate Update Report
+
+      - name: Generate Update Report
         run: |
           echo "# Dependency Update Report" > update-report.md
           echo "Generated on: $(date)" >> update-report.md
@@ -121,87 +121,87 @@ jobs:
           echo '```json' >> update-report.md
           cat package.json | jq '.devDependencies // {}' >> update-report.md
           echo '```' >> update-report.md
-          
-      - name: 📤 Create Pull Request
+
+      - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: '🔄 Update dependencies (${{ github.event.inputs.update_type }})'
-          title: '🔄 Dependency Update: ${{ github.event.inputs.update_type }}'
+          commit-message: "Update dependencies (${{ github.event.inputs.update_type }})"
+          title: "Dependency Update: ${{ github.event.inputs.update_type }}"
           body-path: update-report.md
           branch: dependency-update-${{ github.event.inputs.update_type }}-${{ github.run_id }}
           delete-branch: true
 
   compatibility-check:
-    name: 🧪 n8n Compatibility Check
+    name: n8n Compatibility Check
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        n8n-version: ['latest', '1.0.0', '0.230.0']
-        node-version: ['20.x', '22.x']
-    
+        n8n-version: ["latest", "1.0.0", "0.230.0"]
+        node-version: ["20.x", "22.x"]
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        
-      - name: 🚀 Setup Node.js ${{ matrix.node-version }}
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          
-      - name: 📦 Install Dependencies
+          cache: "npm"
+
+      - name: Install Dependencies
         run: npm ci
-        
-      - name: 🔨 Build Project
+
+      - name: Build Project
         run: npm run build
-        
-      - name: 📦 Install n8n ${{ matrix.n8n-version }}
+
+      - name: Install n8n ${{ matrix.n8n-version }}
         run: |
           if [ "${{ matrix.n8n-version }}" = "latest" ]; then
             npm install -g n8n@latest
           else
             npm install -g n8n@${{ matrix.n8n-version }}
           fi
-          
-      - name: 🧪 Test Compatibility
+
+      - name: Test Compatibility
         run: |
-          echo "🔍 Testing compatibility with n8n ${{ matrix.n8n-version }} on Node ${{ matrix.node-version }}"
-          
+          echo "Testing compatibility with n8n ${{ matrix.n8n-version }} on Node ${{ matrix.node-version }}"
+
           # Check if nodes can be loaded (basic compatibility test)
           node -e "
             const fs = require('fs');
             const path = require('path');
-            
+
             // Test node files exist and are valid
             const nodeFiles = [
               'dist/nodes/Resend/Resend.node.js',
               'dist/nodes/Resend/ResendTrigger.node.js',
               'dist/credentials/ResendApi.credentials.js'
             ];
-            
+
             for (const file of nodeFiles) {
               if (!fs.existsSync(file)) {
                 throw new Error(\`Missing file: \${file}\`);
               }
-              
+
               try {
                 require(path.resolve(file));
-                console.log(\`✅ \${file} loads successfully\`);
+                console.log(\`\${file} loads successfully\`);
               } catch (error) {
                 throw new Error(\`Failed to load \${file}: \${error.message}\`);
               }
             }
-            
-            console.log('🎉 All compatibility checks passed!');
+
+            console.log('All compatibility checks passed!');
           "
 
   cleanup-old-builds:
-    name: 🧹 Cleanup Old Artifacts
+    name: Cleanup Old Artifacts
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 🗑️ Delete Old Workflow Runs
+      - name: Delete Old Workflow Runs
         uses: actions/github-script@v7
         with:
           script: |
@@ -211,10 +211,10 @@ jobs:
               workflow_id: 'ci.yml',
               per_page: 100
             });
-            
+
             // Keep last 50 runs, delete older ones
             const runsToDelete = runs.data.workflow_runs.slice(50);
-            
+
             for (const run of runsToDelete) {
               if (run.status === 'completed') {
                 try {
@@ -231,29 +231,29 @@ jobs:
             }
 
   health-check:
-    name: 🩺 Project Health Check
+    name: Project Health Check
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        
-      - name: 🩺 Repository Health Check
+
+      - name: Repository Health Check
         run: |
-          echo "🩺 Project Health Report"
+          echo "Project Health Report"
           echo "========================"
           echo ""
-          
+
           # Check file sizes
-          echo "📊 Project Statistics:"
+          echo "Project Statistics:"
           echo "- Total files: $(find . -type f | wc -l)"
           echo "- TypeScript files: $(find . -name '*.ts' | wc -l)"
           echo "- JavaScript files: $(find . -name '*.js' | wc -l)"
           echo "- JSON files: $(find . -name '*.json' | wc -l)"
           echo ""
-          
+
           # Check documentation
-          echo "📚 Documentation:"
+          echo "Documentation:"
           if [ -f "README.md" ]; then
             echo "- README.md: $(wc -l < README.md) lines"
           fi
@@ -261,9 +261,9 @@ jobs:
             echo "- docs.md: $(wc -l < docs.md) lines"
           fi
           echo ""
-          
+
           # Check package.json health
-          echo "📦 Package Health:"
+          echo "Package Health:"
           node -e "
             const pkg = require('./package.json');
             console.log(\`- Name: \${pkg.name}\`);
@@ -274,9 +274,9 @@ jobs:
             console.log(\`- Scripts: \${Object.keys(pkg.scripts || {}).length}\`);
           "
           echo ""
-          
+
           # Check git status
-          echo "🔄 Git Status:"
+          echo "Git Status:"
           echo "- Current branch: $(git branch --show-current)"
           echo "- Last commit: $(git log -1 --pretty=format:'%h %s (%an, %ar)')"
           echo "- Total commits: $(git rev-list --count HEAD)"

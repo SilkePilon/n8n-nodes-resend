@@ -1,4 +1,4 @@
-name: 🚀 Release & Publish
+name: Release & Publish
 
 on:
   release:
@@ -6,166 +6,167 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (e.g., 1.2.0)'
+        description: "Version to publish (e.g., 1.2.0)"
         required: true
         type: string
 
 jobs:
   validate-release:
-    name: 🔍 Validate Release
+    name: Validate Release
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: 🚀 Setup Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-          
-      - name: 🔄 Update Package Version
+          node-version: "20.x"
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Update Package Version
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
         run: |
-          echo "🔄 Updating package.json version to ${{ github.event.inputs.version }}"
-          
+          echo "Updating package.json version to ${{ github.event.inputs.version }}"
+
           # Validate version format (basic semver check)
           if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
-            echo "❌ Invalid version format: ${{ github.event.inputs.version }}"
-            echo "💡 Expected format: X.Y.Z (e.g., 1.2.3) or X.Y.Z-pre (e.g., 1.2.3-beta.1)"
+            echo "Invalid version format: ${{ github.event.inputs.version }}"
+            echo "Expected format: X.Y.Z (e.g., 1.2.3) or X.Y.Z-pre (e.g., 1.2.3-beta.1)"
             exit 1
           fi
-          
+
           # Update package.json version
           npm version "${{ github.event.inputs.version }}" --no-git-tag-version
-          
+
           # Verify the change
           NEW_VERSION=$(node -p 'require("./package.json").version')
-          echo "✅ Package version updated to: $NEW_VERSION"
-          
+          echo "Package version updated to: $NEW_VERSION"
+
           # Commit the version change
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add package.json package-lock.json
-          git commit -m "🔖 Bump version to ${{ github.event.inputs.version }}" || echo "No changes to commit"
+          git commit -m "Bump version to ${{ github.event.inputs.version }}" || echo "No changes to commit"
           git push origin ${{ github.ref_name }}
-          
-      - name: 📦 Install Dependencies
+
+      - name: Install Dependencies
         run: npm ci
-        
-      - name: 🔨 Build Project
+
+      - name: Build Project
         run: npm run build
-        
-      - name: 🧹 Run Full Lint
+
+      - name: Run Full Lint
         run: npm run lint
-        
-      - name: 🔍 Community Package Scan
+
+      - name: Community Package Scan
         run: npx @n8n/scan-community-package n8n-nodes-resend
-        
-      - name: 🧪 Pre-publish Validation
+
+      - name: Pre-publish Validation
         run: |
-          echo "🔍 Running pre-publish checks..."
+          echo "Running pre-publish checks..."
           npm run prepublishOnly
-          
-      - name: 📋 Version Validation
+
+      - name: Version Validation
         run: |
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
-          echo "📦 Current package version: $PACKAGE_VERSION"
-          
+          echo "Current package version: $PACKAGE_VERSION"
+
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "$PACKAGE_VERSION" != "${{ github.event.inputs.version }}" ]]; then
-              echo "❌ Package version ($PACKAGE_VERSION) doesn't match input version (${{ github.event.inputs.version }})"
-              echo "💡 This should not happen after the version update step"
+              echo "Package version ($PACKAGE_VERSION) doesn't match input version (${{ github.event.inputs.version }})"
+              echo "This should not happen after the version update step"
               exit 1
             fi
-            echo "✅ Package version matches input version: $PACKAGE_VERSION"
+            echo "Package version matches input version: $PACKAGE_VERSION"
           elif [[ "${{ github.event_name }}" == "release" ]]; then
             RELEASE_TAG="${{ github.event.release.tag_name }}"
             EXPECTED_VERSION="${RELEASE_TAG#v}"  # Remove 'v' prefix if present
             if [[ "$PACKAGE_VERSION" != "$EXPECTED_VERSION" ]]; then
-              echo "⚠️ Package version ($PACKAGE_VERSION) doesn't match release tag ($EXPECTED_VERSION)"
-              echo "💡 Consider using workflow_dispatch to update the version first"
+              echo "Package version ($PACKAGE_VERSION) doesn't match release tag ($EXPECTED_VERSION)"
+              echo "Consider using workflow_dispatch to update the version first"
             fi
           fi
-          
-          echo "✅ Version validation completed"
+
+          echo "Version validation completed"
 
   publish-npm:
-    name: 📤 Publish to NPM
+    name: Publish to NPM
     runs-on: ubuntu-latest
     needs: validate-release
     environment: production
-    
+    permissions:
+      contents: read
+      id-token: write # Required for npm provenance
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: 🔄 Pull Latest Changes
+
+      - name: Pull Latest Changes
         if: github.event_name == 'workflow_dispatch'
         run: |
           git pull origin ${{ github.ref_name }}
-        
-      - name: 🚀 Setup Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-          
-      - name: 📦 Install Dependencies
+          node-version: "20.x"
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Dependencies
         run: npm ci
-        
-      - name: 🔨 Build for Production
+
+      - name: Build for Production
         run: npm run build
-        
-      - name: 🏷️ Create Git Tag
+
+      - name: Create Git Tag
         if: github.event_name == 'workflow_dispatch'
         run: |
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
           TAG_NAME="v$PACKAGE_VERSION"
-          
-          echo "🏷️ Creating Git tag: $TAG_NAME"
+
+          echo "Creating Git tag: $TAG_NAME"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
+
           # Check if tag already exists
           if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-            echo "⚠️ Tag $TAG_NAME already exists, skipping tag creation"
+            echo "Tag $TAG_NAME already exists, skipping tag creation"
           else
             git tag -a "$TAG_NAME" -m "Release version $PACKAGE_VERSION"
             git push origin "$TAG_NAME"
-            echo "✅ Created and pushed tag: $TAG_NAME"
+            echo "Created and pushed tag: $TAG_NAME"
           fi
-        
-      - name: 📤 Publish to NPM
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
-      - name: 📊 Post-Publish Verification
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+
+      - name: Post-Publish Verification
         run: |
           PACKAGE_NAME=$(node -p 'require("./package.json").name')
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
-          
-          echo "⏳ Waiting for package to be available on NPM..."
+
+          echo "Waiting for package to be available on NPM..."
           sleep 30
-          
+
           # Check if package is available
           npm view $PACKAGE_NAME@$PACKAGE_VERSION version || {
-            echo "❌ Package not found on NPM registry"
+            echo "Package not found on NPM registry"
             exit 1
           }
-          
-          echo "✅ Package successfully published to NPM"
-          echo "📦 $PACKAGE_NAME@$PACKAGE_VERSION is now available"
-          
-      - name: 🎉 Create GitHub Release
+
+          echo "Package successfully published to NPM"
+          echo "$PACKAGE_NAME@$PACKAGE_VERSION is now available"
+
+      - name: Create GitHub Release
         if: github.event_name == 'workflow_dispatch'
         uses: actions/github-script@v7
         with:
@@ -174,76 +175,76 @@ jobs:
             const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             const version = packageJson.version;
             const tagName = `v${version}`;
-            
+
             // Create release notes
-            const releaseBody = `# 🚀 Release ${version}
-            
-            ## 📦 Installation
-            
+            const releaseBody = `# Release ${version}
+
+            ## Installation
+
             \`\`\`bash
             npm install n8n-nodes-resend@${version}
             \`\`\`
-            
+
             Or install via n8n Community Nodes:
             1. Go to **Settings** → **Community Nodes**
             2. Install: \`n8n-nodes-resend\`
             3. Restart n8n
-            
-            ## 🔗 Links
+
+            ## Links
             - [NPM Package](https://www.npmjs.com/package/n8n-nodes-resend)
             - [Documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs.md)
             - [Resend API Docs](https://resend.com/docs)
-            
-            ## ✨ Features
-            - 📧 Complete email operations (send, retrieve, update, cancel)
-            - 📎 File attachment support (binary data + remote URLs)
-            - 👥 Contact and segment management
-            - 🌐 Domain management and verification
-            - 🔑 API key management
-            - 📢 Broadcast campaigns
-            - 🎣 Real-time webhook events
-            
+
+            ## Features
+            - Complete email operations (send, retrieve, update, cancel)
+            - File attachment support (binary data + remote URLs)
+            - Contact and segment management
+            - Domain management and verification
+            - API key management
+            - Broadcast campaigns
+            - Real-time webhook events
+
             ---
-            
+
             *Generated automatically by GitHub Actions*`;
-            
+
             try {
               const release = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag_name: tagName,
-                name: `🚀 Release ${version}`,
+                name: `Release ${version}`,
                 body: releaseBody,
                 draft: false,
                 prerelease: version.includes('-')
               });
-              
-              console.log(`✅ Created GitHub release: ${release.data.html_url}`);
+
+              console.log(`Created GitHub release: ${release.data.html_url}`);
             } catch (error) {
               if (error.status === 422) {
-                console.log(`⚠️ Release ${tagName} already exists`);
+                console.log(`Release ${tagName} already exists`);
               } else {
                 throw error;
               }
             }
 
   create-release-notes:
-    name: 📝 Generate Release Notes
+    name: Generate Release Notes
     runs-on: ubuntu-latest
     needs: publish-npm
     if: always() && needs.publish-npm.result == 'success'
-    
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: 📝 Generate Changelog
+
+      - name: Generate Changelog
         run: |
           # Get version information
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
-          
+
           if [[ "${{ github.event_name }}" == "release" ]]; then
             TAG_NAME="${{ github.event.release.tag_name }}"
             echo "# Release Notes for $TAG_NAME" > release-notes.md
@@ -251,41 +252,41 @@ jobs:
             TAG_NAME="v$PACKAGE_VERSION"
             echo "# Release Notes for $TAG_NAME" > release-notes.md
           fi
-          
+
           echo "" >> release-notes.md
-          echo "## 🎉 What's New" >> release-notes.md
+          echo "## What's New" >> release-notes.md
           echo "" >> release-notes.md
-          
+
           echo "### Version $PACKAGE_VERSION" >> release-notes.md
           echo "" >> release-notes.md
-          
+
           # Add installation instructions
-          echo "## 📦 Installation" >> release-notes.md
+          echo "## Installation" >> release-notes.md
           echo "" >> release-notes.md
           echo '```bash' >> release-notes.md
           echo "npm install n8n-nodes-resend@$PACKAGE_VERSION" >> release-notes.md
           echo '```' >> release-notes.md
           echo "" >> release-notes.md
-          
+
           echo "Or install via n8n Community Nodes:" >> release-notes.md
           echo "1. Go to Settings → Community Nodes" >> release-notes.md
           echo "2. Install: \`n8n-nodes-resend\`" >> release-notes.md
           echo "" >> release-notes.md
-          
-          echo "## 🔗 Links" >> release-notes.md
+
+          echo "## Links" >> release-notes.md
           echo "- [NPM Package](https://www.npmjs.com/package/n8n-nodes-resend)" >> release-notes.md
           echo "- [Documentation](https://github.com/${{ github.repository }}/blob/main/docs.md)" >> release-notes.md
           echo "- [Resend API](https://resend.com/docs)" >> release-notes.md
-          
+
           cat release-notes.md
-          
-      - name: 📤 Update Release
+
+      - name: Update Release
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const releaseNotes = fs.readFileSync('release-notes.md', 'utf8');
-            
+
             if (context.eventName === 'release') {
               // Update existing release
               await github.rest.repos.updateRelease({
@@ -294,30 +295,30 @@ jobs:
                 release_id: ${{ github.event.release.id || 'null' }},
                 body: releaseNotes
               });
-              console.log('✅ Updated existing release with release notes');
+              console.log('Updated existing release with release notes');
             } else {
               // For workflow_dispatch, the release was already created in publish-npm job
-              console.log('ℹ️ Release notes generated for workflow_dispatch event');
-              console.log('📝 Release was already created in previous job with release notes');
+              console.log('Release notes generated for workflow_dispatch event');
+              console.log('Release was already created in previous job with release notes');
             }
 
   notify-community:
-    name: 📢 Community Notification
+    name: Community Notification
     runs-on: ubuntu-latest
     needs: [publish-npm, create-release-notes]
     if: always() && needs.publish-npm.result == 'success'
-    
+
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        
-      - name: 📊 Release Summary
+
+      - name: Release Summary
         run: |
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
-          
-          echo "🎉 Successfully released n8n-nodes-resend!"
+
+          echo "Successfully released n8n-nodes-resend!"
           echo "========================================"
-          
+
           if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "Tag: ${{ github.event.release.tag_name }}"
             echo "Release URL: ${{ github.event.release.html_url }}"
@@ -325,12 +326,12 @@ jobs:
             echo "Tag: v$PACKAGE_VERSION"
             echo "Release URL: https://github.com/${{ github.repository }}/releases/tag/v$PACKAGE_VERSION"
           fi
-          
+
           echo "Version: $PACKAGE_VERSION"
           echo "NPM: https://www.npmjs.com/package/n8n-nodes-resend"
           echo ""
-          echo "🔧 Users can now install via:"
+          echo "Users can now install via:"
           echo "- npm install n8n-nodes-resend@$PACKAGE_VERSION"
           echo "- n8n Community Nodes interface"
           echo ""
-          echo "📚 Documentation: https://github.com/${{ github.repository }}/blob/main/docs.md"
+          echo "Documentation: https://github.com/${{ github.repository }}/blob/main/docs.md"
