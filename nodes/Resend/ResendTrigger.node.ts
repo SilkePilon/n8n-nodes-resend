@@ -2,11 +2,23 @@ import {
 	IHookFunctions,
 	IWebhookFunctions,
 	IWebhookResponseData,
+	INode,
 	INodeType,
 	INodeTypeDescription,
 	NodeConnectionType,
 	NodeOperationError,
 } from 'n8n-workflow';
+import { createHmac, timingSafeEqual } from 'crypto';
+
+const WEBHOOK_TOLERANCE_MS = 5 * 60 * 1000;
+
+function parseSvixTimestamp(timestamp: string): number | null {
+	const numeric = Number(timestamp);
+	if (!Number.isFinite(numeric)) {
+		return null;
+	}
+	return numeric > 1e12 ? numeric : numeric * 1000;
+}
 
 async function verifySvixSignature(
 	payload: string,
@@ -14,29 +26,23 @@ async function verifySvixSignature(
 	svixTimestamp: string,
 	svixSignature: string,
 	webhookSigningSecret: string,
+	node: INode,
 ): Promise<void> {
+	const timestampMs = parseSvixTimestamp(svixTimestamp);
+	if (!timestampMs || Math.abs(Date.now() - timestampMs) > WEBHOOK_TOLERANCE_MS) {
+		throw new NodeOperationError(node, 'Webhook signature timestamp is outside the allowed tolerance');
+	}
+
 	// Remove the "whsec_" prefix from the secret
 	const secret = webhookSigningSecret.replace(/^whsec_/, '');
-
-	// Decode the base64 secret
-	const secretBytes = Uint8Array.from(atob(secret), c => c.charCodeAt(0));
+	const secretBytes = Buffer.from(secret, 'base64');
 
 	// Create the signed payload: "id.timestamp.payload"
 	const signedPayload = `${svixId}.${svixTimestamp}.${payload}`;
-	const payloadBytes = new TextEncoder().encode(signedPayload);
-
-	// Import the key for HMAC
-	const key = await globalThis.crypto.subtle.importKey(
-		'raw',
-		secretBytes,
-		{ name: 'HMAC', hash: 'SHA-256' },
-		false,
-		['sign']
-	);
-
-	// Create HMAC-SHA256 signature
-	const signatureBuffer = await globalThis.crypto.subtle.sign('HMAC', key, payloadBytes);
-	const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+	const expectedSignature = createHmac('sha256', secretBytes)
+		.update(signedPayload)
+		.digest('base64');
+	const expectedBytes = Buffer.from(expectedSignature, 'base64');
 
 	// Parse signatures from the header (format: "v1,signature1 v1,signature2")
 	const signatures = svixSignature.split(' ');
@@ -44,16 +50,13 @@ async function verifySvixSignature(
 	for (const sig of signatures) {
 		const [version, signature] = sig.split(',');
 		if (version === 'v1') {
-			// Use timing-safe comparison
-			if (signature === expectedSignature) {
+			const signatureBytes = Buffer.from(signature, 'base64');
+			if (signatureBytes.length === expectedBytes.length && timingSafeEqual(signatureBytes, expectedBytes)) {
 				return; // Signature is valid
 			}
 		}
 	}
-	throw new NodeOperationError(
-		{} as any,
-		'Invalid webhook signature'
-	);
+	throw new NodeOperationError(node, 'Invalid webhook signature');
 }
 
 export class ResendTrigger implements INodeType {
@@ -63,7 +66,7 @@ export class ResendTrigger implements INodeType {
 		icon: 'file:resend-icon-white.svg',		group: ['trigger'],
 		version: 1,
 		description: 'Triggers workflows when Resend email events occur, such as email sent, delivered, opened, clicked, bounced, or complained. Includes secure webhook signature verification.',
-		subtitle: '={{$parameter["events"].join(", ")}}',
+		subtitle: '={{(() => { const events = $parameter["events"] ?? []; const actionLabels = { created: "create", deleted: "delete", updated: "update", sent: "send", opened: "open", clicked: "click", bounced: "bounce", complained: "complain", delivered: "deliver", delivery_delayed: "delay" }; return events.map((event) => { const [resource, action] = event.split("."); if (!resource || !action) { return event; } const actionLabel = actionLabels[action] ?? action.replace(/_/g, " "); return actionLabel + ": " + resource; }).join(", "); })() }}',
 		defaults: {
 			name: 'Resend Trigger',
 		},
@@ -130,13 +133,20 @@ export class ResendTrigger implements INodeType {
 		],
 	}; async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		const bodyData = this.getBodyData();
-		const headers = this.getHeaderData();		const subscribedEvents = this.getNodeParameter('events') as string[];
+		const headers = this.getHeaderData();
+		const request = this.getRequestObject();
+		const subscribedEvents = this.getNodeParameter('events') as string[];
 		const webhookSigningSecret = this.getNodeParameter('webhookSigningSecret') as string;
 		// Verify webhook signature if secret is provided
 		if (webhookSigningSecret && webhookSigningSecret.trim() !== '') {
 			try {
 				// Get the raw body for signature verification
-				const payload = JSON.stringify(bodyData);
+				const rawBody = (request as { rawBody?: unknown }).rawBody ?? (request as { body?: unknown }).body;
+				const payload = typeof rawBody === 'string'
+					? rawBody
+					: Buffer.isBuffer(rawBody)
+						? rawBody.toString('utf8')
+						: JSON.stringify(bodyData ?? {});
 
 				// Extract Svix headers with proper type handling
 				const svixId = (Array.isArray(headers['svix-id']) ? headers['svix-id'][0] : headers['svix-id']) ||
@@ -153,8 +163,8 @@ export class ResendTrigger implements INodeType {
 					};
 				}
 
-				// Verify the webhook signature using Web Crypto API
-				await verifySvixSignature(payload, svixId, svixTimestamp, svixSignature, webhookSigningSecret);
+				// Verify the webhook signature
+				await verifySvixSignature(payload, svixId, svixTimestamp, svixSignature, webhookSigningSecret, this.getNode());
 			} catch (error) {
 				// Signature verification failed
 				console.error('Resend webhook signature verification failed:', error);

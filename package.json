@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-resend",
-  "version": "1.2.3",
-  "description": "Resend n8n node",
+  "version": "2.0.0",
+  "description": "Complete Resend integration for n8n with full API coverage: Email, Broadcasts, Templates, Domains, Contacts, Segments, Topics, Webhooks, and more",
   "keywords": [
     "n8n-community-node-package",
     "resend",
@@ -9,7 +9,10 @@
     "webhook",
     "n8n",
     "automation",
-    "integration"
+    "integration",
+    "broadcast",
+    "template",
+    "contacts"
   ],
   "license": "MIT",
   "homepage": "https://github.com/SilkePilon/n8n-nodes-resend/",
