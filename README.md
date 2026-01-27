@@ -5,13 +5,11 @@
 </h1>
 
 <p align="center">
-	
-  ![NPM Version](https://img.shields.io/npm/v/n8n-nodes-resend)
-  ![GitHub License](https://img.shields.io/github/license/SilkePilon/n8n-nodes-resend)
-	![NPM Downloads](https://img.shields.io/npm/dm/n8n-nodes-resend)
-	![NPM Last Update](https://img.shields.io/npm/last-update/n8n-nodes-resend)
-	![Static Badge](https://img.shields.io/badge/n8n-community_node-blue?logo=n8n)
-
+	<img alt="NPM Version" src="https://img.shields.io/npm/v/n8n-nodes-resend">
+	<img alt="GitHub License" src="https://img.shields.io/github/license/SilkePilon/n8n-nodes-resend">
+	<img alt="NPM Downloads" src="https://img.shields.io/npm/dm/n8n-nodes-resend">
+	<img alt="NPM Last Update" src="https://img.shields.io/npm/last-update/n8n-nodes-resend">
+	<img alt="n8n community node" src="https://img.shields.io/badge/n8n-community_node-blue?logo=n8n">
 </p>
 
 <p align="center">
