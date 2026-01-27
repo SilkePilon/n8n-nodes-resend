@@ -5,8 +5,12 @@
 </h1>
 
 <p align="center">
-  <a href="https://badge.fury.io/js/n8n-nodes-resend"><img src="https://badge.fury.io/js/n8n-nodes-resend.svg" alt="npm version"></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  ![NPM Version](https://img.shields.io/npm/v/n8n-nodes-resend)
+  ![GitHub License](https://img.shields.io/github/license/SilkePilon/n8n-nodes-resend)
+	![NPM Downloads](https://img.shields.io/npm/dm/n8n-nodes-resend)
+	![NPM Last Update](https://img.shields.io/npm/last-update/n8n-nodes-resend)
+	![Static Badge](https://img.shields.io/badge/n8n-community_node-blue?logo=n8n)
+
 </p>
 
 <p align="center">
