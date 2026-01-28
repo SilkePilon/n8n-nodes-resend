@@ -20,220 +20,277 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-
-      - name: Create OpenAPI storage directory
+      - name: Create tracking directory
         run: |
           mkdir -p .github/openapi
 
-      - name: Download current Resend OpenAPI file
+      - name: Clone Resend OpenAPI repository
         run: |
-          echo "Downloading latest resend.yaml from resend/resend-openapi..."
-          curl -sSL https://raw.githubusercontent.com/resend/resend-openapi/main/resend.yaml -o .github/openapi/resend-latest.yaml
-          echo "Download complete"
+          echo "Cloning resend/resend-openapi repository..."
+          git clone --depth=50 https://github.com/resend/resend-openapi.git /tmp/resend-openapi
+          cd /tmp/resend-openapi
+          echo "Repository cloned successfully"
 
-      - name: Check if stored version exists
-        id: check_stored
+      - name: Get last checked commit SHA
+        id: get_last_sha
         run: |
-          if [ -f ".github/openapi/resend.yaml" ]; then
+          if [ -f ".github/openapi/last-checked-commit.txt" ]; then
+            last_sha=$(cat .github/openapi/last-checked-commit.txt)
+            echo "last_sha=$last_sha" >> $GITHUB_OUTPUT
             echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Last checked commit: $last_sha"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "No stored version found - this is the first run"
+            echo "No previous commit tracked - this is the first run"
           fi
 
-      - name: Compare versions
-        id: compare
+      - name: Get current commit SHA
+        id: get_current_sha
         run: |
-          if [ "${{ steps.check_stored.outputs.exists }}" = "true" ]; then
-            if diff -q .github/openapi/resend.yaml .github/openapi/resend-latest.yaml > /dev/null; then
-              echo "changed=false" >> $GITHUB_OUTPUT
-              echo "No changes detected in OpenAPI file"
-            else
-              echo "changed=true" >> $GITHUB_OUTPUT
-              echo "Changes detected in OpenAPI file!"
-            fi
+          cd /tmp/resend-openapi
+          current_sha=$(git log -1 --format="%H" -- resend.yaml)
+          echo "current_sha=$current_sha" >> $GITHUB_OUTPUT
+          echo "Current commit: $current_sha"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [ "${{ steps.get_last_sha.outputs.exists }}" = "false" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "First run - storing baseline commit, no issue needed"
+          elif [ "${{ steps.get_last_sha.outputs.last_sha }}" = "${{ steps.get_current_sha.outputs.current_sha }}" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected - commits match"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "First run - will store baseline version"
+            echo "Changes detected!"
           fi
 
-      - name: Generate diff
-        if: steps.compare.outputs.changed == 'true' && steps.check_stored.outputs.exists == 'true'
+      - name: Get commits since last check
+        if: steps.check_changes.outputs.changed == 'true'
+        id: get_commits
         run: |
-          echo "Generating diff between versions..."
-          diff -u .github/openapi/resend.yaml .github/openapi/resend-latest.yaml > .github/openapi/changes.diff || true
-          
-          # Create a formatted diff for the issue
-          echo "# OpenAPI Changes Detected" > .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "Changes have been detected in the [Resend OpenAPI specification](https://github.com/resend/resend-openapi)." >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "## 📊 Change Summary" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          
-          # Count additions and deletions
-          additions=$(grep -c "^+" .github/openapi/changes.diff || echo "0")
-          deletions=$(grep -c "^-" .github/openapi/changes.diff || echo "0")
-          echo "- **Lines added:** $additions" >> .github/openapi/issue-body.md
-          echo "- **Lines removed:** $deletions" >> .github/openapi/issue-body.md
-          echo "- **Last checked:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
+          cd /tmp/resend-openapi
 
-      - name: Fetch recent commits from resend-openapi
-        if: steps.compare.outputs.changed == 'true' && steps.check_stored.outputs.exists == 'true'
-        id: fetch_commits
-        run: |
-          echo "Fetching recent commits from resend/resend-openapi..."
-          
-          # Get the last 10 commits for resend.yaml
-          commits_json=$(curl -sSL \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/resend/resend-openapi/commits?path=resend.yaml&per_page=10")
-          
-          echo "$commits_json" > .github/openapi/commits.json
-          
-          # Parse and format commits for the issue
-          echo "## 📝 Recent Changes" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "Recent commits to the OpenAPI specification file:" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          
-          # Use jq to parse and format commits (limited to first 10)
-          node -e "
-            const commits = JSON.parse(require('fs').readFileSync('.github/openapi/commits.json', 'utf8'));
-            let output = '';
-            
-            commits.slice(0, 10).forEach((commit, index) => {
-              const sha = commit.sha.substring(0, 7);
-              const message = commit.commit.message.split('\\n')[0]; // First line only
-              const author = commit.commit.author.name;
-              const date = new Date(commit.commit.author.date).toISOString().split('T')[0];
-              const url = \`https://github.com/resend/resend-openapi/commit/\${commit.sha}\`;
-              
-              output += \`\${index + 1}. [\\\`\${sha}\\\`](\${url}) - \${message} _by \${author} on \${date}_\\n\`;
-            });
-            
-            require('fs').appendFileSync('.github/openapi/issue-body.md', output);
-          "
-          
-          echo "" >> .github/openapi/issue-body.md
+          # Get list of commits affecting resend.yaml since last check
+          last_sha="${{ steps.get_last_sha.outputs.last_sha }}"
 
-      - name: Add diff to issue body
-        if: steps.compare.outputs.changed == 'true' && steps.check_stored.outputs.exists == 'true'
+          echo "Getting commits since $last_sha..."
+
+          # Get commit count
+          commit_count=$(git rev-list --count ${last_sha}..HEAD -- resend.yaml)
+          echo "commit_count=$commit_count" >> $GITHUB_OUTPUT
+          echo "Found $commit_count new commits"
+
+          # Get commit log with details (using iso-strict for full timestamp)
+          git log --pretty=format:"%H|%h|%an|%ae|%ad|%s|%b" --date=iso-strict ${last_sha}..HEAD -- resend.yaml > /tmp/commits.txt
+
+          # Get the combined diff
+          git diff ${last_sha}..HEAD -- resend.yaml > /tmp/changes.diff
+
+          # Count changes
+          additions=$(grep -c "^+" /tmp/changes.diff || echo "0")
+          deletions=$(grep -c "^-" /tmp/changes.diff || echo "0")
+          echo "additions=$additions" >> $GITHUB_OUTPUT
+          echo "deletions=$deletions" >> $GITHUB_OUTPUT
+
+      - name: Build issue body
+        if: steps.check_changes.outputs.changed == 'true'
         run: |
-          echo "## 🔍 Detailed Diff" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "<details>" >> .github/openapi/issue-body.md
-          echo "<summary>Click to expand diff</summary>" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo '```diff' >> .github/openapi/issue-body.md
-          
-          # Limit diff to first 500 lines to avoid huge issues
-          head -n 500 .github/openapi/changes.diff >> .github/openapi/issue-body.md
-          
-          line_count=$(wc -l < .github/openapi/changes.diff)
-          if [ "$line_count" -gt 500 ]; then
-            echo "" >> .github/openapi/issue-body.md
-            echo "... (diff truncated, showing first 500 lines of $line_count total)" >> .github/openapi/issue-body.md
+          cd /tmp/resend-openapi
+
+          cat > /tmp/issue-body.md << 'EOF'
+          # OpenAPI Changes Detected
+
+          Changes have been detected in the [Resend OpenAPI specification](https://github.com/resend/resend-openapi).
+
+          ## Change Summary
+
+          EOF
+
+          echo "- **New commits:** ${{ steps.get_commits.outputs.commit_count }}" >> /tmp/issue-body.md
+          echo "- **Lines added:** ${{ steps.get_commits.outputs.additions }}" >> /tmp/issue-body.md
+          echo "- **Lines removed:** ${{ steps.get_commits.outputs.deletions }}" >> /tmp/issue-body.md
+          echo "- **Previous commit:** [\`$(echo ${{ steps.get_last_sha.outputs.last_sha }} | cut -c1-7)\`](https://github.com/resend/resend-openapi/commit/${{ steps.get_last_sha.outputs.last_sha }})" >> /tmp/issue-body.md
+          echo "- **Current commit:** [\`$(echo ${{ steps.get_current_sha.outputs.current_sha }} | cut -c1-7)\`](https://github.com/resend/resend-openapi/commit/${{ steps.get_current_sha.outputs.current_sha }})" >> /tmp/issue-body.md
+          echo "- **Compare view:** [View all changes on GitHub](https://github.com/resend/resend-openapi/compare/${{ steps.get_last_sha.outputs.last_sha }}...${{ steps.get_current_sha.outputs.current_sha }})" >> /tmp/issue-body.md
+          echo "- **Last checked:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          # Add commit timeline (quick overview)
+          echo "## Commit Timeline" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "\`\`\`" >> /tmp/issue-body.md
+
+          # Create a simple timeline from the commits
+          while IFS='|' read -r full_sha short_sha author email timestamp message body; do
+            # Format timestamp to be more compact
+            compact_time=$(echo "$timestamp" | cut -d'T' -f1,2 | tr 'T' ' ' | cut -d'+' -f1)
+            echo "[$compact_time] $short_sha - $message ($author)" >> /tmp/issue-body.md
+          done < /tmp/commits.txt
+
+          echo "\`\`\`" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          # Add commits section
+          echo "## New Commits" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "The following commits have modified \`resend.yaml\` since the last check:" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          # Parse and format commits with full details
+          index=1
+          while IFS='|' read -r full_sha short_sha author email timestamp message body; do
+            commit_url="https://github.com/resend/resend-openapi/commit/$full_sha"
+
+            # Format the timestamp nicely (converts ISO-8601 to readable format)
+            formatted_time=$(echo "$timestamp" | sed 's/T/ at /')
+
+            echo "### $index. [\`$short_sha\`]($commit_url) - $message" >> /tmp/issue-body.md
+            echo "" >> /tmp/issue-body.md
+            echo "- **Author:** $author" >> /tmp/issue-body.md
+            echo "- **Date:** $formatted_time" >> /tmp/issue-body.md
+
+            # Add commit body if it exists and is not empty
+            if [ -n "$body" ] && [ "$body" != " " ]; then
+              echo "- **Details:**" >> /tmp/issue-body.md
+              echo "  \`\`\`" >> /tmp/issue-body.md
+              echo "  $body" >> /tmp/issue-body.md
+              echo "  \`\`\`" >> /tmp/issue-body.md
+            fi
+
+            echo "" >> /tmp/issue-body.md
+            index=$((index + 1))
+          done < /tmp/commits.txt
+
+          echo "" >> /tmp/issue-body.md
+
+          # Add diff section with stats
+          echo "## Detailed Diff" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          # Calculate diff statistics
+          line_count=$(wc -l < /tmp/changes.diff)
+          additions_count=${{ steps.get_commits.outputs.additions }}
+          deletions_count=${{ steps.get_commits.outputs.deletions }}
+
+          echo "**Diff Statistics:**" >> /tmp/issue-body.md
+          echo "- Total lines changed: $line_count" >> /tmp/issue-body.md
+          echo "- Additions: +$additions_count" >> /tmp/issue-body.md
+          echo "- Deletions: -$deletions_count" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          echo "View the changes between [\`$(echo ${{ steps.get_last_sha.outputs.last_sha }} | cut -c1-7)\`](https://github.com/resend/resend-openapi/commit/${{ steps.get_last_sha.outputs.last_sha }}) and [\`$(echo ${{ steps.get_current_sha.outputs.current_sha }} | cut -c1-7)\`](https://github.com/resend/resend-openapi/commit/${{ steps.get_current_sha.outputs.current_sha }}) in the OpenAPI specification:" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          echo "<details open>" >> /tmp/issue-body.md
+          echo "<summary><strong>Full Diff (click to collapse)</strong></summary>" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo '```diff' >> /tmp/issue-body.md
+
+          # Limit diff to first 1000 lines to avoid huge issues
+          head -n 1000 /tmp/changes.diff >> /tmp/issue-body.md
+
+          if [ "$line_count" -gt 1000 ]; then
+            echo "" >> /tmp/issue-body.md
+            echo "... (diff truncated, showing first 1000 of $line_count total lines)" >> /tmp/issue-body.md
+            echo "" >> /tmp/issue-body.md
+            echo "View the complete diff on GitHub: https://github.com/resend/resend-openapi/compare/${{ steps.get_last_sha.outputs.last_sha }}...${{ steps.get_current_sha.outputs.current_sha }}" >> /tmp/issue-body.md
           fi
-          
-          echo '```' >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "</details>" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
 
-      - name: Add action items to issue
-        if: steps.compare.outputs.changed == 'true' && steps.check_stored.outputs.exists == 'true'
-        run: |
-          echo "## ✅ Action Items" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "- [ ] Review the changes to the OpenAPI specification" >> .github/openapi/issue-body.md
-          echo "- [ ] Determine if any node parameters need to be updated" >> .github/openapi/issue-body.md
-          echo "- [ ] Check if new endpoints have been added" >> .github/openapi/issue-body.md
-          echo "- [ ] Verify if any breaking changes affect existing functionality" >> .github/openapi/issue-body.md
-          echo "- [ ] Update the n8n node implementation if necessary" >> .github/openapi/issue-body.md
-          echo "- [ ] Update documentation if API has changed" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "---" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "**Links:**" >> .github/openapi/issue-body.md
-          echo "- [Resend OpenAPI Repository](https://github.com/resend/resend-openapi)" >> .github/openapi/issue-body.md
-          echo "- [Latest resend.yaml](https://github.com/resend/resend-openapi/blob/main/resend.yaml)" >> .github/openapi/issue-body.md
-          echo "- [Resend API Documentation](https://resend.com/docs/api-reference/introduction)" >> .github/openapi/issue-body.md
-          echo "" >> .github/openapi/issue-body.md
-          echo "_This issue was automatically created by the OpenAPI Monitor workflow._" >> .github/openapi/issue-body.md
+          echo '```' >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+          echo "</details>" >> /tmp/issue-body.md
+          echo "" >> /tmp/issue-body.md
+
+          # Add action items
+          cat >> /tmp/issue-body.md << 'EOF'
+          ## Action Items
+
+          - [ ] Review the changes to the OpenAPI specification
+          - [ ] Determine if any node parameters need to be updated
+          - [ ] Check if new endpoints have been added
+          - [ ] Verify if any breaking changes affect existing functionality
+          - [ ] Update the n8n node implementation if necessary
+          - [ ] Update documentation if API has changed
+
+          ---
+
+          **Links:**
+          - [Resend OpenAPI Repository](https://github.com/resend/resend-openapi)
+          - [Compare changes](https://github.com/resend/resend-openapi/compare/${{ steps.get_last_sha.outputs.last_sha }}...${{ steps.get_current_sha.outputs.current_sha }})
+          - [Latest resend.yaml](https://github.com/resend/resend-openapi/blob/main/resend.yaml)
+          - [Resend API Documentation](https://resend.com/docs/api-reference/introduction)
+
+          _This issue was automatically created by the OpenAPI Monitor workflow._
+          EOF
 
       - name: Create GitHub Issue
-        if: steps.compare.outputs.changed == 'true' && steps.check_stored.outputs.exists == 'true'
+        if: steps.check_changes.outputs.changed == 'true'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const issueBody = fs.readFileSync('.github/openapi/issue-body.md', 'utf8');
-            
+            const issueBody = fs.readFileSync('/tmp/issue-body.md', 'utf8');
+
             const date = new Date().toISOString().split('T')[0];
-            
+
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `🔄 Resend OpenAPI Update Detected - ${date}`,
+              title: `Resend OpenAPI Update Detected - ${date}`,
               body: issueBody,
               labels: ['openapi', 'maintenance', 'needs-review']
             });
-            
+
             console.log(`Created issue #${issue.data.number}`);
             console.log(`Issue URL: ${issue.data.html_url}`);
 
-      - name: Update stored version
-        if: steps.compare.outputs.changed == 'true'
+      - name: Update tracked commit
+        if: steps.get_current_sha.outputs.current_sha != ''
         run: |
-          echo "Updating stored OpenAPI version..."
-          cp .github/openapi/resend-latest.yaml .github/openapi/resend.yaml
-          
+          echo "${{ steps.get_current_sha.outputs.current_sha }}" > .github/openapi/last-checked-commit.txt
+
           # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Commit the updated file
-          git add .github/openapi/resend.yaml
-          
-          if [ "${{ steps.check_stored.outputs.exists }}" = "true" ]; then
-            git commit -m "Update stored Resend OpenAPI version [skip ci]"
+
+          # Commit the updated tracking file
+          git add .github/openapi/last-checked-commit.txt
+
+          if [ "${{ steps.get_last_sha.outputs.exists }}" = "true" ]; then
+            if [ "${{ steps.check_changes.outputs.changed }}" = "true" ]; then
+              git commit -m "Update tracked Resend OpenAPI commit (${{ steps.get_commits.outputs.commit_count }} new commits) [skip ci]"
+            else
+              git commit -m "Update tracked Resend OpenAPI commit (no changes) [skip ci]"
+            fi
           else
-            git commit -m "Initialize Resend OpenAPI baseline version [skip ci]"
+            git commit -m "Initialize Resend OpenAPI commit tracking [skip ci]"
           fi
-          
+
           git push
 
-      - name: Cleanup temporary files
+      - name: Cleanup
         if: always()
         run: |
-          rm -f .github/openapi/resend-latest.yaml
-          rm -f .github/openapi/changes.diff
-          rm -f .github/openapi/commits.json
-          rm -f .github/openapi/issue-body.md
+          rm -rf /tmp/resend-openapi
+          rm -f /tmp/commits.txt
+          rm -f /tmp/changes.diff
+          rm -f /tmp/issue-body.md
 
       - name: Report status
         if: always()
         run: |
           echo "OpenAPI Monitor Status"
           echo "======================"
-          echo "Stored version exists: ${{ steps.check_stored.outputs.exists }}"
-          echo "Changes detected: ${{ steps.compare.outputs.changed }}"
-          
-          if [ "${{ steps.compare.outputs.changed }}" = "true" ]; then
-            if [ "${{ steps.check_stored.outputs.exists }}" = "true" ]; then
-              echo "✅ Issue created for OpenAPI changes"
-            else
-              echo "✅ Baseline version stored"
-            fi
+          echo "Previous tracking exists: ${{ steps.get_last_sha.outputs.exists }}"
+          echo "Changes detected: ${{ steps.check_changes.outputs.changed }}"
+
+          if [ "${{ steps.check_changes.outputs.changed }}" = "true" ]; then
+            echo "Issue created for ${{ steps.get_commits.outputs.commit_count }} new commit(s)"
+          elif [ "${{ steps.get_last_sha.outputs.exists }}" = "false" ]; then
+            echo "Baseline commit tracked"
           else
-            echo "✅ No changes detected - OpenAPI is up to date"
+            echo "No changes detected - OpenAPI is up to date"
           fi
