@@ -165,16 +165,49 @@ jobs:
           PACKAGE_VERSION=$(node -p 'require("./package.json").version')
 
           echo "Waiting for package to be available on NPM..."
-          sleep 30
-
-          # Check if package is available
-          npm view $PACKAGE_NAME@$PACKAGE_VERSION version || {
-            echo "Package not found on NPM registry"
+          echo "Package: $PACKAGE_NAME@$PACKAGE_VERSION"
+          
+          # Retry logic: attempt up to 12 times with increasing delays
+          MAX_ATTEMPTS=12
+          ATTEMPT=1
+          FOUND=false
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            
+            if npm view $PACKAGE_NAME@$PACKAGE_VERSION version >/dev/null 2>&1; then
+              FOUND=true
+              echo "✓ Package found on NPM registry!"
+              break
+            fi
+            
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              # Wait 10 seconds for first 3 attempts, then 15 seconds, then 30 seconds
+              if [ $ATTEMPT -le 3 ]; then
+                WAIT_TIME=10
+              elif [ $ATTEMPT -le 6 ]; then
+                WAIT_TIME=15
+              else
+                WAIT_TIME=30
+              fi
+              
+              echo "Package not yet available. Waiting ${WAIT_TIME}s before retry..."
+              sleep $WAIT_TIME
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          
+          if [ "$FOUND" = false ]; then
+            echo "✗ Package not found on NPM registry after $MAX_ATTEMPTS attempts"
+            echo "This may be a temporary propagation delay. Check manually:"
+            echo "https://www.npmjs.com/package/$PACKAGE_NAME"
             exit 1
-          }
+          fi
 
           echo "Package successfully published to NPM"
           echo "$PACKAGE_NAME@$PACKAGE_VERSION is now available"
+          echo "https://www.npmjs.com/package/$PACKAGE_NAME/v/$PACKAGE_VERSION"
 
       - name: Create GitHub Release
         if: github.event_name == 'workflow_dispatch'

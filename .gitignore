@@ -8,3 +8,9 @@ yarn.lock
 .vscode/launch.json
 plans
 .claude/
+
+# OpenAPI Monitor temporary files
+.github/openapi/resend-latest.yaml
+.github/openapi/changes.diff
+.github/openapi/commits.json
+.github/openapi/issue-body.md
