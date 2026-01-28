@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="/"><img src=".github/media/resend.png" alt="n8n-nodes-resend" width="900"></a>
+  <a href="/"><img src=".github/media/resend-header.png" alt="n8n-nodes-resend" width="900"></a>
   <br>
 </h1>
 
