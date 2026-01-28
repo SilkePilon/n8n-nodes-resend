@@ -230,14 +230,14 @@ jobs:
         if: steps.get_current_sha.outputs.current_sha != ''
         run: |
           echo "${{ steps.get_current_sha.outputs.current_sha }}" > .github/openapi/last-checked-commit.txt
-          
+
           # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           # Commit the updated tracking file
           git add .github/openapi/last-checked-commit.txt
-          
+
           if [ "${{ steps.get_last_sha.outputs.exists }}" = "true" ]; then
             if [ "${{ steps.check_changes.outputs.changed }}" = "true" ]; then
               git commit -m "Update tracked Resend OpenAPI commit (${{ steps.get_commits.outputs.commit_count }} new commits) [skip ci]"
@@ -247,7 +247,7 @@ jobs:
           else
             git commit -m "Initialize Resend OpenAPI commit tracking [skip ci]"
           fi
-          
+
           git push
 
       - name: Create GitHub Issue
@@ -257,9 +257,9 @@ jobs:
           script: |
             const fs = require('fs');
             const issueBody = fs.readFileSync('/tmp/issue-body.md', 'utf8');
-            
+
             const date = new Date().toISOString().split('T')[0];
-            
+
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -267,9 +267,12 @@ jobs:
               body: issueBody,
               labels: ['openapi', 'maintenance', 'needs-review']
             });
-            
+
             console.log(`Created issue #${issue.data.number}`);
             console.log(`Issue URL: ${issue.data.html_url}`);
+
+      - name: Cleanup
+        if: always()
         run: |
           rm -rf /tmp/resend-openapi
           rm -f /tmp/commits.txt
