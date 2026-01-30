@@ -497,7 +497,9 @@ export function getSendAndWaitConfig(context: IExecuteFunctions): SendAndWaitCon
 	const approvedSignedResumeUrl = context.getSignedResumeUrl({ approved: 'true' });
 
 	if (responseType === 'freeText') {
-		const label = context.getNodeParameter('options.messageButtonLabel', 0, 'Respond') as string;
+		const label = escapeHtml(
+			context.getNodeParameter('options.messageButtonLabel', 0, 'Respond') as string,
+		);
 		config.options.push({
 			label,
 			url: approvedSignedResumeUrl,
