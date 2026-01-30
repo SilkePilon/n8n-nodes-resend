@@ -5,6 +5,8 @@ import * as list from './list.operation';
 import * as retrieve from './retrieve.operation';
 import * as update from './update.operation';
 import * as cancel from './cancel.operation';
+import * as listAttachments from './listAttachments.operation';
+import * as getAttachment from './getAttachment.operation';
 
 export const operations: INodeProperties[] = [
 	{
@@ -25,10 +27,22 @@ export const operations: INodeProperties[] = [
 				action: 'Cancel an email',
 			},
 			{
+				name: 'Get Attachment',
+				value: 'getAttachment',
+				description: 'Get an attachment from a sent email',
+				action: 'Get an attachment',
+			},
+			{
 				name: 'List',
 				value: 'list',
 				description: 'List sent emails',
 				action: 'List emails',
+			},
+			{
+				name: 'List Attachments',
+				value: 'listAttachments',
+				description: 'List attachments for a sent email',
+				action: 'List attachments',
 			},
 			{
 				name: 'Retrieve',
@@ -67,7 +81,9 @@ export const descriptions: INodeProperties[] = [
 	...retrieve.description,
 	...update.description,
 	...cancel.description,
+	...listAttachments.description,
+	...getAttachment.description,
 ];
 
 export { execute } from './execute';
-export { send, sendBatch, list, retrieve, update, cancel };
+export { send, sendBatch, list, retrieve, update, cancel, listAttachments, getAttachment };

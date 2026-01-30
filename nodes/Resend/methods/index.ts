@@ -111,3 +111,7 @@ export async function getSegments(this: ILoadOptionsFunctions): Promise<INodePro
 export async function getTopics(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	return loadDropdownOptions(this, '/topics');
 }
+
+export async function getAudiences(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/audiences');
+}
