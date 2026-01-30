@@ -1,4 +1,4 @@
-import type { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import type { INodeType, INodeTypeDescription, IWebhookFunctions } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
 
 import { router } from './actions/router';
@@ -21,6 +21,11 @@ import {
 	getTemplates,
 	getTopics,
 } from './methods';
+import {
+	sendAndWaitWebhooksDescription,
+	sendAndWaitWebhook,
+	SEND_AND_WAIT_WAITING_TOOLTIP,
+} from './utils/sendAndWait';
 
 export class Resend implements INodeType {
 	description: INodeTypeDescription = {
@@ -45,6 +50,8 @@ export class Resend implements INodeType {
 				required: true,
 			},
 		],
+		waitingNodeTooltip: SEND_AND_WAIT_WAITING_TOOLTIP,
+		webhooks: sendAndWaitWebhooksDescription,
 		inputs: ['main' as NodeConnectionType],
 		outputs: ['main' as NodeConnectionType],
 		properties: [
@@ -142,6 +149,10 @@ export class Resend implements INodeType {
 			getTopics,
 			getAudiences,
 		},
+	};
+
+	webhook = async function (this: IWebhookFunctions) {
+		return sendAndWaitWebhook.call(this);
 	};
 
 	execute = router;

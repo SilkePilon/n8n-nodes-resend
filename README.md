@@ -15,6 +15,7 @@
 <p align="center">
   <a href="#installation">Installation</a> |
   <a href="#credentials">Credentials</a> |
+  <a href="#human-in-the-loop">Human in the Loop</a> |
   <a href="#resources">Resources</a> |
   <a href="#trigger-events">Trigger Events</a> |
   <a href="#development">Development</a>
@@ -30,7 +31,7 @@ Comprehensive coverage of the Resend API (v1.1.0). The table below shows which e
 
 | API Resource           | Endpoint                   | Status  | Operations                                                                                                       |
 | ---------------------- | -------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Email**              | `/emails`                  | ✅ Full | Send, Send Batch, List, Get, Update, Cancel, List Attachments, Get Attachment                                    |
+| **Email**              | `/emails`                  | ✅ Full | Send, Send Batch, Send and Wait, List, Get, Update, Cancel, List Attachments, Get Attachment                     |
 | **Receiving Emails**   | `/emails/receiving`        | ✅ Full | List, Get, List Attachments, Get Attachment                                                                      |
 | **Domains**            | `/domains`                 | ✅ Full | Create, List, Get, Update, Delete, Verify                                                                        |
 | **API Keys**           | `/api-keys`                | ✅ Full | Create, List, Delete                                                                                             |
@@ -74,20 +75,49 @@ docker run -it --rm \
 2. In n8n, go to **Credentials** > **Add credential**
 3. Search for **Resend API** and paste your key
 
+## Human in the Loop
+
+The **Send and Wait for Response** operation enables human-in-the-loop workflows. Send an email and pause the workflow until the recipient responds via approval buttons or a form.
+
+### Features
+
+- **Approval Workflows**: Send emails with Approve/Decline buttons for quick decisions
+- **Free Text Responses**: Collect text input via a response form
+- **Configurable Wait Time**: Set a timeout or wait indefinitely
+- **Secure Callbacks**: Responses use signed URLs for security
+
+### How to Use
+
+1. In the node panel, go to **Human in the Loop** > **Resend**
+2. Or select **Email** resource > **Send and Wait for Response** operation
+
+### Configuration Options
+
+| Option                   | Description                                              |
+| ------------------------ | -------------------------------------------------------- |
+| **Response Type**        | Choose between Approval (buttons) or Free Text (form)    |
+| **Approval Type**        | Single button (Approve only) or Double (Approve/Decline) |
+| **Button Labels**        | Customize the button text                                |
+| **Button Styles**        | Primary or Secondary styling                             |
+| **Message Button Label** | Label for the form link button (Free Text mode)          |
+| **Response Form Title**  | Title shown on the response form                         |
+| **Limit Wait Time**      | Set a timeout for the wait period                        |
+
 ## Resources
 
 ### Email
 
-| Operation        | Description                                   |
-| ---------------- | --------------------------------------------- |
-| Send             | Send a single email with optional attachments |
-| Send Batch       | Send up to 100 emails in one request          |
-| List             | List sent emails                              |
-| Get              | Retrieve email details and status             |
-| Cancel           | Cancel a scheduled email                      |
-| Update           | Modify a scheduled email                      |
-| List Attachments | List attachments for a sent email             |
-| Get Attachment   | Get a specific attachment from a sent email   |
+| Operation        | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| Send             | Send a single email with optional attachments     |
+| Send Batch       | Send up to 100 emails in one request              |
+| Send and Wait    | Send email and wait for recipient response (HITL) |
+| List             | List sent emails                                  |
+| Get              | Retrieve email details and status                 |
+| Cancel           | Cancel a scheduled email                          |
+| Update           | Modify a scheduled email                          |
+| List Attachments | List attachments for a sent email                 |
+| Get Attachment   | Get a specific attachment from a sent email       |
 
 ### Receiving Email
 
