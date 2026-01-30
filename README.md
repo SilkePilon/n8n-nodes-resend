@@ -28,20 +28,20 @@ A community node for [n8n](https://n8n.io) that integrates with the [Resend](htt
 
 Comprehensive coverage of the Resend API (v1.1.0). The table below shows which endpoints are currently implemented:
 
-| API Resource           | Endpoint                   | Status     | Operations                                                                                                       |
-| ---------------------- | -------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Email**              | `/emails`                  | ✅ Full    | Send, Send Batch, List, Get, Update, Cancel, List Attachments, Get Attachment                                    |
-| **Receiving Emails**   | `/emails/receiving`        | ✅ Full    | List, Get, List Attachments, Get Attachment                                                                      |
-| **Domains**            | `/domains`                 | ✅ Full    | Create, List, Get, Update, Delete, Verify                                                                        |
-| **API Keys**           | `/api-keys`                | ✅ Full    | Create, List, Delete                                                                                             |
-| **Templates**          | `/templates`               | ✅ Full    | Create, List, Get, Update, Delete, Publish, Duplicate                                                            |
-| **Audiences**          | `/audiences`               | ✅ Full    | Create, List, Get, Delete                                                                                        |
-| **Contacts**           | `/audiences/{id}/contacts` | ✅ Full    | Create, List, Get, Update, Delete, Add to Segment, List Segments, Remove from Segment, Get Topics, Update Topics |
-| **Broadcasts**         | `/broadcasts`              | ✅ Full    | Create, List, Get, Update, Delete, Send                                                                          |
-| **Segments**           | `/segments`                | ⚠️ Partial | Create, List, Get, Delete (Missing: Update, Filter conditions)                                                   |
-| **Topics**             | `/topics`                  | ✅ Full    | Create, List, Get, Update, Delete                                                                                |
-| **Contact Properties** | `/contact-properties`      | ✅ Full    | Create, List, Get, Update, Delete                                                                                |
-| **Webhooks**           | `/webhooks`                | ✅ Full    | Create, List, Get, Update, Delete                                                                                |
+| API Resource           | Endpoint                   | Status  | Operations                                                                                                       |
+| ---------------------- | -------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Email**              | `/emails`                  | ✅ Full | Send, Send Batch, List, Get, Update, Cancel, List Attachments, Get Attachment                                    |
+| **Receiving Emails**   | `/emails/receiving`        | ✅ Full | List, Get, List Attachments, Get Attachment                                                                      |
+| **Domains**            | `/domains`                 | ✅ Full | Create, List, Get, Update, Delete, Verify                                                                        |
+| **API Keys**           | `/api-keys`                | ✅ Full | Create, List, Delete                                                                                             |
+| **Templates**          | `/templates`               | ✅ Full | Create, List, Get, Update, Delete, Publish, Duplicate                                                            |
+| **Audiences**          | `/audiences`               | ✅ Full | Create, List, Get, Delete                                                                                        |
+| **Contacts**           | `/audiences/{id}/contacts` | ✅ Full | Create, List, Get, Update, Delete, Add to Segment, List Segments, Remove from Segment, Get Topics, Update Topics |
+| **Broadcasts**         | `/broadcasts`              | ✅ Full | Create, List, Get, Update, Delete, Send                                                                          |
+| **Segments**           | `/segments`                | ✅ Full | Create, List, Get, Delete                                                                                        |
+| **Topics**             | `/topics`                  | ✅ Full | Create, List, Get, Update, Delete                                                                                |
+| **Contact Properties** | `/contact-properties`      | ✅ Full | Create, List, Get, Update, Delete                                                                                |
+| **Webhooks**           | `/webhooks`                | ✅ Full | Create, List, Get, Update, Delete                                                                                |
 
 ## Installation
 
@@ -134,12 +134,12 @@ docker run -it --rm \
 
 ### Segment
 
-| Operation | Description              |
-| --------- | ------------------------ |
-| Create    | Create a new segment     |
-| Get       | Retrieve segment details |
-| Delete    | Remove a segment         |
-| List      | List all segments        |
+| Operation | Description                                          |
+| --------- | ---------------------------------------------------- |
+| Create    | Create a new segment with optional filter conditions |
+| Get       | Retrieve segment details                             |
+| Delete    | Remove a segment                                     |
+| List      | List all segments                                    |
 
 ### Topic
 
