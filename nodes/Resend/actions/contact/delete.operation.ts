@@ -25,7 +25,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const contactIdentifier = this.getNodeParameter('contactIdentifier', index) as string;
 
-	const response = await apiRequest.call(this, 'DELETE', `/contacts/${contactIdentifier}`);
+	const response = await apiRequest.call(this, 'DELETE', `/contacts/${encodeURIComponent(contactIdentifier)}`);
 
 	return [{ json: response }];
 }

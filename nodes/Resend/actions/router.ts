@@ -16,11 +16,10 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 	const items = this.getInputData();
 	const returnData: INodeExecutionData[] = [];
 
-	const resource = this.getNodeParameter('resource', 0) as string;
-	const operation = this.getNodeParameter('operation', 0) as string;
-
 	for (let i = 0; i < items.length; i++) {
 		try {
+			const resource = this.getNodeParameter('resource', i) as string;
+			const operation = this.getNodeParameter('operation', i) as string;
 			let executionData: INodeExecutionData[] = [];
 
 			switch (resource) {

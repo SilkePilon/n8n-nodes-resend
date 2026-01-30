@@ -586,8 +586,17 @@ export async function execute(
 						);
 					}
 
+					const filename = attachment.filename || binaryData.fileName;
+					if (!filename) {
+						throw new NodeOperationError(
+							this.getNode(),
+							'File Name is required for binary attachments.',
+							{ itemIndex: index },
+						);
+					}
+
 					const attachmentEntry: Record<string, unknown> = {
-						filename: attachment.filename,
+						filename,
 						content: binaryData.data,
 					};
 					if (contentId) {

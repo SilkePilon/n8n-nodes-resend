@@ -79,7 +79,7 @@ export async function getTemplateVariables(
 	const apiKey = credentials.apiKey as string;
 
 	const response = await this.helpers.httpRequest({
-		url: `${RESEND_API_BASE}/templates/${encodeURIComponent(templateId)}`,
+		url: `${RESEND_API_BASE}/templates/${encodeURIComponent(normalizedTemplateId)}`,
 		method: 'GET',
 		headers: {
 			Authorization: `Bearer ${apiKey}`,

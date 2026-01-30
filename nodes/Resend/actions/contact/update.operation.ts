@@ -163,7 +163,7 @@ export async function execute(
 		body.properties = props;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/contacts/${identifier}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/contacts/${encodeURIComponent(identifier)}`, body);
 
 	return [{ json: response }];
 }
