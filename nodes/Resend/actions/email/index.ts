@@ -1,6 +1,7 @@
-import { INodeProperties } from 'n8n-workflow';
+import { INodeProperties, SEND_AND_WAIT_OPERATION } from 'n8n-workflow';
 import * as send from './send.operation';
 import * as sendBatch from './sendBatch.operation';
+import * as sendAndWait from './sendAndWait.operation';
 import * as list from './list.operation';
 import * as retrieve from './retrieve.operation';
 import * as update from './update.operation';
@@ -57,6 +58,12 @@ export const operations: INodeProperties[] = [
 				action: 'Send an email',
 			},
 			{
+				name: 'Send and Wait for Response',
+				value: SEND_AND_WAIT_OPERATION,
+				description: 'Send an email and wait for the recipient to respond',
+				action: 'Send message and wait for response',
+			},
+			{
 				name: 'Send Batch',
 				value: 'sendBatch',
 				description: 'Send multiple emails at once',
@@ -76,6 +83,7 @@ export const operations: INodeProperties[] = [
 export const descriptions: INodeProperties[] = [
 	...operations,
 	...send.description,
+	...sendAndWait.description,
 	...sendBatch.description,
 	...list.description,
 	...retrieve.description,
@@ -86,4 +94,4 @@ export const descriptions: INodeProperties[] = [
 ];
 
 export { execute } from './execute';
-export { send, sendBatch, list, retrieve, update, cancel, listAttachments, getAttachment };
+export { send, sendAndWait, sendBatch, list, retrieve, update, cancel, listAttachments, getAttachment };

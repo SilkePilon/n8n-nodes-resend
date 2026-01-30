@@ -1,6 +1,8 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
+import { SEND_AND_WAIT_OPERATION } from 'n8n-workflow';
 
 import * as send from './send.operation';
+import * as sendAndWait from './sendAndWait.operation';
 import * as sendBatch from './sendBatch.operation';
 import * as list from './list.operation';
 import * as retrieve from './retrieve.operation';
@@ -17,6 +19,8 @@ export async function execute(
 	switch (operation) {
 		case 'send':
 			return send.execute.call(this, index);
+		case SEND_AND_WAIT_OPERATION:
+			return sendAndWait.execute.call(this, index);
 		case 'sendBatch':
 			return sendBatch.execute.call(this, index);
 		case 'list':
