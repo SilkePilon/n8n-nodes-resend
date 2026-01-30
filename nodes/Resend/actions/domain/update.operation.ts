@@ -1,0 +1,89 @@
+import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import { apiRequest } from '../../transport';
+
+export const description: INodeProperties[] = [
+	{
+		displayName: 'Domain ID',
+		name: 'domainId',
+		type: 'string',
+		required: true,
+		default: '',
+		placeholder: '4dd369bc-aa82-4ff3-97de-514ae3000ee0',
+		displayOptions: {
+			show: {
+				resource: ['domains'],
+				operation: ['update'],
+			},
+		},
+		description: 'The ID of the domain',
+	},
+	{
+		displayName: 'Domain Update Options',
+		name: 'domainUpdateOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['domains'],
+				operation: ['update'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Click Tracking',
+				name: 'click_tracking',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to track clicks within the body of each HTML email',
+			},
+			{
+				displayName: 'Open Tracking',
+				name: 'open_tracking',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to track the open rate of each email',
+			},
+			{
+				displayName: 'TLS',
+				name: 'tls',
+				type: 'options',
+				options: [
+					{ name: 'Opportunistic', value: 'opportunistic' },
+					{ name: 'Enforced', value: 'enforced' },
+				],
+				default: 'opportunistic',
+				description:
+					'TLS setting for email delivery. Opportunistic attempts secure connection but falls back to unencrypted if needed. Enforced requires TLS and will not send if unavailable.',
+			},
+		],
+	},
+];
+
+export async function execute(
+	this: IExecuteFunctions,
+	index: number,
+): Promise<INodeExecutionData[]> {
+	const domainId = this.getNodeParameter('domainId', index) as string;
+	const updateOptions = this.getNodeParameter('domainUpdateOptions', index, {}) as {
+		click_tracking?: boolean;
+		open_tracking?: boolean;
+		tls?: string;
+	};
+
+	const body: IDataObject = {};
+
+	if (updateOptions.click_tracking !== undefined) {
+		body.click_tracking = updateOptions.click_tracking;
+	}
+	if (updateOptions.open_tracking !== undefined) {
+		body.open_tracking = updateOptions.open_tracking;
+	}
+	if (updateOptions.tls) {
+		body.tls = updateOptions.tls;
+	}
+
+	const response = await apiRequest.call(this, 'PATCH', `/domains/${domainId}`, body);
+
+	return [{ json: response }];
+}
