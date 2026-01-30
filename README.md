@@ -28,23 +28,20 @@ A community node for [n8n](https://n8n.io) that integrates with the [Resend](htt
 
 Comprehensive coverage of the Resend API (v1.1.0). The table below shows which endpoints are currently implemented:
 
-| API Resource                 | Endpoint                                   | Status          | Operations                                                      |
-| ---------------------------- | ------------------------------------------ | --------------- | --------------------------------------------------------------- |
-| **Email**              | `/emails`                                | ✅ Full         | Send, Send Batch, List, Get, Update, Cancel                     |
-| **Email Attachments**  | `/emails/{id}/attachments`               | ❌ Missing      | List attachments, Get attachment                                |
-| **Receiving Emails**   | `/emails/receiving`                      | ❌ Missing      | List received, Get received, Get attachments                    |
-| **Domains**            | `/domains`                               | ✅ Full         | Create, List, Get, Update, Delete, Verify                       |
-| **API Keys**           | `/api-keys`                              | ✅ Full         | Create, List, Delete                                            |
-| **Templates**          | `/templates`                             | ⚠️ Partial    | Create, List, Get, Update, Delete (Missing: Publish, Duplicate) |
-| **Audiences**          | `/audiences`                             | ⚠️ Deprecated | Replaced by Segments in v2.0.0                                  |
-| **Contacts**           | `/audiences/{id}/contacts`               | ✅ Full         | Create, List, Get, Update, Delete                               |
-| **Contact Segments**   | `/audiences/{id}/contacts/{id}/segments` | ❌ Missing      | Add to segment, List segments, Remove from segment              |
-| **Contact Topics**     | `/audiences/{id}/contacts/{id}/topics`   | ❌ Missing      | Get topics, Update topics                                       |
-| **Broadcasts**         | `/broadcasts`                            | ✅ Full         | Create, List, Get, Update, Delete, Send                         |
-| **Segments**           | `/segments`                              | ⚠️ Partial    | Create, List, Get, Delete (Missing: Update, Filter conditions)  |
-| **Topics**             | `/topics`                                | ✅ Full         | Create, List, Get, Update, Delete                               |
-| **Contact Properties** | `/contact-properties`                    | ✅ Full         | Create, List, Get, Update, Delete                               |
-| **Webhooks**           | `/webhooks`                              | ✅ Full         | Create, List, Get, Update, Delete                               |
+| API Resource           | Endpoint                   | Status     | Operations                                                                                                       |
+| ---------------------- | -------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Email**              | `/emails`                  | ✅ Full    | Send, Send Batch, List, Get, Update, Cancel, List Attachments, Get Attachment                                    |
+| **Receiving Emails**   | `/emails/receiving`        | ✅ Full    | List, Get, List Attachments, Get Attachment                                                                      |
+| **Domains**            | `/domains`                 | ✅ Full    | Create, List, Get, Update, Delete, Verify                                                                        |
+| **API Keys**           | `/api-keys`                | ✅ Full    | Create, List, Delete                                                                                             |
+| **Templates**          | `/templates`               | ✅ Full    | Create, List, Get, Update, Delete, Publish, Duplicate                                                            |
+| **Audiences**          | `/audiences`               | ✅ Full    | Create, List, Get, Delete                                                                                        |
+| **Contacts**           | `/audiences/{id}/contacts` | ✅ Full    | Create, List, Get, Update, Delete, Add to Segment, List Segments, Remove from Segment, Get Topics, Update Topics |
+| **Broadcasts**         | `/broadcasts`              | ✅ Full    | Create, List, Get, Update, Delete, Send                                                                          |
+| **Segments**           | `/segments`                | ⚠️ Partial | Create, List, Get, Delete (Missing: Update, Filter conditions)                                                   |
+| **Topics**             | `/topics`                  | ✅ Full    | Create, List, Get, Update, Delete                                                                                |
+| **Contact Properties** | `/contact-properties`      | ✅ Full    | Create, List, Get, Update, Delete                                                                                |
+| **Webhooks**           | `/webhooks`                | ✅ Full    | Create, List, Get, Update, Delete                                                                                |
 
 ## Installation
 
@@ -81,24 +78,49 @@ docker run -it --rm \
 
 ### Email
 
-| Operation  | Description                                   |
-| ---------- | --------------------------------------------- |
-| Send       | Send a single email with optional attachments |
-| Send Batch | Send up to 100 emails in one request          |
-| List       | List sent emails                              |
-| Get        | Retrieve email details and status             |
-| Cancel     | Cancel a scheduled email                      |
-| Update     | Modify a scheduled email                      |
+| Operation        | Description                                   |
+| ---------------- | --------------------------------------------- |
+| Send             | Send a single email with optional attachments |
+| Send Batch       | Send up to 100 emails in one request          |
+| List             | List sent emails                              |
+| Get              | Retrieve email details and status             |
+| Cancel           | Cancel a scheduled email                      |
+| Update           | Modify a scheduled email                      |
+| List Attachments | List attachments for a sent email             |
+| Get Attachment   | Get a specific attachment from a sent email   |
+
+### Receiving Email
+
+| Operation        | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| List             | List all received emails                        |
+| Get              | Retrieve a received email by ID                 |
+| List Attachments | List attachments for a received email           |
+| Get Attachment   | Get a specific attachment from a received email |
+
+### Audience
+
+| Operation | Description             |
+| --------- | ----------------------- |
+| Create    | Create a new audience   |
+| Get       | Retrieve audience by ID |
+| Delete    | Delete an audience      |
+| List      | List all audiences      |
 
 ### Contact
 
-| Operation | Description                |
-| --------- | -------------------------- |
-| Create    | Add a new contact          |
-| Get       | Retrieve contact details   |
-| Update    | Modify contact information |
-| Delete    | Remove a contact           |
-| List      | List all contacts          |
+| Operation           | Description                              |
+| ------------------- | ---------------------------------------- |
+| Create              | Add a new contact                        |
+| Get                 | Retrieve contact details                 |
+| Update              | Modify contact information               |
+| Delete              | Remove a contact                         |
+| List                | List all contacts                        |
+| Add to Segment      | Add a contact to a segment               |
+| List Segments       | List segments for a contact              |
+| Remove From Segment | Remove a contact from a segment          |
+| Get Topics          | Get topic subscriptions for a contact    |
+| Update Topics       | Update topic subscriptions for a contact |
 
 ### Contact Property
 
@@ -142,13 +164,15 @@ docker run -it --rm \
 
 ### Template
 
-| Operation | Description               |
-| --------- | ------------------------- |
-| Create    | Create an email template  |
-| Get       | Retrieve template details |
-| Update    | Modify a template         |
-| Delete    | Remove a template         |
-| List      | List all templates        |
+| Operation | Description                    |
+| --------- | ------------------------------ |
+| Create    | Create an email template       |
+| Get       | Retrieve template details      |
+| Update    | Modify a template              |
+| Delete    | Remove a template              |
+| List      | List all templates             |
+| Publish   | Publish a template             |
+| Duplicate | Duplicate an existing template |
 
 ### Domain
 
@@ -183,8 +207,8 @@ docker run -it --rm \
 
 The **Resend Trigger** node receives webhooks for real-time email events. Signatures are automatically verified using Svix.
 
-| Event                      | Description                  |
-| -------------------------- | ---------------------------- |
+| Event                    | Description                  |
+| ------------------------ | ---------------------------- |
 | `email.sent`             | Email sent to recipient      |
 | `email.delivered`        | Email delivered successfully |
 | `email.delivery_delayed` | Email delivery delayed       |

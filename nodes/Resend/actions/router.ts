@@ -11,6 +11,8 @@ import * as topics from './topic';
 import * as contacts from './contact';
 import * as contactProperties from './contactProperty';
 import * as webhooks from './webhook';
+import * as audiences from './audience';
+import * as receivingEmails from './receivingEmail';
 
 export async function router(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 	const items = this.getInputData();
@@ -52,6 +54,12 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 					break;
 				case 'webhooks':
 					executionData = await webhooks.execute.call(this, i, operation);
+					break;
+				case 'audiences':
+					executionData = await audiences.execute.call(this, i, operation);
+					break;
+				case 'receivingEmails':
+					executionData = await receivingEmails.execute.call(this, i, operation);
 					break;
 				default:
 					throw new NodeOperationError(

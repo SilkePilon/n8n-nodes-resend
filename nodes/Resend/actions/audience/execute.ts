@@ -3,10 +3,7 @@ import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import * as create from './create.operation';
 import * as get from './get.operation';
 import * as list from './list.operation';
-import * as update from './update.operation';
 import * as del from './delete.operation';
-import * as publish from './publish.operation';
-import * as duplicate from './duplicate.operation';
 
 export async function execute(
 	this: IExecuteFunctions,
@@ -20,15 +17,9 @@ export async function execute(
 			return get.execute.call(this, index);
 		case 'list':
 			return list.execute.call(this);
-		case 'update':
-			return update.execute.call(this, index);
 		case 'delete':
 			return del.execute.call(this, index);
-		case 'publish':
-			return publish.execute.call(this, index);
-		case 'duplicate':
-			return duplicate.execute.call(this, index);
 		default:
-			throw new Error(`Unsupported operation: ${operation}`);
+			throw new Error(`Unknown operation: ${operation}`);
 	}
 }

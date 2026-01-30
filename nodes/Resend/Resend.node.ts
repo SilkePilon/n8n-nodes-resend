@@ -12,7 +12,10 @@ import * as topics from './actions/topic';
 import * as contacts from './actions/contact';
 import * as contactProperties from './actions/contactProperty';
 import * as webhooks from './actions/webhook';
+import * as audiences from './actions/audience';
+import * as receivingEmails from './actions/receivingEmail';
 import {
+	getAudiences,
 	getSegments,
 	getTemplateVariables,
 	getTemplates,
@@ -32,7 +35,7 @@ export class Resend implements INodeType {
 		description:
 			'Interact with Resend API for emails, templates, domains, API keys, broadcasts, segments, topics, contacts, contact properties, and webhooks',
 		subtitle:
-			'={{(() => { const resourceLabels = { apiKeys: "api key", broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
+			'={{(() => { const resourceLabels = { apiKeys: "api key", audiences: "audience", broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
 		defaults: {
 			name: 'Resend',
 		},
@@ -58,6 +61,11 @@ export class Resend implements INodeType {
 						description: 'Manage API keys',
 					},
 					{
+						name: 'Audience',
+						value: 'audiences',
+						description: 'Manage audiences',
+					},
+					{
 						name: 'Broadcast',
 						value: 'broadcasts',
 						description: 'Manage email broadcasts',
@@ -81,6 +89,11 @@ export class Resend implements INodeType {
 						name: 'Email',
 						value: 'email',
 						description: 'Send and manage emails',
+					},
+					{
+						name: 'Receiving Email',
+						value: 'receivingEmails',
+						description: 'Manage received emails and attachments',
 					},
 					{
 						name: 'Segment',
@@ -116,6 +129,8 @@ export class Resend implements INodeType {
 			...contacts.descriptions,
 			...contactProperties.descriptions,
 			...webhooks.descriptions,
+			...audiences.descriptions,
+			...receivingEmails.descriptions,
 		],
 	};
 
@@ -125,6 +140,7 @@ export class Resend implements INodeType {
 			getTemplates,
 			getSegments,
 			getTopics,
+			getAudiences,
 		},
 	};
 
