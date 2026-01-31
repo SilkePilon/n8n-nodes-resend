@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['get'],
 			},
 		},
-		description: 'The ID of the contact property',
+		description: 'The unique identifier of the contact property to retrieve. Obtain from the Create Contact Property response or List Contact Properties operation.',
 	},
 ];
 

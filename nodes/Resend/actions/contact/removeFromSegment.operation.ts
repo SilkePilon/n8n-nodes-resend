@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'aud_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['removeFromSegment'],
 			},
 		},
-		description: 'The ID of the audience the contact belongs to',
+		description: 'The unique identifier of the audience containing the contact. Obtain from the List Audiences operation.',
 	},
 	{
 		displayName: 'Contact ID',
@@ -22,13 +23,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'con_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['removeFromSegment'],
 			},
 		},
-		description: 'The ID of the contact',
+		description: 'The unique identifier of the contact to remove from the segment. Obtain from the List Contacts operation.',
 	},
 	{
 		displayName: 'Segment ID',
@@ -36,13 +38,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'seg_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['removeFromSegment'],
 			},
 		},
-		description: 'The ID of the segment to remove the contact from',
+		description: 'The unique identifier of the segment to remove the contact from. The contact will no longer receive broadcasts targeting this segment.',
 	},
 ];
 

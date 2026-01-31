@@ -13,13 +13,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'aud_123456',
 		displayOptions: {
 			show: {
 				resource: ['segments'],
 				operation: ['create'],
 			},
 		},
-		description: 'The ID of the audience this segment belongs to',
+		description: 'The unique identifier of the audience this segment will belong to. Obtain from the List Audiences operation. Segments allow you to group contacts within an audience.',
 	},
 	{
 		displayName: 'Segment Name',
@@ -34,7 +35,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The name of the segment',
+		description: 'A descriptive name for the segment (e.g., Active Users, Premium Customers). Used to identify the segment when creating broadcasts.',
 	},
 	{
 		displayName: 'Filter (JSON)',
@@ -47,7 +48,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Filter conditions for the segment as JSON object',
+		description: 'Optional filter conditions as JSON object to automatically include contacts matching certain criteria. See Resend documentation for filter syntax.',
 	},
 ];
 

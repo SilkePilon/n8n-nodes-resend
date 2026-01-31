@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['delete'],
 			},
 		},
-		description: 'The ID of the webhook',
+		description: 'The unique identifier of the webhook to delete. This action is permanent and the webhook will immediately stop receiving events.',
 	},
 ];
 

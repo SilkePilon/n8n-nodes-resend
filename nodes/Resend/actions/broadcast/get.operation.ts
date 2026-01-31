@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['get'],
 			},
 		},
-		description: 'The ID of the broadcast',
+		description: 'The unique identifier of the broadcast to retrieve. Obtain from the Create Broadcast response or List Broadcasts operation. Returns full broadcast details including content and status.',
 	},
 ];
 

@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'aud_123456',
 		displayOptions: {
 			show: {
 				resource: ['audiences'],
 				operation: ['delete'],
 			},
 		},
-		description: 'The ID of the audience to delete',
+		description: 'The unique identifier of the audience to delete. This action is permanent and will also delete all contacts and segments within this audience.',
 	},
 ];
 

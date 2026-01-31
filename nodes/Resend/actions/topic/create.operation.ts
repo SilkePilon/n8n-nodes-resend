@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The name of the topic',
+		description: 'A descriptive name for the topic (e.g., Weekly Newsletter, Product Updates). Topics allow contacts to manage their email preferences.',
 	},
 	{
 		displayName: 'Default Subscription',
@@ -33,7 +33,7 @@ export const description: INodeProperties[] = [
 			{ name: 'Opt In', value: 'opt_in' },
 			{ name: 'Opt Out', value: 'opt_out' },
 		],
-		description: 'Default subscription preference for new contacts',
+		description: 'Default subscription status for new contacts. Opt In means contacts must explicitly subscribe; Opt Out means they are subscribed by default.',
 	},
 	{
 		displayName: 'Create Options',
@@ -53,7 +53,7 @@ export const description: INodeProperties[] = [
 				name: 'description',
 				type: 'string',
 				default: '',
-				description: 'Short description of the topic',
+				description: 'A brief description of the topic shown to contacts on the preference page. Helps them understand what emails they will receive.',
 			},
 			{
 				displayName: 'Visibility',
@@ -64,7 +64,7 @@ export const description: INodeProperties[] = [
 					{ name: 'Private', value: 'private' },
 					{ name: 'Public', value: 'public' },
 				],
-				description: 'Visibility on the unsubscribe page',
+				description: 'Whether the topic is visible on the unsubscribe page. Public topics let contacts manage their own subscriptions.',
 			},
 		],
 	},

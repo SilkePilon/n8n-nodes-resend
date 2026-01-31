@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'ae2014de-c168-4c61-8267-70d2662a1ce1',
 		displayOptions: {
 			show: {
 				resource: ['email'],
 				operation: ['getAttachment'],
 			},
 		},
-		description: 'The ID of the sent email',
+		description: 'The unique identifier of the sent email containing the attachment. Obtain from the Send Email response or List Emails operation.',
 	},
 	{
 		displayName: 'Attachment ID',
@@ -22,13 +23,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'att_123456',
 		displayOptions: {
 			show: {
 				resource: ['email'],
 				operation: ['getAttachment'],
 			},
 		},
-		description: 'The ID of the attachment to retrieve',
+		description: 'The unique identifier of the attachment to retrieve. Obtain from the List Attachments operation.',
 	},
 ];
 

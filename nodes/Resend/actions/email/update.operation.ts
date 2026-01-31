@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'The ID of the email to update',
+		description: 'The unique identifier of the scheduled email to update. Obtain from the Send Email response when scheduling emails for future delivery.',
 	},
 	{
 		displayName: 'Scheduled At',
@@ -30,7 +30,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'Schedule email to be sent later. The date should be in ISO 8601 format (e.g., 2024-08-05T11:52:01.858Z).',
+			'New scheduled delivery time for the email. Must be in ISO 8601 format (e.g., 2024-08-05T11:52:01.858Z). Only works for emails that have not yet been sent.',
 	},
 ];
 

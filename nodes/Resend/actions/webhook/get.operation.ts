@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['get'],
 			},
 		},
-		description: 'The ID of the webhook',
+		description: 'The unique identifier of the webhook to retrieve. Obtain from the Create Webhook response or List Webhooks operation. Returns webhook details including endpoint URL, events, and status.',
 	},
 ];
 

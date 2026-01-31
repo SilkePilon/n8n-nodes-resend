@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Key for the contact property (letters, numbers, underscores)',
+		description: 'Unique identifier for the property using lowercase letters, numbers, and underscores (e.g., company_name, signup_date). Used to reference the property when creating/updating contacts.',
 	},
 	{
 		displayName: 'Type',
@@ -33,7 +33,7 @@ export const description: INodeProperties[] = [
 			{ name: 'String', value: 'string' },
 			{ name: 'Number', value: 'number' },
 		],
-		description: 'Data type for the contact property',
+		description: 'The data type for this property. Use String for text values, Number for numeric values like quantities or prices.',
 	},
 	{
 		displayName: 'Fallback Value',
@@ -47,7 +47,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Default value when the property is not set on a contact',
+		description: 'Default value used in email templates when the property is not set for a contact. Ensures templates render correctly even with missing data.',
 	},
 ];
 

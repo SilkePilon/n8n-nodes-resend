@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The name of the template',
+		description: 'A descriptive name for the template (e.g., order-confirmation, welcome-email). Used for identification in the template list.',
 	},
 	{
 		displayName: 'From',
@@ -31,7 +31,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'Sender email address. To include a friendly name, use the format "Your Name &lt;sender@domain.com&gt;".',
+			'Default sender email address for emails using this template. Must be from a verified domain. Format: "Display Name &lt;email@domain.com&gt;".',
 	},
 	{
 		displayName: 'Subject',
@@ -46,7 +46,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Default subject line for the template',
+		description: 'Default subject line for emails using this template. Can include template variables like {{{PRODUCT_NAME}}}.',
 	},
 	{
 		displayName: 'HTML Content',
@@ -65,7 +65,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'HTML version of the template',
+		description: 'HTML content of the template. Use {{{VARIABLE|fallback}}} syntax for dynamic content. Variables are replaced when sending emails.',
 	},
 	{
 		displayName: 'Template Variables',
@@ -81,7 +81,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Define variables used in the template',
+		description: 'Define template variables that will be replaced when sending emails. Use uppercase names (e.g., PRODUCT, PRICE) for consistency.',
 		options: [
 			{
 				name: 'variables',
@@ -93,7 +93,7 @@ export const description: INodeProperties[] = [
 						type: 'string',
 						required: true,
 						default: '',
-						description: 'Variable name (we recommend uppercase, e.g. PRODUCT)',
+						description: 'Variable name used in the template with {{{NAME}}} syntax. Recommend using uppercase (e.g., PRODUCT, CUSTOMER_NAME).',
 					},
 					{
 						displayName: 'Type',
@@ -104,14 +104,14 @@ export const description: INodeProperties[] = [
 							{ name: 'String', value: 'string' },
 							{ name: 'Number', value: 'number' },
 						],
-						description: 'Variable data type',
+						description: 'The data type of the variable. Use Number for prices, quantities, or other numeric values.',
 					},
 					{
 						displayName: 'Fallback Value',
 						name: 'fallbackValue',
 						type: 'string',
 						default: '',
-						description: 'Fallback value used when a variable is not provided',
+						description: 'Default value displayed when the variable is not provided when sending the email. Use {{{VAR|fallback}}} in HTML.',
 					},
 				],
 			},

@@ -16,7 +16,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Public HTTPS URL where webhook events will be delivered',
+		description: 'The public HTTPS URL where Resend will send webhook event notifications. Must be accessible from the internet and use HTTPS.',
 	},
 	{
 		displayName: 'Events',
@@ -31,7 +31,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		options: webhookEventOptions,
-		description: 'Events that should trigger webhook delivery',
+		description: 'Select which email events should trigger webhook notifications. Common events include email.sent, email.delivered, email.opened, and email.bounced.',
 	},
 ];
 

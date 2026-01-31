@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The name of the audience',
+		description: 'A descriptive name for the audience (e.g., Newsletter Subscribers, Product Users). Audiences are containers for contacts and segments.',
 	},
 ];
 

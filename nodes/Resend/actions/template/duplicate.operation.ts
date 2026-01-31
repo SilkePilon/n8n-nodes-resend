@@ -14,7 +14,7 @@ export const description: INodeProperties[] = [
 				operation: ['duplicate'],
 			},
 		},
-		description: 'The ID or alias of the template to duplicate',
+		description: 'The unique identifier or alias of the template to duplicate. Obtain from the List Templates operation. Creates an exact copy with a new ID.',
 	},
 ];
 

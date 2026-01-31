@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'email_123456',
 		displayOptions: {
 			show: {
 				resource: ['receivingEmails'],
 				operation: ['get'],
 			},
 		},
-		description: 'The ID of the received email to retrieve',
+		description: 'The unique identifier of the received email to retrieve. Obtain from the List Receiving Emails operation or webhook payload. Returns full email details including sender, subject, body, and headers.',
 	},
 ];
 

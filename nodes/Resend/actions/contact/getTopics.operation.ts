@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'aud_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['getTopics'],
 			},
 		},
-		description: 'The ID of the audience the contact belongs to',
+		description: 'The unique identifier of the audience containing the contact. Obtain from the List Audiences operation.',
 	},
 	{
 		displayName: 'Contact ID',
@@ -22,13 +23,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'con_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['getTopics'],
 			},
 		},
-		description: 'The ID of the contact',
+		description: 'The unique identifier of the contact whose topic subscriptions to retrieve. Returns all topics and their subscription status.',
 	},
 	{
 		displayName: 'Return All',
@@ -41,7 +43,7 @@ export const description: INodeProperties[] = [
 				operation: ['getTopics'],
 			},
 		},
-		description: 'Whether to return all results or only up to a given limit',
+		description: 'Whether to return all topic subscriptions or only up to the specified limit. Set to true to retrieve all topics regardless of quantity.',
 	},
 	{
 		displayName: 'Limit',
@@ -58,7 +60,7 @@ export const description: INodeProperties[] = [
 				returnAll: [false],
 			},
 		},
-		description: 'Max number of results to return',
+		description: 'Maximum number of topic subscriptions to return. Use a smaller value for faster responses.',
 	},
 ];
 

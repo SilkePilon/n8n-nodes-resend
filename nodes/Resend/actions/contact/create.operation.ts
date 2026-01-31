@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The email address of the contact',
+		description: 'The email address for the new contact. This will be used for sending emails and must be unique within the audience.',
 	},
 	{
 		displayName: 'Create Fields',
@@ -35,14 +35,14 @@ export const description: INodeProperties[] = [
 				name: 'first_name',
 				type: 'string',
 				default: '',
-				description: 'The first name of the contact',
+				description: 'The contact\'s first name. Used for personalization in email templates.',
 			},
 			{
 				displayName: 'Last Name',
 				name: 'last_name',
 				type: 'string',
 				default: '',
-				description: 'The last name of the contact',
+				description: 'The contact\'s last name. Used for personalization in email templates.',
 			},
 			{
 				displayName: 'Properties',
@@ -52,6 +52,7 @@ export const description: INodeProperties[] = [
 				typeOptions: {
 					multipleValues: true,
 				},
+				description: 'Custom key-value properties to store additional contact information like company, role, or any custom data',
 				options: [
 					{
 						name: 'properties',
@@ -63,12 +64,14 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								required: true,
 								default: '',
+								description: 'The property name. Example: "company", "role", "plan".',
 							},
 							{
 								displayName: 'Value',
 								name: 'value',
 								type: 'string',
 								default: '',
+								description: 'The property value. Example: "Acme Inc", "Developer", "Pro".',
 							},
 						],
 					},
@@ -82,6 +85,7 @@ export const description: INodeProperties[] = [
 				typeOptions: {
 					multipleValues: true,
 				},
+				description: 'Assign the contact to one or more segments on creation',
 				options: [
 					{
 						name: 'segments',
@@ -93,6 +97,7 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								required: true,
 								default: '',
+								description: 'The unique identifier of the segment to add this contact to',
 							},
 						],
 					},
@@ -106,6 +111,7 @@ export const description: INodeProperties[] = [
 				typeOptions: {
 					multipleValues: true,
 				},
+				description: 'Set topic subscription preferences for the contact on creation',
 				options: [
 					{
 						name: 'topics',
@@ -117,15 +123,17 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								required: true,
 								default: '',
+								description: 'The unique identifier of the subscription topic',
 							},
 							{
 								displayName: 'Subscription',
 								name: 'subscription',
 								type: 'options',
 								default: 'opt_in',
+								description: 'Whether the contact is subscribed (opt_in) or unsubscribed (opt_out) from this topic',
 								options: [
-									{ name: 'Opt In', value: 'opt_in' },
-									{ name: 'Opt Out', value: 'opt_out' },
+									{ name: 'Opt In', value: 'opt_in', description: 'Contact wants to receive emails on this topic' },
+									{ name: 'Opt Out', value: 'opt_out', description: 'Contact does not want emails on this topic' },
 								],
 							},
 						],
@@ -137,7 +145,7 @@ export const description: INodeProperties[] = [
 				name: 'unsubscribed',
 				type: 'boolean',
 				default: false,
-				description: 'Whether the contact is unsubscribed from emails',
+				description: 'Whether the contact is globally unsubscribed from all emails. Set to true to prevent all email delivery to this contact.',
 			},
 		],
 	},

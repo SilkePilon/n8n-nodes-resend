@@ -17,7 +17,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'Sender email address. To include a friendly name, use the format "Your Name &lt;sender@domain.com&gt;".',
+			'The sender email address that will appear in the "From" field. Must be from a verified domain. To include a display name, use format "Your Name &lt;sender@domain.com&gt;". Example: "Support Team &lt;support@company.com&gt;".',
 	},
 	{
 		displayName: 'To',
@@ -32,7 +32,7 @@ export const description: INodeProperties[] = [
 				operation: ['send'],
 			},
 		},
-		description: 'Recipient email address. For multiple addresses, separate with commas (max 50).',
+		description: 'The recipient email address(es) to send the email to. For multiple recipients, separate addresses with commas. Maximum 50 recipients per email. Example: "user1@example.com, user2@example.com".',
 	},
 	{
 		displayName: 'Subject',
@@ -47,7 +47,7 @@ export const description: INodeProperties[] = [
 				operation: ['send'],
 			},
 		},
-		description: 'Email subject line',
+		description: 'The email subject line that recipients will see. Keep it concise and descriptive.',
 	},
 	{
 		displayName: 'Use Template',
@@ -60,7 +60,7 @@ export const description: INodeProperties[] = [
 				operation: ['send'],
 			},
 		},
-		description: 'Whether to send using a published template instead of HTML/Text content',
+		description: 'Whether to use a pre-built email template instead of providing HTML/Text content directly. Templates allow reusable designs with dynamic variables.',
 	},
 	{
 		displayName: 'Email Format',
@@ -70,17 +70,17 @@ export const description: INodeProperties[] = [
 			{
 				name: 'HTML',
 				value: 'html',
-				description: 'Send email with HTML content',
+				description: 'Send email with rich HTML formatting including images, links, and styled text',
 			},
 			{
 				name: 'HTML and Text',
 				value: 'both',
-				description: 'Send email with both HTML and text content',
+				description: 'Send both HTML and plain text versions for maximum compatibility across email clients',
 			},
 			{
 				name: 'Text',
 				value: 'text',
-				description: 'Send email with plain text content',
+				description: 'Send plain text email without formatting for simple messages',
 			},
 		],
 		default: 'html',
@@ -92,7 +92,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'Choose the format for your email content. HTML allows rich formatting, text is simple and universally compatible.',
+			'Choose the content format for your email. HTML enables rich formatting, text is simple and universally compatible, both provides a fallback.',
 	},
 	{
 		displayName: 'Template Name or ID',
@@ -178,7 +178,7 @@ export const description: INodeProperties[] = [
 				useTemplate: [false],
 			},
 		},
-		description: 'HTML version of the email content',
+		description: 'The HTML body of the email. Supports full HTML including inline CSS, images (via URLs or cid: for inline attachments), tables, and links. Example: "&lt;h1&gt;Welcome&lt;/h1&gt;&lt;p&gt;Hello {{name}}!&lt;/p&gt;".',
 	},
 	{
 		displayName: 'Text Content',
@@ -198,7 +198,7 @@ export const description: INodeProperties[] = [
 				useTemplate: [false],
 			},
 		},
-		description: 'Plain text version of the email content',
+		description: 'The plain text version of the email body. Used as fallback for email clients that cannot display HTML, or as the primary content for text-only emails.',
 	},
 	{
 		displayName: 'Additional Options',
@@ -221,7 +221,7 @@ export const description: INodeProperties[] = [
 				typeOptions: {
 					multipleValues: true,
 				},
-				description: 'Email attachments (not supported with scheduled emails)',
+				description: 'Add file attachments to the email. Can be binary data from previous nodes or remote URLs. Note: Attachments are not supported with scheduled emails.',
 				options: [
 					{
 						name: 'attachments',
@@ -236,12 +236,12 @@ export const description: INodeProperties[] = [
 									{
 										name: 'Binary Data',
 										value: 'binaryData',
-										description: 'Use binary data from previous node',
+										description: 'Use binary file data from a previous node in the workflow',
 									},
 									{
 										name: 'Remote URL',
 										value: 'url',
-										description: 'Use a URL to a remote file',
+										description: 'Download and attach a file from a public URL',
 									},
 								],
 							},
@@ -251,7 +251,7 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								default: 'data',
 								placeholder: 'data',
-								description: 'Name of the binary property which contains the file data',
+								description: 'The name of the binary property containing the file data. Default is "data" which is the standard output from file nodes.',
 								displayOptions: {
 									show: {
 										attachmentType: ['binaryData'],
@@ -264,7 +264,7 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								default: '',
 								placeholder: 'image-1',
-								description: 'Content ID for embedding inline attachments via cid:',
+								description: 'Content ID for embedding images inline in HTML using cid: references. Example: Use "logo" here and reference it in HTML as &lt;img src="cid:logo"&gt;.',
 							},
 							{
 								displayName: 'Content Type',
@@ -272,7 +272,7 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								default: '',
 								placeholder: 'image/png',
-								description: 'Content type for the attachment',
+								description: 'The MIME type of the attachment. Examples: "application/pdf", "image/png", "image/jpeg", "text/csv".',
 							},
 							{
 								displayName: 'File Name',
@@ -280,7 +280,7 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								default: '',
 								placeholder: 'document.pdf',
-								description: 'Name for the attached file (required for both binary data and URL)',
+								description: 'The filename that will appear for the attachment in the email. Required for both binary data and URL attachments.',
 							},
 							{
 								displayName: 'File URL',
@@ -288,7 +288,7 @@ export const description: INodeProperties[] = [
 								type: 'string',
 								default: '',
 								placeholder: 'https://example.com/file.pdf',
-								description: 'URL to the remote file',
+								description: 'The publicly accessible URL to download the file from. Must be a direct link to the file.',
 								displayOptions: {
 									show: {
 										attachmentType: ['url'],
@@ -304,14 +304,14 @@ export const description: INodeProperties[] = [
 				name: 'bcc',
 				type: 'string',
 				default: '',
-				description: 'BCC recipient email addresses (comma-separated)',
+				description: 'Blind carbon copy recipients who will receive the email without other recipients seeing them. Comma-separated for multiple addresses.',
 			},
 			{
 				displayName: 'CC',
 				name: 'cc',
 				type: 'string',
 				default: '',
-				description: 'CC recipient email addresses (comma-separated)',
+				description: 'Carbon copy recipients who will be visible to all recipients. Comma-separated for multiple addresses.',
 			},
 			{
 				displayName: 'Headers',
@@ -342,21 +342,21 @@ export const description: INodeProperties[] = [
 						],
 					},
 				],
-				description: 'Custom headers to add to the email',
+				description: 'Custom email headers to include in the message. Useful for tracking, thread management, or custom metadata.',
 			},
 			{
 				displayName: 'Reply To',
 				name: 'reply_to',
 				type: 'string',
 				default: '',
-				description: 'Reply-to email address. For multiple addresses, use comma-separated values.',
+				description: 'The email address where replies should be sent. Use this if you want replies to go to a different address than the sender. Comma-separated for multiple addresses.',
 			},
 			{
 				displayName: 'Scheduled At',
 				name: 'scheduled_at',
 				type: 'string',
 				default: '',
-				description: 'Schedule email to be sent later (e.g., "in 1 min" or ISO 8601 format)',
+				description: 'Schedule the email to be sent at a future time. Accepts natural language like "in 1 hour" or ISO 8601 format "2024-12-25T09:00:00Z". Note: Cannot use attachments with scheduled emails.',
 			},
 			{
 				displayName: 'Tags',
@@ -388,14 +388,14 @@ export const description: INodeProperties[] = [
 						],
 					},
 				],
-				description: 'Tags to attach to the email',
+				description: 'Key-value tags to categorize and track emails. Useful for analytics and filtering. Example: name="campaign", value="welcome-series".',
 			},
 			{
 				displayName: 'Topic ID',
 				name: 'topic_id',
 				type: 'string',
 				default: '',
-				description: 'Topic ID to scope the email to',
+				description: 'Associate this email with a specific subscription topic. Used for managing email preferences and unsubscribe handling.',
 			},
 		],
 	},

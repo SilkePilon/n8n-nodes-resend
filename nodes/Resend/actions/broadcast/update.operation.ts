@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'The ID of the broadcast',
+		description: 'The unique identifier of the broadcast to update. Only unsent broadcasts can be modified. Obtain from the Create Broadcast response.',
 	},
 	{
 		displayName: 'Update Fields',
@@ -36,8 +36,8 @@ export const description: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'you@example.com',
-				description: 'Sender email address',
-			},
+			description: 'Sender email address for the broadcast. Must be from a verified domain. Format: "Name &lt;email@domain.com&gt;" or just "email@domain.com".',
+		},
 			{
 				displayName: 'HTML Content',
 				name: 'html',
@@ -47,7 +47,7 @@ export const description: INodeProperties[] = [
 					multiline: true,
 				},
 				placeholder: '<p>Your HTML content here</p>',
-				description: 'The HTML version of the message',
+				description: 'The HTML body of the broadcast email. Use {{{VARIABLE|fallback}}} for personalization and include {{{RESEND_UNSUBSCRIBE_URL}}} for the required unsubscribe link.',
 			},
 			{
 				displayName: 'Name',
@@ -71,7 +71,7 @@ export const description: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'seg_123456',
-				description: 'The ID of the segment you want to send to',
+				description: 'The unique identifier of the segment to target. All contacts in this segment will receive the broadcast. Obtain from the List Segments operation.',
 			},
 			{
 				displayName: 'Subject',
@@ -79,7 +79,7 @@ export const description: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'Newsletter Subject',
-				description: 'Email subject',
+				description: 'Email subject line. Keep concise and compelling to maximize open rates.',
 			},
 			{
 				displayName: 'Text Content',
@@ -90,7 +90,7 @@ export const description: INodeProperties[] = [
 					multiline: true,
 				},
 				placeholder: 'Your plain text content here',
-				description: 'The plain text version of the message',
+				description: 'Plain text version of the email for clients that do not support HTML. If omitted, Resend will auto-generate from HTML.',
 			},
 			{
 				displayName: 'Topic ID',
