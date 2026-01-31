@@ -16,7 +16,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'The ID of the webhook',
+		description: 'The unique identifier of the webhook to update. Obtain from the Create Webhook response or List Webhooks operation.',
 	},
 	{
 		displayName: 'Update Fields',
@@ -37,7 +37,7 @@ export const description: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'https://example.com/webhooks/resend',
-				description: 'Public HTTPS URL where webhook events will be delivered',
+				description: 'New HTTPS URL where Resend will send webhook event notifications. Must be accessible from the internet.',
 			},
 			{
 				displayName: 'Events',
@@ -45,7 +45,7 @@ export const description: INodeProperties[] = [
 				type: 'multiOptions',
 				default: ['email.sent'],
 				options: webhookEventOptions,
-				description: 'Events that should trigger webhook delivery',
+				description: 'Update which email events should trigger webhook notifications.',
 			},
 			{
 				displayName: 'Status',
@@ -56,7 +56,7 @@ export const description: INodeProperties[] = [
 					{ name: 'Enabled', value: 'enabled' },
 					{ name: 'Disabled', value: 'disabled' },
 				],
-				description: 'Whether the webhook should be enabled or disabled',
+				description: 'Enable or disable the webhook. Disabled webhooks will not receive any event notifications.',
 			},
 		],
 	},

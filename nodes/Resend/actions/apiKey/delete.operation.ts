@@ -16,7 +16,7 @@ export const description: INodeProperties[] = [
 				operation: ['delete'],
 			},
 		},
-		description: 'The ID of the API key to delete',
+		description: 'The unique identifier of the API key to delete. This action is permanent and the key will immediately stop working. Obtain from the List API Keys operation.',
 	},
 ];
 

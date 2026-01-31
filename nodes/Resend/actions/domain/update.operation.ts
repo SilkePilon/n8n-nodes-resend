@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'The ID of the domain',
+		description: 'The unique identifier of the domain to update. Obtain from the Create Domain response or List Domains operation.',
 	},
 	{
 		displayName: 'Domain Update Options',

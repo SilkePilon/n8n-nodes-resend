@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'aud_123456',
 		displayOptions: {
 			show: {
 				resource: ['audiences'],
 				operation: ['get'],
 			},
 		},
-		description: 'The ID of the audience to retrieve',
+		description: 'The unique identifier of the audience to retrieve. Obtain from the Create Audience response or List Audiences operation. Returns audience details including name and creation date.',
 	},
 ];
 

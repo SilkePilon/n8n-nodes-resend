@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['delete'],
 			},
 		},
-		description: 'The ID of the contact property',
+		description: 'The unique identifier of the contact property to delete. This action is permanent and will remove the property from all contacts.',
 	},
 ];
 

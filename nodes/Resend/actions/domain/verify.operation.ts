@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['verify'],
 			},
 		},
-		description: 'The ID of the domain',
+		description: 'The unique identifier of the domain to verify. Triggers a verification check for the domain. Make sure DNS records are configured correctly before verifying.',
 	},
 ];
 

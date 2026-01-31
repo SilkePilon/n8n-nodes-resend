@@ -18,7 +18,7 @@ export const description: INodeProperties[] = [
 				operation: ['sendBatch'],
 			},
 		},
-		description: 'Array of emails to send (max 100)',
+		description: 'Array of emails to send in a single API call. Maximum 100 emails per batch. Each email can have different recipients, content, and options.',
 		options: [
 			{
 				name: 'emails',
@@ -50,12 +50,12 @@ export const description: INodeProperties[] = [
 																	{
 																		name: 'Binary Data',
 																		value: 'binaryData',
-																		description: 'Use binary data from previous node',
+																		description: 'Use binary data from a previous node (e.g., Read File, HTTP Request)',
 																	},
 																	{
 																		name: 'Remote URL',
 																		value: 'url',
-																		description: 'Use a URL to a remote file',
+																		description: 'Use a publicly accessible URL to fetch the file for attachment',
 																	},
 																]
 													},
@@ -65,7 +65,7 @@ export const description: INodeProperties[] = [
 														type: 'string',
 														default: 'data',
 														placeholder: 'data',
-														description: 'Name of the binary property',
+														description: 'Name of the binary property containing the file. Usually "data" from Read File or HTTP Request nodes.',
 													},
 													{
 														displayName: 'Content ID',
@@ -73,7 +73,7 @@ export const description: INodeProperties[] = [
 														type: 'string',
 														default: '',
 														placeholder: 'image-1',
-														description: 'Content ID for inline attachments',
+														description: 'Content ID for inline images. Reference in HTML as &lt;img src="cid:image-1"&gt;.',
 													},
 													{
 														displayName: 'Content Type',
@@ -81,7 +81,7 @@ export const description: INodeProperties[] = [
 														type: 'string',
 														default: '',
 														placeholder: 'application/pdf',
-														description: 'Content type for the attachment',
+														description: 'MIME type of the attachment (e.g., application/pdf). Auto-detected if not specified.',
 													},
 													{
 														displayName: 'File Name',
@@ -89,7 +89,7 @@ export const description: INodeProperties[] = [
 														type: 'string',
 														default: '',
 														placeholder: 'document.pdf',
-														description: 'Name for the attached file',
+														description: 'Filename shown to the recipient. Required for all attachments.',
 													},
 													{
 														displayName: 'File URL',
@@ -97,26 +97,26 @@ export const description: INodeProperties[] = [
 														type: 'string',
 														default: '',
 														placeholder: 'https://example.com/file.pdf',
-														description: 'URL to the remote file',
+														description: 'Publicly accessible URL to the file. Resend will download and attach it.',
 													},
 													]
 											},
 									],
-								description: 'Email attachments',
+								description: 'File attachments. Use Binary Data for files from previous nodes or Remote URL for web files.',
 							},
 							{
 								displayName: 'BCC',
 								name: 'bcc',
 								type: 'string',
 								default: '',
-								description: 'BCC recipient email addresses (comma-separated)',
+								description: 'Blind carbon copy recipients. Comma-separated. Recipients will not see other BCC addresses.',
 							},
 							{
 								displayName: 'CC',
 								name: 'cc',
 								type: 'string',
 								default: '',
-								description: 'CC recipient email addresses (comma-separated)',
+								description: 'Carbon copy recipients. Comma-separated. All recipients will see CC addresses.',
 							},
 							{
 								displayName: 'Headers',
@@ -144,14 +144,14 @@ export const description: INodeProperties[] = [
 													]
 											},
 									],
-								description: 'Custom headers to add to the email',
+								description: 'Custom email headers for advanced use cases like email threading or tracking.',
 							},
 							{
 								displayName: 'Reply To',
 								name: 'reply_to',
 								type: 'string',
 								default: '',
-								description: 'Reply-to email address',
+								description: 'Email address where replies should be sent. Can be different from the sender address.',
 							},
 							{
 								displayName: 'Tags',
@@ -180,14 +180,14 @@ export const description: INodeProperties[] = [
 													]
 											},
 									],
-								description: 'Tags to attach to the email',
+								description: 'Key-value tags for email categorization and analytics. Use for tracking campaigns or custom metadata.',
 							},
 							{
 								displayName: 'Topic ID',
 								name: 'topic_id',
 								type: 'string',
 								default: '',
-								description: 'Topic ID to scope the email to',
+								description: 'Topic identifier for subscription preferences. Obtain from the List Topics operation.',
 							},
 					]
 					},
@@ -199,21 +199,21 @@ export const description: INodeProperties[] = [
 							{
 								name: 'HTML',
 								value: 'html',
-								description: 'Send email with HTML content',
+								description: 'Send email with HTML content only. Plain text auto-generated.',
 							},
 							{
 								name: 'HTML and Text',
 								value: 'both',
-								description: 'Send email with both HTML and text content',
+								description: 'Send email with both HTML and custom plain text.',
 							},
 							{
 								name: 'Text',
 								value: 'text',
-								description: 'Send email with plain text content',
+								description: 'Send email with plain text content only.',
 							},
 					],
 						default: 'html',
-						description: 'Choose the format for your email content',
+						description: 'Choose the content format for your email. HTML recommended for rich formatting.',
 					},
 					{
 						displayName: 'From',
@@ -222,14 +222,14 @@ export const description: INodeProperties[] = [
 							required:	true,
 						default: '',
 						placeholder: 'you@example.com',
-						description: 'Sender email address',
+						description: 'Sender email address. Must be from a verified domain. Format: "Name &lt;email@domain.com&gt;" or just email.',
 					},
 					{
 						displayName: 'HTML Content',
 						name: 'html',
 						type: 'string',
 						default: '',
-						description: 'HTML content of the email',
+						description: 'HTML body of the email. Use for rich formatting, images, and links.',
 						placeholder: '<p>Your HTML content here</p>',
 					},
 					{
@@ -239,7 +239,7 @@ export const description: INodeProperties[] = [
 							required:	true,
 						default: '',
 						placeholder: 'Hello from n8n!',
-						description: 'Email subject',
+						description: 'Email subject line. Keep concise and descriptive.',
 					},
 					{
 						displayName: 'Template Name or ID',
@@ -247,14 +247,14 @@ export const description: INodeProperties[] = [
 						type: 'string',
 						default: '',
 						placeholder: '34a080c9-b17d-4187-ad80-5af20266e535',
-						description: 'Template ID or alias',
+						description: 'Template ID or alias to use instead of HTML content. Obtain from List Templates operation.',
 					},
 					{
 						displayName: 'Template Variables',
 						name: 'templateVariables',
 						type: 'fixedCollection',
 						default: {},
-						description: 'Variables to render the template with',
+						description: 'Key-value pairs to replace template placeholders. Keys must match the template variable names.',
 						options: [
 							{
 								name: 'variables',
@@ -266,14 +266,14 @@ export const description: INodeProperties[] = [
 												type: 'string',
 													required:	true,
 												default: '',
-												description: 'Template variable name',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Value for the template variable',
+											description: 'Variable name as defined in the template (e.g., FIRST_NAME, PRODUCT_NAME).',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'The value to replace the variable placeholder with.',
 											},
 									]
 							},

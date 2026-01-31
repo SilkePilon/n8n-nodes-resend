@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['get'],
 			},
 		},
-		description: 'The ID of the domain',
+		description: 'The unique identifier of the domain to retrieve. Obtain from the Create Domain response or List Domains operation. Returns domain details including verification status and DNS records.',
 	},
 ];
 

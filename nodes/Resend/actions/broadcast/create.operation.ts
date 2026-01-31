@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The ID of the segment for this broadcast',
+		description: 'The unique identifier of the segment to target with this broadcast. Obtain from the List Segments operation. All contacts in this segment will receive the broadcast.',
 	},
 	{
 		displayName: 'From',
@@ -31,7 +31,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'Sender email address. To include a friendly name, use the format "Your Name &lt;sender@domain.com&gt;".',
+			'Sender email address for the broadcast. Must be from a verified domain. To include a friendly name, use the format "Your Name &lt;sender@domain.com&gt;".',
 	},
 	{
 		displayName: 'Subject',
@@ -46,7 +46,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'Email subject',
+		description: 'The subject line of the broadcast email. Keep it concise and compelling to maximize open rates.',
 	},
 	{
 		displayName: 'HTML Content',
@@ -66,7 +66,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'The HTML version of the message. You can use variables like {{{FIRST_NAME|fallback}}} and {{{RESEND_UNSUBSCRIBE_URL}}}.',
+			'The HTML content of the broadcast email. Use variables like {{{FIRST_NAME|fallback}}} for personalization and {{{RESEND_UNSUBSCRIBE_URL}}} for the required unsubscribe link.',
 	},
 	{
 		displayName: 'Create Options',
@@ -106,7 +106,7 @@ export const description: INodeProperties[] = [
 					multiline: true,
 				},
 				placeholder: 'Your plain text content here',
-				description: 'The plain text version of the message',
+				description: 'Plain text version of the email for clients that do not support HTML. If omitted, Resend will auto-generate from the HTML content.',
 			},
 			{
 				displayName: 'Topic ID',

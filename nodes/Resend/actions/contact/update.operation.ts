@@ -17,7 +17,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'Choose whether to update the contact by ID or email address',
+		description: 'Choose how to identify the contact: by their unique ID or their email address. Use ID for precise matching, email for convenience.',
 	},
 	{
 		displayName: 'Contact ID',
@@ -33,7 +33,7 @@ export const description: INodeProperties[] = [
 				updateBy: ['id'],
 			},
 		},
-		description: 'The ID of the contact to update',
+		description: 'The unique identifier of the contact to update. Obtain from the List Contacts or Create Contact operation.',
 	},
 	{
 		displayName: 'Contact Email',
@@ -49,7 +49,7 @@ export const description: INodeProperties[] = [
 				updateBy: ['email'],
 			},
 		},
-		description: 'The email address of the contact to update',
+		description: 'The email address of the contact to update. Must be an existing contact in Resend.',
 	},
 	{
 		displayName: 'Update Fields',
@@ -69,21 +69,21 @@ export const description: INodeProperties[] = [
 				name: 'first_name',
 				type: 'string',
 				default: '',
-				description: 'The first name of the contact',
+				description: 'The first name of the contact. Can be used in email personalization with {{{FIRST_NAME}}} variable.',
 			},
 			{
 				displayName: 'Last Name',
 				name: 'last_name',
 				type: 'string',
 				default: '',
-				description: 'The last name of the contact',
+				description: 'The last name of the contact. Can be used in email personalization with {{{LAST_NAME}}} variable.',
 			},
 			{
 				displayName: 'Unsubscribed',
 				name: 'unsubscribed',
 				type: 'boolean',
 				default: false,
-				description: 'Whether the contact is unsubscribed from emails',
+				description: "Whether the contact is unsubscribed from emails. Set to true to prevent future emails from being sent to this contact.",
 			},
 			{
 				displayName: 'Properties',

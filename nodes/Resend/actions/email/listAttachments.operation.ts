@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'ae2014de-c168-4c61-8267-70d2662a1ce1',
 		displayOptions: {
 			show: {
 				resource: ['email'],
 				operation: ['listAttachments'],
 			},
 		},
-		description: 'The ID of the sent email',
+		description: 'The unique identifier of the sent email whose attachments to list. Obtain from the Send Email response or List Emails operation.',
 	},
 	{
 		displayName: 'Return All',
@@ -27,7 +28,7 @@ export const description: INodeProperties[] = [
 				operation: ['listAttachments'],
 			},
 		},
-		description: 'Whether to return all results or only up to a given limit',
+		description: 'Whether to return all attachments or only up to the specified limit. Set to true to retrieve all attachments regardless of quantity.',
 	},
 	{
 		displayName: 'Limit',
@@ -44,7 +45,7 @@ export const description: INodeProperties[] = [
 				returnAll: [false],
 			},
 		},
-		description: 'Max number of results to return',
+		description: 'Maximum number of attachments to return. Use a smaller value for faster responses.',
 	},
 ];
 

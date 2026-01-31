@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['retrieve'],
 			},
 		},
-		description: 'The ID of the email to retrieve',
+		description: 'The unique identifier of the email to retrieve details for. Obtain from the Send Email response or List Emails operation. Returns email metadata including delivery status, timestamps, and recipient information.',
 	},
 ];
 

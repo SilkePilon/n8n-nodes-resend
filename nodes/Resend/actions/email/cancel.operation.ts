@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['cancel'],
 			},
 		},
-		description: 'The ID of the email to cancel',
+		description: 'The unique identifier of the scheduled email to cancel. Only works for emails that have been scheduled for future delivery and have not yet been sent.',
 	},
 ];
 

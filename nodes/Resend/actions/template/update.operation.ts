@@ -39,14 +39,14 @@ export const description: INodeProperties[] = [
 				name: 'alias',
 				type: 'string',
 				default: '',
-				description: 'Template alias',
+				description: 'A human-readable shortcut to reference the template instead of its UUID. Use lowercase letters, numbers, and hyphens.',
 			},
 			{
 				displayName: 'From',
 				name: 'from',
 				type: 'string',
 				default: '',
-				description: 'Sender email address',
+				description: 'Default sender email address. Must be from a verified domain. Format: "Name &lt;email@domain.com&gt;" or just email.',
 			},
 			{
 				displayName: 'HTML Content',
@@ -57,14 +57,14 @@ export const description: INodeProperties[] = [
 					multiline: true,
 					rows: 4,
 				},
-				description: 'HTML content of the template',
+				description: 'HTML body of the template. Use {{VARIABLE_NAME}} syntax for dynamic content.',
 			},
 			{
 				displayName: 'Name',
 				name: 'name',
 				type: 'string',
 				default: '',
-				description: 'Template name',
+				description: 'Internal display name for the template. Used to identify templates in Resend dashboard.',
 			},
 			{
 				displayName: 'Reply To',
@@ -78,7 +78,7 @@ export const description: INodeProperties[] = [
 				name: 'subject',
 				type: 'string',
 				default: '',
-				description: 'Default subject line for the template',
+				description: 'Default subject line for emails using this template. Can include {{VARIABLE}} placeholders for personalization.',
 			},
 			{
 				displayName: 'Text Content',
@@ -108,7 +108,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'Define variables used in the template',
+		description: 'Define variables used in the template. These become placeholders that get replaced with actual values when sending emails using the Send Email or Send Batch operation.',
 		options: [
 			{
 				name: 'variables',
@@ -131,7 +131,7 @@ export const description: INodeProperties[] = [
 							{ name: 'String', value: 'string' },
 							{ name: 'Number', value: 'number' },
 						],
-						description: 'Variable data type',
+						description: 'Data type of the variable. Use String for text values (names, messages) or Number for numeric values (prices, quantities).',
 					},
 					{
 						displayName: 'Fallback Value',

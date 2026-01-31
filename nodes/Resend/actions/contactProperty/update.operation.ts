@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['update'],
 			},
 		},
-		description: 'The ID of the contact property',
+		description: 'The unique identifier of the contact property to update. Obtain from the List Contact Properties operation.',
 	},
 	{
 		displayName: 'Update Fields',
@@ -36,7 +36,7 @@ export const description: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'Acme Corp',
-				description: 'Default value when the property is not set on a contact',
+				description: 'New default value used in email templates when the property is not set on a contact.',
 			},
 		],
 	},

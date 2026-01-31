@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['delete'],
 			},
 		},
-		description: 'The ID of the broadcast',
+		description: 'The unique identifier of the broadcast to delete. This action is permanent and cannot be undone. Only unsent broadcasts can be deleted.',
 	},
 ];
 

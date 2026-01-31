@@ -15,7 +15,7 @@ export const description: INodeProperties[] = [
 				operation: ['delete'],
 			},
 		},
-		description: 'The ID of the domain',
+		description: 'The unique identifier of the domain to remove from Resend. This action is permanent. You will no longer be able to send emails from this domain.',
 	},
 ];
 

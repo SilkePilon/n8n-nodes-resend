@@ -37,8 +37,9 @@ export class Resend implements INodeType {
 		},
 		group: ['output'],
 		version: 1,
+		usableAsTool: true,
 		description:
-			'Interact with Resend API for emails, templates, domains, API keys, broadcasts, segments, topics, contacts, contact properties, and webhooks',
+			'Send emails, manage contacts, create broadcasts, handle templates, domains, API keys, segments, topics, and webhooks using the Resend email platform',
 		subtitle:
 			'={{(() => { const resourceLabels = { apiKeys: "api key", audiences: "audience", broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
 		defaults: {
@@ -65,62 +66,62 @@ export class Resend implements INodeType {
 					{
 						name: 'API Key',
 						value: 'apiKeys',
-						description: 'Manage API keys',
+						description: 'Create, list, or delete API keys for authenticating with the Resend API',
 					},
 					{
 						name: 'Audience',
 						value: 'audiences',
-						description: 'Manage audiences',
+						description: 'Create, get, list, or delete audiences (contact lists) for organizing email recipients',
 					},
 					{
 						name: 'Broadcast',
 						value: 'broadcasts',
-						description: 'Manage email broadcasts',
+						description: 'Create, send, update, or delete email broadcasts to reach multiple contacts at once',
 					},
 					{
 						name: 'Contact',
 						value: 'contacts',
-						description: 'Manage contacts',
+						description: 'Add, update, delete, or list contacts (email subscribers) and manage their segment and topic memberships',
 					},
 					{
 						name: 'Contact Property',
 						value: 'contactProperties',
-						description: 'Manage contact properties',
+						description: 'Create, update, delete, or list custom contact properties (metadata fields) for storing additional contact information',
 					},
 					{
 						name: 'Domain',
 						value: 'domains',
-						description: 'Manage email domains',
+						description: 'Add, verify, update, or delete sending domains for email authentication and deliverability',
 					},
 					{
 						name: 'Email',
 						value: 'email',
-						description: 'Send and manage emails',
+						description: 'Send single or batch emails, retrieve sent emails, cancel scheduled emails, or manage email attachments',
 					},
 					{
 						name: 'Receiving Email',
 						value: 'receivingEmails',
-						description: 'Manage received emails and attachments',
+						description: 'List and retrieve received emails and their attachments from inbound email processing',
 					},
 					{
 						name: 'Segment',
 						value: 'segments',
-						description: 'Manage contact segments',
+						description: 'Create, update, delete, or list contact segments for grouping contacts based on criteria',
 					},
 					{
 						name: 'Template',
 						value: 'templates',
-						description: 'Manage email templates',
+						description: 'Create, update, publish, duplicate, or delete reusable email templates with dynamic variables',
 					},
 					{
 						name: 'Topic',
 						value: 'topics',
-						description: 'Manage subscription topics',
+						description: 'Create, update, delete, or list subscription topics for managing email preferences',
 					},
 					{
 						name: 'Webhook',
 						value: 'webhooks',
-						description: 'Manage webhooks',
+						description: 'Create, update, delete, or list webhooks for receiving real-time notifications about email events',
 					},
 				],
 				default: 'email',

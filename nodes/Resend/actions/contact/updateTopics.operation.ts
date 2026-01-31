@@ -8,13 +8,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'aud_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['updateTopics'],
 			},
 		},
-		description: 'The ID of the audience the contact belongs to',
+		description: 'The unique identifier of the audience containing the contact. Obtain from the List Audiences operation.',
 	},
 	{
 		displayName: 'Contact ID',
@@ -22,13 +23,14 @@ export const description: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
+		placeholder: 'con_123456',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['updateTopics'],
 			},
 		},
-		description: 'The ID of the contact',
+		description: 'The unique identifier of the contact whose topic subscriptions to update. Allows subscribing or unsubscribing from multiple topics.',
 	},
 	{
 		displayName: 'Topics',
@@ -56,7 +58,8 @@ export const description: INodeProperties[] = [
 						type: 'string',
 						required: true,
 						default: '',
-						description: 'The ID of the topic',
+						placeholder: 'topic_123456',
+						description: 'The unique identifier of the topic. Obtain from the List Topics operation.',
 					},
 					{
 						displayName: 'Subscribed',
@@ -64,12 +67,12 @@ export const description: INodeProperties[] = [
 						type: 'boolean',
 						required: true,
 						default: true,
-						description: 'Whether the contact should be subscribed to this topic',
+						description: 'Whether the contact should be subscribed (true) or unsubscribed (false) from this topic. Unsubscribed contacts will not receive emails scoped to this topic.',
 					},
 				],
 			},
 		],
-		description: 'Topics to update for the contact',
+		description: 'List of topics to update subscription status for. Each topic requires its ID and a boolean subscribed value.',
 	},
 ];
 

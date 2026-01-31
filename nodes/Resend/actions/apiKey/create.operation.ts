@@ -16,7 +16,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The name of the API key to create',
+		description: 'A descriptive name for the API key (e.g., Production Emails, Dev Testing). Helps identify the key in the dashboard.',
 	},
 	{
 		displayName: 'Permission',
@@ -33,7 +33,7 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The permission level for the API key',
+		description: 'Permission level for the API key. Full Access allows all operations; Sending Access only allows sending emails (optionally restricted to a specific domain).',
 	},
 	{
 		displayName: 'Domain ID',
@@ -49,7 +49,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 		description:
-			'Restrict an API key to send emails only from a specific domain. This is only used when the permission is set to sending access.',
+			'Optional: Restrict this API key to only send emails from a specific verified domain. Obtain the Domain ID from the List Domains operation.',
 	},
 ];
 
