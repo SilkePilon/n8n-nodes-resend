@@ -4,7 +4,7 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	createDynamicIdField({
-		fieldName: 'templateId',
+		fieldName: 'templateIdDuplicate',
 		resourceName: 'template',
 		displayName: 'Template',
 		required: true,
@@ -23,7 +23,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = resolveDynamicIdValue(this, 'templateId', index);
+	const templateId = resolveDynamicIdValue(this, 'templateIdDuplicate', index);
 
 	const response = await apiRequest.call(
 		this,

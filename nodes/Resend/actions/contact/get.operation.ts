@@ -4,6 +4,20 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	createDynamicIdField({
+		fieldName: 'audienceIdGet',
+		resourceName: 'audience',
+		displayName: 'Audience',
+		required: true,
+		placeholder: 'aud_123456',
+		description: 'The audience containing the contact. Contacts are scoped to audiences.',
+		displayOptions: {
+			show: {
+				resource: ['contacts'],
+				operation: ['get'],
+			},
+		},
+	}),
+	createDynamicIdField({
 		fieldName: 'contactIdentifier',
 		resourceName: 'contact',
 		displayName: 'Contact',
@@ -23,9 +37,10 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
+	const audienceId = resolveDynamicIdValue(this, 'audienceIdGet', index);
 	const contactIdentifier = resolveDynamicIdValue(this, 'contactIdentifier', index);
 
-	const response = await apiRequest.call(this, 'GET', `/contacts/${contactIdentifier}`);
+	const response = await apiRequest.call(this, 'GET', `/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(contactIdentifier)}`);
 
 	return [{ json: response }];
 }

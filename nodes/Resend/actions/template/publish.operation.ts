@@ -4,12 +4,12 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	createDynamicIdField({
-		fieldName: 'templateId',
+		fieldName: 'templateIdPublish',
 		resourceName: 'template',
 		displayName: 'Template',
 		required: true,
 		placeholder: 'template_123456',
-		description: 'The template to publish',
+		description: 'The template to publish. Publishing makes the template available for sending emails.',
 		displayOptions: {
 			show: {
 				resource: ['templates'],
@@ -23,7 +23,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = resolveDynamicIdValue(this, 'templateId', index);
+	const templateId = resolveDynamicIdValue(this, 'templateIdPublish', index);
 
 	const response = await apiRequest.call(
 		this,

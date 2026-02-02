@@ -3,6 +3,20 @@ import { apiRequest } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
+	createDynamicIdField({
+		fieldName: 'audienceIdUpdate',
+		resourceName: 'audience',
+		displayName: 'Audience',
+		required: true,
+		placeholder: 'aud_123456',
+		description: 'The audience containing the contact. Contacts are scoped to audiences.',
+		displayOptions: {
+			show: {
+				resource: ['contacts'],
+				operation: ['update'],
+			},
+		},
+	}),
 	{
 		displayName: 'Update By',
 		name: 'updateBy',
@@ -136,6 +150,8 @@ export async function execute(
 		properties?: { properties: PropertyItem[] };
 	};
 
+	const audienceId = resolveDynamicIdValue(this, 'audienceIdUpdate', index);
+
 	let identifier: string;
 	if (updateBy === 'id') {
 		identifier = resolveDynamicIdValue(this, 'contactId', index);
@@ -163,7 +179,7 @@ export async function execute(
 		body.properties = props;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/contacts/${encodeURIComponent(identifier)}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(identifier)}`, body);
 
 	return [{ json: response }];
 }

@@ -125,16 +125,154 @@ export async function getBroadcasts(this: ILoadOptionsFunctions): Promise<INodeP
 	return loadDropdownOptions(this, '/broadcasts');
 }
 
+/**
+ * Contacts are scoped to audiences. This method reads the currently selected
+ * audience ID from node parameters and fetches contacts from that audience.
+ */
 export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	return loadDropdownOptions(this, '/contacts');
+	// Helper to safely get string value
+	const getStringValue = (value: unknown) =>
+		typeof value === 'string' && value.trim() ? value : undefined;
+
+	const safeGet = (getter: () => unknown) => {
+		try {
+			return getter();
+		} catch {
+			return undefined;
+		}
+	};
+
+	// Try to get audience ID from various possible parameter names
+	const getParameterValue = (name: string): string | undefined => {
+		const currentParameters = this.getCurrentNodeParameters();
+
+		// Check if it's a resourceLocator object
+		const paramValue = currentParameters?.[name];
+		if (paramValue && typeof paramValue === 'object' && 'value' in paramValue) {
+			return getStringValue((paramValue as { value: unknown }).value);
+		}
+
+		const fromCurrentParameters = getStringValue(paramValue);
+		if (fromCurrentParameters) {
+			return fromCurrentParameters;
+		}
+
+		const fromCurrentNodeParameter = getStringValue(
+			safeGet(() => this.getCurrentNodeParameter(name)),
+		);
+		if (fromCurrentNodeParameter) {
+			return fromCurrentNodeParameter;
+		}
+
+		return undefined;
+	};
+
+	// Check all possible audience field names used across contact operations
+	const audienceFieldNames = [
+		'audienceIdCreate',
+		'audienceIdList',
+		'audienceIdGet',
+		'audienceIdUpdate',
+		'audienceIdDelete',
+		'audienceIdAddSegment',
+		'audienceIdListSegments',
+		'audienceIdRemoveSegment',
+		'audienceIdGetTopics',
+		'audienceIdUpdateTopics',
+		'audienceId',
+	];
+
+	let audienceId: string | undefined;
+	for (const fieldName of audienceFieldNames) {
+		audienceId = getParameterValue(fieldName);
+		if (audienceId) break;
+	}
+
+	if (!audienceId) {
+		// No audience selected yet, return empty list
+		return [];
+	}
+
+	// Skip if it's an expression
+	if (audienceId.startsWith('={{') || audienceId.includes('{{')) {
+		return [];
+	}
+
+	const credentials = await this.getCredentials('resendApi');
+	const apiKey = credentials.apiKey as string;
+
+	try {
+		const response = await this.helpers.httpRequest({
+			url: `${RESEND_API_BASE}/audiences/${encodeURIComponent(audienceId)}/contacts`,
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+			},
+			qs: { limit: 100 },
+			json: true,
+		});
+
+		const items = response?.data ?? [];
+		return items
+			.filter((item: { id?: string }) => item?.id)
+			.map((item: { id: string; email?: string; first_name?: string; last_name?: string }) => {
+				const displayParts: string[] = [];
+				if (item.first_name || item.last_name) {
+					displayParts.push([item.first_name, item.last_name].filter(Boolean).join(' '));
+				}
+				if (item.email) {
+					displayParts.push(item.email);
+				}
+				const displayName = displayParts.length > 0
+					? `${displayParts.join(' - ')} (${item.id})`
+					: item.id;
+				return {
+					name: displayName,
+					value: item.id,
+				};
+			});
+	} catch {
+		// If API call fails (e.g., invalid audience ID), return empty list
+		return [];
+	}
 }
 
 export async function getDomains(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	return loadDropdownOptions(this, '/domains');
 }
 
+/**
+ * Load webhooks with endpoint URL in display name.
+ */
 export async function getWebhooks(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	return loadDropdownOptions(this, '/webhooks');
+	const credentials = await this.getCredentials('resendApi');
+	const apiKey = credentials.apiKey as string;
+
+	const response = await this.helpers.httpRequest({
+		url: `${RESEND_API_BASE}/webhooks`,
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+		qs: { limit: 100 },
+		json: true,
+	});
+
+	const items = response?.data ?? [];
+	return items
+		.filter((item: { id?: string }) => item?.id)
+		.map((item: { id: string; endpoint?: string; status?: string }) => {
+			let displayName = item.id;
+			if (item.endpoint) {
+				// Truncate long URLs for display
+				const shortEndpoint = item.endpoint.length > 50
+					? item.endpoint.substring(0, 47) + '...'
+					: item.endpoint;
+				const statusLabel = item.status ? ` [${item.status}]` : '';
+				displayName = `${shortEndpoint}${statusLabel} (${item.id})`;
+			}
+			return { name: displayName, value: item.id };
+		});
 }
 
 export async function getApiKeys(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
@@ -145,12 +283,79 @@ export async function getContactProperties(this: ILoadOptionsFunctions): Promise
 	return loadDropdownOptions(this, '/contact-properties');
 }
 
+/**
+ * Load sent emails with subject/recipients in display name.
+ */
 export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	return loadDropdownOptions(this, '/emails');
+	const credentials = await this.getCredentials('resendApi');
+	const apiKey = credentials.apiKey as string;
+
+	const response = await this.helpers.httpRequest({
+		url: `${RESEND_API_BASE}/emails`,
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+		qs: { limit: 100 },
+		json: true,
+	});
+
+	const items = response?.data ?? [];
+	return items
+		.filter((item: { id?: string }) => item?.id)
+		.map((item: { id: string; subject?: string; to?: string[]; from?: string; last_event?: string }) => {
+			const parts: string[] = [];
+			if (item.subject) {
+				// Truncate long subjects
+				parts.push(item.subject.length > 40 ? item.subject.substring(0, 37) + '...' : item.subject);
+			}
+			if (item.to && item.to.length > 0) {
+				parts.push(`to: ${item.to[0]}${item.to.length > 1 ? ` +${item.to.length - 1}` : ''}`);
+			}
+			if (item.last_event) {
+				parts.push(`[${item.last_event}]`);
+			}
+			const displayName = parts.length > 0
+				? `${parts.join(' | ')} (${item.id})`
+				: item.id;
+			return { name: displayName, value: item.id };
+		});
 }
 
+/**
+ * Load received emails with subject/sender in display name.
+ */
 export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	return loadDropdownOptions(this, '/emails/received');
+	const credentials = await this.getCredentials('resendApi');
+	const apiKey = credentials.apiKey as string;
+
+	const response = await this.helpers.httpRequest({
+		url: `${RESEND_API_BASE}/emails/receiving`,
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+		qs: { limit: 100 },
+		json: true,
+	});
+
+	const items = response?.data ?? [];
+	return items
+		.filter((item: { id?: string }) => item?.id)
+		.map((item: { id: string; subject?: string; from?: string; to?: string[] }) => {
+			const parts: string[] = [];
+			if (item.subject) {
+				// Truncate long subjects
+				parts.push(item.subject.length > 40 ? item.subject.substring(0, 37) + '...' : item.subject);
+			}
+			if (item.from) {
+				parts.push(`from: ${item.from}`);
+			}
+			const displayName = parts.length > 0
+				? `${parts.join(' | ')} (${item.id})`
+				: item.id;
+			return { name: displayName, value: item.id };
+		});
 }
 
 // ListSearch wrapper functions for resourceLocator
