@@ -1,22 +1,22 @@
 import type { INodeProperties, IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Email ID',
-		name: 'emailIdForAttachment',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'emailIdForAttachment',
+		resourceName: 'email',
+		displayName: 'Email',
 		required: true,
-		default: '',
 		placeholder: 'ae2014de-c168-4c61-8267-70d2662a1ce1',
+		description: 'The sent email containing the attachment. Obtain from the Send Email response or List Emails operation.',
 		displayOptions: {
 			show: {
 				resource: ['email'],
 				operation: ['getAttachment'],
 			},
 		},
-		description: 'The unique identifier of the sent email containing the attachment. Obtain from the Send Email response or List Emails operation.',
-	},
+	}),
 	{
 		displayName: 'Attachment ID',
 		name: 'attachmentId',
@@ -38,7 +38,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const emailId = this.getNodeParameter('emailIdForAttachment', index) as string;
+	const emailId = resolveDynamicIdValue(this, 'emailIdForAttachment', index);
 	const attachmentId = this.getNodeParameter('attachmentId', index) as string;
 
 	const response = await apiRequest.call(

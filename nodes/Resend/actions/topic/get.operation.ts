@@ -1,33 +1,29 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Topic Name or ID',
-		name: 'topicId',
-		type: 'options',
+	createDynamicIdField({
+		fieldName: 'topicId',
+		resourceName: 'topic',
+		displayName: 'Topic',
 		required: true,
-		default: '',
 		placeholder: 'topic_123456',
-		typeOptions: {
-			loadOptionsMethod: 'getTopics',
-		},
+		description: 'The topic to retrieve',
 		displayOptions: {
 			show: {
 				resource: ['topics'],
 				operation: ['get'],
 			},
 		},
-		description:
-			'Select a topic or enter an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-	},
+	}),
 ];
 
 export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const topicId = this.getNodeParameter('topicId', index) as string;
+	const topicId = resolveDynamicIdValue(this, 'topicId', index);
 
 	const response = await apiRequest.call(this, 'GET', `/topics/${topicId}`);
 
