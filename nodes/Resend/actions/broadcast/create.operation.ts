@@ -4,7 +4,7 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	{
-		displayName: '',
+		displayName: 'Variable Syntax: Use {{{VARIABLE_NAME|fallback}}} for personalization. Required: Include {{{RESEND_UNSUBSCRIBE_URL}}} in your content.',
 		name: 'broadcastNotice',
 		type: 'notice',
 		default: '',
@@ -14,8 +14,6 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		 
-		description: '<strong>Variable Syntax:</strong> Use <code>{{{VARIABLE_NAME|fallback}}}</code> for personalization<strong>Required:</strong> Include <code>{{{RESEND_UNSUBSCRIBE_URL}}}</code> in your content',
 	},
 	createDynamicIdField({
 		fieldName: 'segmentId',

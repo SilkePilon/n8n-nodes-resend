@@ -5,7 +5,7 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	{
-		displayName: '',
+		displayName: 'Tips: The sender address must be from a verified domain. Scheduled emails cannot include attachments. Maximum 50 recipients per email.',
 		name: 'sendEmailNotice',
 		type: 'notice',
 		default: '',
@@ -15,8 +15,6 @@ export const description: INodeProperties[] = [
 				operation: ['send'],
 			},
 		},
-		 
-		description: '&lt;strong&gt;Tips:&lt;/strong&gt;• The sender address must be from a &lt;strong&gt;verified domain&lt;/strong&gt;• Scheduled emails &lt;strong&gt;cannot include attachments&lt;/strong&gt;• Maximum 50 recipients per email',
 	},
 	{
 		displayName: 'From',

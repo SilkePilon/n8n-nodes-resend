@@ -124,18 +124,18 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Operation        | Description                                     |
 | ---------------- | ----------------------------------------------- |
 | List             | List all received emails                        |
-| Get              | Retrieve a received email by ID                 |
+| Get              | Retrieve a received email                       |
 | List Attachments | List attachments for a received email           |
 | Get Attachment   | Get a specific attachment from a received email |
 
 ### Audience
 
-| Operation | Description             |
-| --------- | ----------------------- |
-| Create    | Create a new audience   |
-| Get       | Retrieve audience by ID |
-| Delete    | Delete an audience      |
-| List      | List all audiences      |
+| Operation | Description               |
+| --------- | ------------------------- |
+| Create    | Create a new audience     |
+| Get       | Retrieve audience details |
+| Delete    | Delete an audience        |
+| List      | List all audiences        |
 
 ### Contact
 

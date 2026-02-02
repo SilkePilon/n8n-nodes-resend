@@ -284,7 +284,7 @@ export async function getContactProperties(this: ILoadOptionsFunctions): Promise
 }
 
 /**
- * Load sent emails with subject/recipients in display name.
+ * Load sent emails with subject and date in display name.
  */
 export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const credentials = await this.getCredentials('resendApi');
@@ -303,27 +303,29 @@ export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePrope
 	const items = response?.data ?? [];
 	return items
 		.filter((item: { id?: string }) => item?.id)
-		.map((item: { id: string; subject?: string; to?: string[]; from?: string; last_event?: string }) => {
+		.map((item: { id: string; subject?: string; created_at?: string }) => {
 			const parts: string[] = [];
 			if (item.subject) {
 				// Truncate long subjects
-				parts.push(item.subject.length > 40 ? item.subject.substring(0, 37) + '...' : item.subject);
+				parts.push(item.subject.length > 50 ? item.subject.substring(0, 47) + '...' : item.subject);
 			}
-			if (item.to && item.to.length > 0) {
-				parts.push(`to: ${item.to[0]}${item.to.length > 1 ? ` +${item.to.length - 1}` : ''}`);
-			}
-			if (item.last_event) {
-				parts.push(`[${item.last_event}]`);
+			if (item.created_at) {
+				// Format date as DD/MM/YYYY
+				const date = new Date(item.created_at);
+				const day = date.getDate().toString().padStart(2, '0');
+				const month = (date.getMonth() + 1).toString().padStart(2, '0');
+				const year = date.getFullYear();
+				parts.push(`${day}/${month}/${year}`);
 			}
 			const displayName = parts.length > 0
-				? `${parts.join(' | ')} (${item.id})`
+				? `${parts.join(' - ')} (${item.id})`
 				: item.id;
 			return { name: displayName, value: item.id };
 		});
 }
 
 /**
- * Load received emails with subject/sender in display name.
+ * Load received emails with subject and date in display name.
  */
 export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const credentials = await this.getCredentials('resendApi');
@@ -342,17 +344,22 @@ export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<IN
 	const items = response?.data ?? [];
 	return items
 		.filter((item: { id?: string }) => item?.id)
-		.map((item: { id: string; subject?: string; from?: string; to?: string[] }) => {
+		.map((item: { id: string; subject?: string; created_at?: string }) => {
 			const parts: string[] = [];
 			if (item.subject) {
 				// Truncate long subjects
-				parts.push(item.subject.length > 40 ? item.subject.substring(0, 37) + '...' : item.subject);
+				parts.push(item.subject.length > 50 ? item.subject.substring(0, 47) + '...' : item.subject);
 			}
-			if (item.from) {
-				parts.push(`from: ${item.from}`);
+			if (item.created_at) {
+				// Format date as DD/MM/YYYY
+				const date = new Date(item.created_at);
+				const day = date.getDate().toString().padStart(2, '0');
+				const month = (date.getMonth() + 1).toString().padStart(2, '0');
+				const year = date.getFullYear();
+				parts.push(`${day}/${month}/${year}`);
 			}
 			const displayName = parts.length > 0
-				? `${parts.join(' | ')} (${item.id})`
+				? `${parts.join(' - ')} (${item.id})`
 				: item.id;
 			return { name: displayName, value: item.id };
 		});
