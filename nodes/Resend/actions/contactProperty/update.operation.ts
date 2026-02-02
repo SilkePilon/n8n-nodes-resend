@@ -36,7 +36,7 @@ export const description: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'Acme Corp',
-				description: 'New default value used in email templates when the property is not set on a contact.',
+				description: 'New default value used in email templates when the property is not set on a contact',
 			},
 		],
 	},

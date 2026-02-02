@@ -1,4 +1,4 @@
-import type { ILoadOptionsFunctions, INodePropertyOptions } from 'n8n-workflow';
+import type { ILoadOptionsFunctions, INodePropertyOptions, INodeListSearchResult } from 'n8n-workflow';
 
 const RESEND_API_BASE = 'https://api.resend.com';
 
@@ -151,4 +151,118 @@ export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePrope
 
 export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	return loadDropdownOptions(this, '/emails/received');
+}
+
+// ListSearch wrapper functions for resourceLocator
+// These convert the loadOptions format to listSearch format
+
+/**
+ * Generic wrapper to convert loadOptions methods to listSearch format
+ */
+async function wrapForListSearch(
+	loadOptionsFunctions: ILoadOptionsFunctions,
+	loadOptionsMethod: () => Promise<INodePropertyOptions[]>,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	const options = await loadOptionsMethod.call(loadOptionsFunctions);
+
+	let filteredOptions = options;
+	if (filter) {
+		const filterLower = filter.toLowerCase();
+		filteredOptions = options.filter(option =>
+			option.name.toLowerCase().includes(filterLower) ||
+			option.value.toString().toLowerCase().includes(filterLower)
+		);
+	}
+
+	return {
+		results: filteredOptions.map(option => ({
+			name: option.name,
+			value: option.value,
+		}))
+	};
+}
+
+export async function getApiKeysListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getApiKeys, filter);
+}
+
+export async function getAudiencesListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getAudiences, filter);
+}
+
+export async function getBroadcastsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getBroadcasts, filter);
+}
+
+export async function getContactPropertiesListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getContactProperties, filter);
+}
+
+export async function getContactsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getContacts, filter);
+}
+
+export async function getDomainsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getDomains, filter);
+}
+
+export async function getEmailsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getEmails, filter);
+}
+
+export async function getReceivedEmailsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getReceivedEmails, filter);
+}
+
+export async function getSegmentsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getSegments, filter);
+}
+
+export async function getTemplatesListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getTemplates, filter);
+}
+
+export async function getTopicsListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getTopics, filter);
+}
+
+export async function getWebhooksListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getWebhooks, filter);
 }

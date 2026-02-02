@@ -144,7 +144,7 @@ export const description: INodeProperties[] = [
 													]
 											},
 									],
-								description: 'Custom email headers for advanced use cases like email threading or tracking.',
+								description: 'Custom email headers for advanced use cases like email threading or tracking',
 							},
 							{
 								displayName: 'Reply To',
@@ -204,12 +204,12 @@ export const description: INodeProperties[] = [
 							{
 								name: 'HTML and Text',
 								value: 'both',
-								description: 'Send email with both HTML and custom plain text.',
+								description: 'Send email with both HTML and custom plain text',
 							},
 							{
 								name: 'Text',
 								value: 'text',
-								description: 'Send email with plain text content only.',
+								description: 'Send email with plain text content only',
 							},
 					],
 						default: 'html',
@@ -266,14 +266,14 @@ export const description: INodeProperties[] = [
 												type: 'string',
 													required:	true,
 												default: '',
-											description: 'Variable name as defined in the template (e.g., FIRST_NAME, PRODUCT_NAME).',
+											description: 'Variable name as defined in the template (e.g., FIRST_NAME, PRODUCT_NAME)',
 										},
 										{
 											displayName: 'Value',
 											name: 'value',
 											type: 'string',
 											default: '',
-											description: 'The value to replace the variable placeholder with.',
+											description: 'The value to replace the variable placeholder with',
 											},
 									]
 							},

@@ -13,7 +13,7 @@ export const description: INodeProperties[] = [
 				operation: ['list'],
 			},
 		},
-		description: 'Whether to return all sent emails or only up to the specified limit. Set to true to retrieve all emails regardless of quantity.',
+		description: 'Whether to return all results or only up to a given limit',
 	},
 	{
 		displayName: 'Limit',
@@ -30,7 +30,7 @@ export const description: INodeProperties[] = [
 				returnAll: [false],
 			},
 		},
-		description: 'Maximum number of emails to return. Use a smaller value for faster responses when you only need recent emails.',
+		description: 'Max number of results to return',
 	},
 ];
 

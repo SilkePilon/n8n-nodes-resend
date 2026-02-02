@@ -45,7 +45,7 @@ export const description: INodeProperties[] = [
 				type: 'multiOptions',
 				default: ['email.sent'],
 				options: webhookEventOptions,
-				description: 'Update which email events should trigger webhook notifications.',
+				description: 'Update which email events should trigger webhook notifications',
 			},
 			{
 				displayName: 'Status',
