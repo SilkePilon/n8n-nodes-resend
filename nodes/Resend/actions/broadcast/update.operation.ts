@@ -1,22 +1,22 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Broadcast ID',
-		name: 'broadcastId',
-		type: 'string',
+	...createDynamicIdField({
+		fieldName: 'broadcastId',
+		resourceName: 'broadcast',
+		displayName: 'Broadcast',
 		required: true,
-		default: '',
 		placeholder: 'bc_123456',
+		description: 'The unique identifier of the broadcast to update. Only unsent broadcasts can be modified. Obtain from the Create Broadcast response.',
 		displayOptions: {
 			show: {
 				resource: ['broadcasts'],
 				operation: ['update'],
 			},
 		},
-		description: 'The unique identifier of the broadcast to update. Only unsent broadcasts can be modified. Obtain from the Create Broadcast response.',
-	},
+	}),
 	{
 		displayName: 'Update Fields',
 		name: 'broadcastUpdateFields',
@@ -66,12 +66,15 @@ export const description: INodeProperties[] = [
 				description: 'Reply-to email address. For multiple addresses, use comma-separated values.',
 			},
 			{
-				displayName: 'Segment ID',
+				displayName: 'Target Segment',
 				name: 'segment_id',
 				type: 'string',
 				default: '',
 				placeholder: 'seg_123456',
-				description: 'The unique identifier of the segment to target. All contacts in this segment will receive the broadcast. Obtain from the List Segments operation.',
+				typeOptions: {
+					loadOptionsMethod: 'getSegments',
+				},
+				description: 'The segment to target. All contacts in this segment will receive the broadcast.',
 			},
 			{
 				displayName: 'Subject',
@@ -93,12 +96,15 @@ export const description: INodeProperties[] = [
 				description: 'Plain text version of the email for clients that do not support HTML. If omitted, Resend will auto-generate from HTML.',
 			},
 			{
-				displayName: 'Topic ID',
+				displayName: 'Topic',
 				name: 'topic_id',
 				type: 'string',
 				default: '',
 				placeholder: 'topic_123456',
-				description: 'Topic ID that the broadcast will be scoped to',
+				typeOptions: {
+					loadOptionsMethod: 'getTopics',
+				},
+				description: 'Topic to scope the broadcast to',
 			},
 		],
 	},
@@ -108,7 +114,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const broadcastId = this.getNodeParameter('broadcastId', index) as string;
+	const broadcastId = resolveDynamicIdValue(this, 'broadcastId', index);
 	const updateFields = this.getNodeParameter('broadcastUpdateFields', index, {}) as IDataObject;
 
 	const response = await apiRequest.call(

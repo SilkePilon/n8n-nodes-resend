@@ -1,28 +1,29 @@
 import type { INodeProperties, IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Template ID',
-		name: 'templateIdDuplicate',
-		type: 'string',
+	...createDynamicIdField({
+		fieldName: 'templateId',
+		resourceName: 'template',
+		displayName: 'Template',
 		required: true,
-		default: '',
+		placeholder: 'template_123456',
+		description: 'The template to duplicate',
 		displayOptions: {
 			show: {
 				resource: ['templates'],
 				operation: ['duplicate'],
 			},
 		},
-		description: 'The unique identifier or alias of the template to duplicate. Obtain from the List Templates operation. Creates an exact copy with a new ID.',
-	},
+	}),
 ];
 
 export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = this.getNodeParameter('templateIdDuplicate', index) as string;
+	const templateId = resolveDynamicIdValue(this, 'templateId', index);
 
 	const response = await apiRequest.call(
 		this,

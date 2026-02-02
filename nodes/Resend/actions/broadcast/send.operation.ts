@@ -1,22 +1,22 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Broadcast ID',
-		name: 'broadcastId',
-		type: 'string',
+	...createDynamicIdField({
+		fieldName: 'broadcastId',
+		resourceName: 'broadcast',
+		displayName: 'Broadcast',
 		required: true,
-		default: '',
 		placeholder: 'bc_123456',
+		description: 'The unique identifier of the broadcast to send. Obtain from the Create Broadcast response. The broadcast will be sent to all contacts in its target segment.',
 		displayOptions: {
 			show: {
 				resource: ['broadcasts'],
 				operation: ['send'],
 			},
 		},
-		description: 'The unique identifier of the broadcast to send. Obtain from the Create Broadcast response. The broadcast will be sent to all contacts in its target segment.',
-	},
+	}),
 	{
 		displayName: 'Send Options',
 		name: 'broadcastSendOptions',
@@ -46,7 +46,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const broadcastId = this.getNodeParameter('broadcastId', index) as string;
+	const broadcastId = resolveDynamicIdValue(this, 'broadcastId', index);
 	const sendOptions = this.getNodeParameter('broadcastSendOptions', index, {}) as {
 		scheduled_at?: string;
 	};

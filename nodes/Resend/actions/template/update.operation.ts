@@ -1,26 +1,22 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Template Name or ID',
-		name: 'templateId',
-		type: 'options',
+	...createDynamicIdField({
+		fieldName: 'templateId',
+		resourceName: 'template',
+		displayName: 'Template',
 		required: true,
-		default: '',
-		placeholder: '34a080c9-b17d-4187-ad80-5af20266e535',
-		typeOptions: {
-			loadOptionsMethod: 'getTemplates',
-		},
+		placeholder: 'template_123456',
+		description: 'The template to update',
 		displayOptions: {
 			show: {
 				resource: ['templates'],
 				operation: ['update'],
 			},
 		},
-		description:
-			'Select a template or enter an ID/alias using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-	},
+	}),
 	{
 		displayName: 'Update Fields',
 		name: 'templateUpdateFields',
@@ -156,7 +152,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = this.getNodeParameter('templateId', index) as string;
+	const templateId = resolveDynamicIdValue(this, 'templateId', index);
 	const updateFields = this.getNodeParameter('templateUpdateFields', index, {}) as {
 		alias?: string;
 		from?: string;

@@ -1,29 +1,29 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Domain ID',
-		name: 'domainId',
-		type: 'string',
+	...createDynamicIdField({
+		fieldName: 'domainId',
+		resourceName: 'domain',
+		displayName: 'Domain',
 		required: true,
-		default: '',
 		placeholder: '4dd369bc-aa82-4ff3-97de-514ae3000ee0',
+		description: 'The unique identifier of the domain to retrieve. Obtain from the Create Domain response or List Domains operation. Returns domain details including verification status and DNS records.',
 		displayOptions: {
 			show: {
 				resource: ['domains'],
 				operation: ['get'],
 			},
 		},
-		description: 'The unique identifier of the domain to retrieve. Obtain from the Create Domain response or List Domains operation. Returns domain details including verification status and DNS records.',
-	},
+	}),
 ];
 
 export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const domainId = this.getNodeParameter('domainId', index) as string;
+	const domainId = resolveDynamicIdValue(this, 'domainId', index);
 
 	const response = await apiRequest.call(this, 'GET', `/domains/${domainId}`);
 

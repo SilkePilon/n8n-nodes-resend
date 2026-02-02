@@ -1,33 +1,29 @@
 import type { INodeProperties, IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Segment Name or ID',
-		name: 'segmentId',
-		type: 'options',
+	...createDynamicIdField({
+		fieldName: 'segmentId',
+		resourceName: 'segment',
+		displayName: 'Segment',
 		required: true,
-		default: '',
 		placeholder: 'seg_123456',
-		typeOptions: {
-			loadOptionsMethod: 'getSegments',
-		},
+		description: 'Select a segment or enter an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: {
 			show: {
 				resource: ['segments'],
 				operation: ['get'],
 			},
 		},
-		description:
-			'Select a segment or enter an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-	},
+	}),
 ];
 
 export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const segmentId = this.getNodeParameter('segmentId', index) as string;
+	const segmentId = resolveDynamicIdValue(this, 'segmentId', index);
 
 	const response = await apiRequest.call(this, 'GET', `/segments/${segmentId}`);
 

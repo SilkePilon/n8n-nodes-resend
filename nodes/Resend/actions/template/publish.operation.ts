@@ -1,29 +1,29 @@
 import type { INodeProperties, IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Template ID',
-		name: 'templateIdPublish',
-		type: 'string',
+	...createDynamicIdField({
+		fieldName: 'templateId',
+		resourceName: 'template',
+		displayName: 'Template',
 		required: true,
-		default: '',
-		placeholder: '34a080c9-b17d-4187-ad80-5af20266e535',
+		placeholder: 'template_123456',
+		description: 'The template to publish',
 		displayOptions: {
 			show: {
 				resource: ['templates'],
 				operation: ['publish'],
 			},
 		},
-		description: 'The unique identifier or alias of the template to publish. Publishing makes the template available for sending emails. Obtain from Create Template or List Templates.',
-	},
+	}),
 ];
 
 export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const templateId = this.getNodeParameter('templateIdPublish', index) as string;
+	const templateId = resolveDynamicIdValue(this, 'templateId', index);
 
 	const response = await apiRequest.call(
 		this,

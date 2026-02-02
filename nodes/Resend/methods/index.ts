@@ -66,7 +66,12 @@ export async function getTemplateVariables(
 		return undefined;
 	};
 
-	const templateId = getParameterValue('emailTemplateId') ?? getParameterValue('templateId');
+	const templateId = getParameterValue('emailTemplateId') ??
+					  getParameterValue('emailTemplateIdDropdown') ??
+					  getParameterValue('emailTemplateIdManual') ??
+					  getParameterValue('templateId') ??
+					  getParameterValue('templateIdDropdown') ??
+					  getParameterValue('templateIdManual');
 	if (!templateId) {
 		return [];
 	}
