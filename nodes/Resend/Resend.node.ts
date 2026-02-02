@@ -15,11 +15,19 @@ import * as webhooks from './actions/webhook';
 import * as audiences from './actions/audience';
 import * as receivingEmails from './actions/receivingEmail';
 import {
+	getApiKeys,
 	getAudiences,
+	getBroadcasts,
+	getContactProperties,
+	getContacts,
+	getDomains,
+	getEmails,
+	getReceivedEmails,
 	getSegments,
 	getTemplateVariables,
 	getTemplates,
 	getTopics,
+	getWebhooks,
 } from './methods';
 import {
 	sendAndWaitWebhooksDescription,
@@ -144,11 +152,19 @@ export class Resend implements INodeType {
 
 	methods = {
 		loadOptions: {
+			getApiKeys,
+			getAudiences,
+			getBroadcasts,
+			getContactProperties,
+			getContacts,
+			getDomains,
+			getEmails,
+			getReceivedEmails,
+			getSegments,
 			getTemplateVariables,
 			getTemplates,
-			getSegments,
 			getTopics,
-			getAudiences,
+			getWebhooks,
 		},
 	};
 
