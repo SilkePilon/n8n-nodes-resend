@@ -1,6 +1,7 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import { normalizeEmailList, buildTemplateSendVariables, RESEND_API_BASE } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
 	{
@@ -94,16 +95,13 @@ export const description: INodeProperties[] = [
 		description:
 			'Choose the content format for your email. HTML enables rich formatting, text is simple and universally compatible, both provides a fallback.',
 	},
-	{
-		displayName: 'Template Name or ID',
-		name: 'emailTemplateId',
-		type: 'options',
-		required: true,
-		default: '',
+	createDynamicIdField({
+		fieldName: 'emailTemplateId',
+		resourceName: 'template',
+		displayName: 'Email Template',
+		required: false, // Templates are optional for emails
 		placeholder: '34a080c9-b17d-4187-ad80-5af20266e535',
-		typeOptions: {
-			loadOptionsMethod: 'getTemplates',
-		},
+		description: 'Template to use for this email',
 		displayOptions: {
 			show: {
 				resource: ['email'],
@@ -111,9 +109,7 @@ export const description: INodeProperties[] = [
 				useTemplate: [true],
 			},
 		},
-		description:
-			'Select a template or enter an ID/alias using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-	},
+	}),
 	{
 		displayName: 'Template Variables',
 		name: 'emailTemplateVariables',
@@ -449,7 +445,7 @@ export async function execute(
 	};
 
 	if (useTemplate) {
-		const templateId = this.getNodeParameter('emailTemplateId', index) as string;
+		const templateId = resolveDynamicIdValue(this, 'emailTemplateId', index);
 		const templateVariables = this.getNodeParameter('emailTemplateVariables', index, {}) as {
 			variables?: Array<{ key: string; value?: unknown }>;
 		};

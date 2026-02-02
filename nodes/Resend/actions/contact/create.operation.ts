@@ -1,7 +1,22 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
+	createDynamicIdField({
+		fieldName: 'audienceIdCreate',
+		resourceName: 'audience',
+		displayName: 'Audience',
+		required: true,
+		placeholder: 'aud_123456',
+		description: 'The audience to create the contact in. Contacts must belong to an audience.',
+		displayOptions: {
+			show: {
+				resource: ['contacts'],
+				operation: ['create'],
+			},
+		},
+	}),
 	{
 		displayName: 'Email',
 		name: 'email',
@@ -179,6 +194,8 @@ export async function execute(
 		topics?: { topics: TopicItem[] };
 	};
 
+	const audienceId = resolveDynamicIdValue(this, 'audienceIdCreate', index);
+
 	const body: IDataObject = { email };
 
 	if (createFields.first_name) {
@@ -210,7 +227,7 @@ export async function execute(
 		}));
 	}
 
-	const response = await apiRequest.call(this, 'POST', '/contacts', body);
+	const response = await apiRequest.call(this, 'POST', `/audiences/${encodeURIComponent(audienceId)}/contacts`, body);
 
 	return [{ json: response }];
 }

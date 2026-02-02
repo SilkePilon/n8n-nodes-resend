@@ -5,23 +5,23 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Audience ID',
-		name: 'audienceId',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'audienceId',
+		resourceName: 'audience',
+		displayName: 'Target Audience',
 		required: true,
-		default: '',
 		placeholder: 'aud_123456',
+		description: 'The audience this segment will belong to. Segments allow you to group contacts within an audience.',
 		displayOptions: {
 			show: {
 				resource: ['segments'],
 				operation: ['create'],
 			},
 		},
-		description: 'The unique identifier of the audience this segment will belong to. Obtain from the List Audiences operation. Segments allow you to group contacts within an audience.',
-	},
+	}),
 	{
 		displayName: 'Segment Name',
 		name: 'segmentName',
@@ -56,7 +56,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const audienceId = this.getNodeParameter('audienceId', index) as string;
+	const audienceId = resolveDynamicIdValue(this, 'audienceId', index);
 	const segmentName = this.getNodeParameter('segmentName', index) as string;
 	const filterInput = this.getNodeParameter('segmentFilter', index, '') as string | IDataObject;
 

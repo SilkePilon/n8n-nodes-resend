@@ -1,37 +1,36 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties, IDataObject } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Audience ID',
-		name: 'audienceIdListSegments',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'audienceIdListSegments',
+		resourceName: 'audience',
+		displayName: 'Audience',
 		required: true,
-		default: '',
 		placeholder: 'aud_123456',
+		description: 'The audience containing the contact.',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['listSegments'],
 			},
 		},
-		description: 'The unique identifier of the audience containing the contact. Obtain from the List Audiences operation.',
-	},
-	{
-		displayName: 'Contact ID',
-		name: 'contactIdListSegments',
-		type: 'string',
+	}),
+	createDynamicIdField({
+		fieldName: 'contactIdListSegments',
+		resourceName: 'contact',
+		displayName: 'Contact',
 		required: true,
-		default: '',
 		placeholder: 'con_123456',
+		description: 'The contact whose segment memberships to retrieve.',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['listSegments'],
 			},
 		},
-		description: 'The unique identifier of the contact whose segment memberships to retrieve. Returns all segments this contact belongs to.',
-	},
+	}),
 	{
 		displayName: 'Return All',
 		name: 'returnAll',
@@ -43,7 +42,7 @@ export const description: INodeProperties[] = [
 				operation: ['listSegments'],
 			},
 		},
-		description: 'Whether to return all segment memberships or only up to the specified limit. Set to true to retrieve all segments regardless of quantity.',
+		description: 'Whether to return all results or only up to a given limit',
 	},
 	{
 		displayName: 'Limit',
@@ -60,7 +59,7 @@ export const description: INodeProperties[] = [
 				returnAll: [false],
 			},
 		},
-		description: 'Maximum number of segment memberships to return. Use a smaller value for faster responses.',
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -68,8 +67,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const audienceId = this.getNodeParameter('audienceIdListSegments', index) as string;
-	const contactId = this.getNodeParameter('contactIdListSegments', index) as string;
+	const audienceId = resolveDynamicIdValue(this, 'audienceIdListSegments', index);
+	const contactId = resolveDynamicIdValue(this, 'contactIdListSegments', index);
 	const returnAll = this.getNodeParameter('returnAll', index, false) as boolean;
 	const limit = this.getNodeParameter('limit', index, 50) as number;
 

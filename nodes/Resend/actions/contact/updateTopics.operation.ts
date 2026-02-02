@@ -1,37 +1,36 @@
 import type { INodeProperties, IExecuteFunctions, INodeExecutionData, IDataObject } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Audience ID',
-		name: 'audienceIdUpdateTopics',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'audienceIdUpdateTopics',
+		resourceName: 'audience',
+		displayName: 'Audience',
 		required: true,
-		default: '',
 		placeholder: 'aud_123456',
+		description: 'The audience containing the contact to update topic subscriptions.',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['updateTopics'],
 			},
 		},
-		description: 'The unique identifier of the audience containing the contact. Obtain from the List Audiences operation.',
-	},
-	{
-		displayName: 'Contact ID',
-		name: 'contactIdUpdateTopics',
-		type: 'string',
+	}),
+	createDynamicIdField({
+		fieldName: 'contactIdUpdateTopics',
+		resourceName: 'contact',
+		displayName: 'Contact',
 		required: true,
-		default: '',
 		placeholder: 'con_123456',
+		description: 'The contact whose topic subscriptions to update.',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
 				operation: ['updateTopics'],
 			},
 		},
-		description: 'The unique identifier of the contact whose topic subscriptions to update. Allows subscribing or unsubscribing from multiple topics.',
-	},
+	}),
 	{
 		displayName: 'Topics',
 		name: 'topicsToUpdate',
@@ -53,13 +52,16 @@ export const description: INodeProperties[] = [
 				displayName: 'Topic',
 				values: [
 					{
-						displayName: 'Topic ID',
+						displayName: 'Topic',
 						name: 'id',
 						type: 'string',
 						required: true,
 						default: '',
 						placeholder: 'topic_123456',
-						description: 'The unique identifier of the topic. Obtain from the List Topics operation.',
+						typeOptions: {
+							loadOptionsMethod: 'getTopics',
+						},
+						description: 'The topic to update subscription for',
 					},
 					{
 						displayName: 'Subscribed',
@@ -85,8 +87,8 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const audienceId = this.getNodeParameter('audienceIdUpdateTopics', index) as string;
-	const contactId = this.getNodeParameter('contactIdUpdateTopics', index) as string;
+	const audienceId = resolveDynamicIdValue(this, 'audienceIdUpdateTopics', index);
+	const contactId = resolveDynamicIdValue(this, 'contactIdUpdateTopics', index);
 	const topicsInput = this.getNodeParameter('topicsToUpdate', index, { topics: [] }) as {
 		topics: TopicItem[];
 	};

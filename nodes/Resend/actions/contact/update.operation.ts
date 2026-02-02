@@ -1,7 +1,22 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
+	createDynamicIdField({
+		fieldName: 'audienceIdUpdate',
+		resourceName: 'audience',
+		displayName: 'Audience',
+		required: true,
+		placeholder: 'aud_123456',
+		description: 'The audience containing the contact. Contacts are scoped to audiences.',
+		displayOptions: {
+			show: {
+				resource: ['contacts'],
+				operation: ['update'],
+			},
+		},
+	}),
 	{
 		displayName: 'Update By',
 		name: 'updateBy',
@@ -19,13 +34,13 @@ export const description: INodeProperties[] = [
 		},
 		description: 'Choose how to identify the contact: by their unique ID or their email address. Use ID for precise matching, email for convenience.',
 	},
-	{
-		displayName: 'Contact ID',
-		name: 'contactId',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'contactId',
+		resourceName: 'contact',
+		displayName: 'Contact',
 		required: true,
-		default: '',
 		placeholder: 'con_123456',
+		description: 'The unique identifier of the contact to update. Obtain from the List Contacts or Create Contact operation.',
 		displayOptions: {
 			show: {
 				resource: ['contacts'],
@@ -33,8 +48,7 @@ export const description: INodeProperties[] = [
 				updateBy: ['id'],
 			},
 		},
-		description: 'The unique identifier of the contact to update. Obtain from the List Contacts or Create Contact operation.',
-	},
+	}),
 	{
 		displayName: 'Contact Email',
 		name: 'contactEmail',
@@ -136,9 +150,11 @@ export async function execute(
 		properties?: { properties: PropertyItem[] };
 	};
 
+	const audienceId = resolveDynamicIdValue(this, 'audienceIdUpdate', index);
+
 	let identifier: string;
 	if (updateBy === 'id') {
-		identifier = this.getNodeParameter('contactId', index) as string;
+		identifier = resolveDynamicIdValue(this, 'contactId', index);
 	} else {
 		identifier = this.getNodeParameter('contactEmail', index) as string;
 	}
@@ -163,7 +179,7 @@ export async function execute(
 		body.properties = props;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/contacts/${encodeURIComponent(identifier)}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(identifier)}`, body);
 
 	return [{ json: response }];
 }

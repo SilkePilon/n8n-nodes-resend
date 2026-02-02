@@ -1,22 +1,22 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Segment ID',
-		name: 'segmentId',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'segmentId',
+		resourceName: 'segment',
+		displayName: 'Target Segment',
 		required: true,
-		default: '',
 		placeholder: 'seg_123456',
+		description: 'The segment to target with this broadcast. All contacts in the selected segment will receive the broadcast.',
 		displayOptions: {
 			show: {
 				resource: ['broadcasts'],
 				operation: ['create'],
 			},
 		},
-		description: 'The unique identifier of the segment to target with this broadcast. Obtain from the List Segments operation. All contacts in this segment will receive the broadcast.',
-	},
+	}),
 	{
 		displayName: 'From',
 		name: 'broadcastFrom',
@@ -109,12 +109,15 @@ export const description: INodeProperties[] = [
 				description: 'Plain text version of the email for clients that do not support HTML. If omitted, Resend will auto-generate from the HTML content.',
 			},
 			{
-				displayName: 'Topic ID',
+				displayName: 'Topic',
 				name: 'topic_id',
 				type: 'string',
 				default: '',
 				placeholder: 'topic_123456',
-				description: 'Topic ID that the broadcast will be scoped to',
+				typeOptions: {
+					loadOptionsMethod: 'getTopics',
+				},
+				description: 'Topic to scope the broadcast to',
 			},
 		],
 	},
@@ -124,7 +127,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const segmentId = this.getNodeParameter('segmentId', index) as string;
+	const segmentId = resolveDynamicIdValue(this, 'segmentId', index);
 	const from = this.getNodeParameter('broadcastFrom', index) as string;
 	const subject = this.getNodeParameter('broadcastSubject', index) as string;
 	const html = this.getNodeParameter('broadcastHtml', index) as string;

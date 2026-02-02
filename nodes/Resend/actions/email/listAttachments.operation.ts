@@ -1,22 +1,22 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties, IDataObject } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
+import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	{
-		displayName: 'Email ID',
-		name: 'emailIdForAttachments',
-		type: 'string',
+	createDynamicIdField({
+		fieldName: 'emailIdForAttachments',
+		resourceName: 'email',
+		displayName: 'Email',
 		required: true,
-		default: '',
 		placeholder: 'ae2014de-c168-4c61-8267-70d2662a1ce1',
+		description: 'The sent email whose attachments to list. Obtain from the Send Email response or List Emails operation.',
 		displayOptions: {
 			show: {
 				resource: ['email'],
 				operation: ['listAttachments'],
 			},
 		},
-		description: 'The unique identifier of the sent email whose attachments to list. Obtain from the Send Email response or List Emails operation.',
-	},
+	}),
 	{
 		displayName: 'Return All',
 		name: 'returnAll',
@@ -28,7 +28,7 @@ export const description: INodeProperties[] = [
 				operation: ['listAttachments'],
 			},
 		},
-		description: 'Whether to return all attachments or only up to the specified limit. Set to true to retrieve all attachments regardless of quantity.',
+		description: 'Whether to return all results or only up to a given limit',
 	},
 	{
 		displayName: 'Limit',
@@ -45,7 +45,7 @@ export const description: INodeProperties[] = [
 				returnAll: [false],
 			},
 		},
-		description: 'Maximum number of attachments to return. Use a smaller value for faster responses.',
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -53,7 +53,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const emailId = this.getNodeParameter('emailIdForAttachments', index) as string;
+	const emailId = resolveDynamicIdValue(this, 'emailIdForAttachments', index);
 	const returnAll = this.getNodeParameter('returnAll', index, false) as boolean;
 	const limit = this.getNodeParameter('limit', index, 50) as number;
 
