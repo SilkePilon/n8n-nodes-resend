@@ -1,4 +1,4 @@
-import isbot from 'isbot';
+import { isbot } from 'isbot';
 import {
 	NodeOperationError,
 	SEND_AND_WAIT_OPERATION,
