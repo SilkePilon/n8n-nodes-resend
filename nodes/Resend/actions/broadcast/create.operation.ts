@@ -3,6 +3,18 @@ import { apiRequest } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
+	{
+		displayName: 'Variable Syntax: Use {{{VARIABLE_NAME|fallback}}} for personalization. Required: Include {{{RESEND_UNSUBSCRIBE_URL}}} in your content.',
+		name: 'broadcastNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['broadcasts'],
+				operation: ['create'],
+			},
+		},
+	},
 	createDynamicIdField({
 		fieldName: 'segmentId',
 		resourceName: 'segment',

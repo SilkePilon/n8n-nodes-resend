@@ -48,8 +48,8 @@ export const operations: INodeProperties[] = [
 			{
 				name: 'Retrieve',
 				value: 'retrieve',
-				description: 'Get details of a specific sent email including subject, recipients, status, and timestamps by email ID',
-				action: 'Get email details by ID',
+				description: 'Get details of a specific sent email including subject, recipients, status, and timestamps',
+				action: 'Get email details',
 			},
 			{
 				name: 'Send',
