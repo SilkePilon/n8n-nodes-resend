@@ -115,3 +115,35 @@ export async function getTopics(this: ILoadOptionsFunctions): Promise<INodePrope
 export async function getAudiences(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	return loadDropdownOptions(this, '/audiences');
 }
+
+export async function getBroadcasts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/broadcasts');
+}
+
+export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/contacts');
+}
+
+export async function getDomains(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/domains');
+}
+
+export async function getWebhooks(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/webhooks');
+}
+
+export async function getApiKeys(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/api-keys');
+}
+
+export async function getContactProperties(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/contact-properties');
+}
+
+export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/emails');
+}
+
+export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	return loadDropdownOptions(this, '/emails/received');
+}
