@@ -3,6 +3,20 @@ import { apiRequest } from '../../transport';
 
 export const description: INodeProperties[] = [
 	{
+		displayName: '',
+		name: 'domainNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['domains'],
+				operation: ['create'],
+			},
+		},
+		 
+		description: 'After adding a domain, you must &lt;strong&gt;configure DNS records&lt;/strong&gt; (SPF, DKIM, DMARC) and &lt;strong&gt;verify the domain&lt;/strong&gt; before sending emails',
+	},
+	{
 		displayName: 'Domain Name',
 		name: 'domainName',
 		type: 'string',
