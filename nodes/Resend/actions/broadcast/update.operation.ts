@@ -66,6 +66,14 @@ export const description: INodeProperties[] = [
 				description: 'Reply-to email address. For multiple addresses, use comma-separated values.',
 			},
 			{
+				displayName: 'Subject',
+				name: 'subject',
+				type: 'string',
+				default: '',
+				placeholder: 'Newsletter Subject',
+				description: 'Email subject line. Keep concise and compelling to maximize open rates.',
+			},
+			{
 				displayName: 'Target Segment',
 				name: 'segment_id',
 				type: 'string',
@@ -75,14 +83,6 @@ export const description: INodeProperties[] = [
 					loadOptionsMethod: 'getSegments',
 				},
 				description: 'The segment to target. All contacts in this segment will receive the broadcast.',
-			},
-			{
-				displayName: 'Subject',
-				name: 'subject',
-				type: 'string',
-				default: '',
-				placeholder: 'Newsletter Subject',
-				description: 'Email subject line. Keep concise and compelling to maximize open rates.',
 			},
 			{
 				displayName: 'Text Content',
