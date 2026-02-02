@@ -4,7 +4,7 @@ import { webhookEventOptions } from './index';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'webhookId',
 		resourceName: 'webhook',
 		displayName: 'Webhook',

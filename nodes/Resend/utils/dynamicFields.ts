@@ -1,4 +1,4 @@
-import type { INodeProperties, IExecuteFunctions } from 'n8n-workflow';
+import type { INodeProperties, IExecuteFunctions, INodeParameterResourceLocator } from 'n8n-workflow';
 
 /**
  * Maps resource names to their corresponding API methods for loading dropdown options.
@@ -39,7 +39,7 @@ export const RESOURCE_DISPLAY_MAP = {
 } as const;
 
 /**
- * Configuration options for creating dynamic ID fields.
+ * Configuration options for creating resourceLocator fields.
  */
 export interface DynamicIdFieldOptions {
 	/** Base name for the field (e.g., 'contactId', 'templateId') */
@@ -59,22 +59,21 @@ export interface DynamicIdFieldOptions {
 }
 
 /**
- * Creates a dynamic ID field set that provides both dropdown selection and manual input options.
+ * Creates a single resourceLocator field that provides inline dropdown selection and manual input.
  *
- * This function generates three interconnected fields:
- * 1. A choice selector (dropdown vs manual input)
- * 2. An API-populated dropdown for selecting from existing resources
- * 3. A manual text input for entering IDs directly
+ * This function generates a single field with two modes:
+ * - 'list' mode: Shows API-populated dropdown for selecting from existing resources
+ * - 'id' mode: Shows manual text input for entering IDs directly
  *
- * The fields use conditional display logic to show/hide based on user selection.
+ * The field uses n8n's resourceLocator type for inline mode switching.
  *
- * @param options Configuration options for the dynamic ID fields
- * @returns Array of INodeProperties representing the complete field set
+ * @param options Configuration options for the resourceLocator field
+ * @returns Single INodeProperties representing the resourceLocator field
  *
  * @example
  * ```typescript
- * // Create dynamic fields for template selection
- * const templateFields = createDynamicIdField({
+ * // Create resourceLocator field for template selection
+ * const templateField = createDynamicIdField({
  *   fieldName: 'templateId',
  *   resourceName: 'template',
  *   displayName: 'Template',
@@ -90,7 +89,7 @@ export interface DynamicIdFieldOptions {
  * });
  * ```
  */
-export function createDynamicIdField(options: DynamicIdFieldOptions): INodeProperties[] {
+export function createDynamicIdField(options: DynamicIdFieldOptions): INodeProperties {
 	const {
 		fieldName,
 		resourceName,
@@ -107,83 +106,42 @@ export function createDynamicIdField(options: DynamicIdFieldOptions): INodePrope
 	// Get the method name for loading options
 	const methodName = RESOURCE_METHOD_MAP[resourceName];
 
-	// Generate field names
-	const choiceFieldName = `${fieldName}Choice`;
-	const dropdownFieldName = `${fieldName}Dropdown`;
-	const manualFieldName = `${fieldName}Manual`;
-
-	return [
-		// Choice selector: From list vs By ID
-		{
-			displayName: `${displayName} Selection`,
-			name: choiceFieldName,
-			type: 'options',
-			options: [
-				{
-					name: 'From List',
-					value: 'fromList',
-					description: `Select ${resourceDisplayName.toLowerCase()} from dropdown list`,
-				},
-				{
-					name: `By ${resourceDisplayName} ID`,
-					value: 'byId',
-					description: `Enter ${resourceDisplayName.toLowerCase()} ID manually`,
-				},
-			],
-			default: 'fromList',
-			displayOptions,
-			description: `Choose how to specify the ${resourceDisplayName.toLowerCase()} - select from list or enter ID manually`,
-		},
-
-		// API-populated dropdown (shown when "From list" selected)
-		{
-			displayName: `${displayName} Name or ID`,
-			name: dropdownFieldName,
-			type: 'options',
-			required,
-			default: '',
-			placeholder: placeholder || `Select ${resourceDisplayName.toLowerCase()}...`,
-			typeOptions: {
-				loadOptionsMethod: methodName,
-			},
-			displayOptions: {
-				...displayOptions,
-				show: {
-					...displayOptions?.show,
-					[choiceFieldName]: ['fromList'],
+	return {
+		displayName,
+		name: fieldName,
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required,
+		displayOptions,
+		description: description || `Select a ${resourceDisplayName.toLowerCase()} or enter an ID directly. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.`,
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: `Select ${resourceDisplayName.toLowerCase()}...`,
+				typeOptions: {
+					searchListMethod: methodName,
 				},
 			},
-			description: description || `Select a ${resourceDisplayName.toLowerCase()} or enter an ID/alias using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.`,
-		},
-
-		// Manual text input (shown when "By ID" selected)
-		{
-			displayName: `${displayName} ID`,
-			name: manualFieldName,
-			type: 'string',
-			required,
-			default: '',
-			placeholder: placeholder || `Enter ${resourceDisplayName.toLowerCase()} ID...`,
-			displayOptions: {
-				...displayOptions,
-				show: {
-					...displayOptions?.show,
-					[choiceFieldName]: ['byId'],
-				},
-			},
-			description: description || `Enter the ${resourceDisplayName.toLowerCase()} ID directly. You can use expressions to set this value dynamically.`,
-		},
-	];
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: placeholder || `Enter ${resourceDisplayName.toLowerCase()} ID...`,
+			}
+		]
+	};
 }
 
 /**
- * Resolves the actual ID value from dynamic ID fields during workflow execution.
+ * Resolves the actual ID value from a resourceLocator field during workflow execution.
  *
- * This helper function determines which field contains the actual ID value based on the
- * choice selection and returns the appropriate value for use in API calls.
+ * This helper function extracts the ID value from the resourceLocator structure
+ * based on the selected mode and returns the appropriate value for use in API calls.
  *
  * @param executeFunctions The n8n execution context
- * @param fieldName Base field name used when creating the dynamic fields
+ * @param fieldName Field name used when creating the resourceLocator field
  * @param index Current item index in the workflow execution
  * @returns The resolved ID value as a string
  *
@@ -203,15 +161,6 @@ export function resolveDynamicIdValue(
 	fieldName: string,
 	index: number,
 ): string {
-	const choiceFieldName = `${fieldName}Choice`;
-	const dropdownFieldName = `${fieldName}Dropdown`;
-	const manualFieldName = `${fieldName}Manual`;
-
-	const choice = executeFunctions.getNodeParameter(choiceFieldName, index) as string;
-
-	if (choice === 'fromList') {
-		return executeFunctions.getNodeParameter(dropdownFieldName, index) as string;
-	} else {
-		return executeFunctions.getNodeParameter(manualFieldName, index) as string;
-	}
+	const resourceLocator = executeFunctions.getNodeParameter(fieldName, index) as INodeParameterResourceLocator;
+	return resourceLocator.value as string;
 }

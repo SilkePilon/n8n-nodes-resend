@@ -20,7 +20,7 @@ export const description: INodeProperties[] = [
 		},
 		description: 'Choose how to identify the contact: by their unique ID or their email address. Use ID for precise matching, email for convenience.',
 	},
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'contactId',
 		resourceName: 'contact',
 		displayName: 'Contact',

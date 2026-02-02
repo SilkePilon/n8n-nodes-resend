@@ -95,7 +95,7 @@ export const description: INodeProperties[] = [
 		description:
 			'Choose the content format for your email. HTML enables rich formatting, text is simple and universally compatible, both provides a fallback.',
 	},
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'emailTemplateId',
 		resourceName: 'template',
 		displayName: 'Email Template',
@@ -139,7 +139,7 @@ export const description: INodeProperties[] = [
 						default: '',
 						typeOptions: {
 							loadOptionsMethod: 'getTemplateVariables',
-							loadOptionsDependsOn: ['emailTemplateIdDropdown', 'emailTemplateIdManual'],
+							loadOptionsDependsOn: ['emailTemplateId'],
 							allowCustomValues: true,
 						},
 						description:

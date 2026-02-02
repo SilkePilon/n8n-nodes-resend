@@ -3,7 +3,7 @@ import { apiRequest } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'audienceIdRemoveSegment',
 		resourceName: 'audience',
 		displayName: 'Audience',
@@ -17,7 +17,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 	}),
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'contactIdRemoveSegment',
 		resourceName: 'contact',
 		displayName: 'Contact',
@@ -31,7 +31,7 @@ export const description: INodeProperties[] = [
 			},
 		},
 	}),
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'segmentIdRemove',
 		resourceName: 'segment',
 		displayName: 'Segment',

@@ -8,7 +8,7 @@ import { apiRequest } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	...createDynamicIdField({
+	createDynamicIdField({
 		fieldName: 'audienceId',
 		resourceName: 'audience',
 		displayName: 'Target Audience',
