@@ -1,0 +1,316 @@
+{
+  "name": "Resend - Contact Sync on Events",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "resend-contact-sync",
+        "webhookSigningSecret": "={{ $env.RESEND_WEBHOOK_SECRET }}",
+        "events": [
+          "contact.created",
+          "contact.updated",
+          "contact.deleted"
+        ]
+      },
+      "id": "trigger-1",
+      "name": "Resend Trigger",
+      "type": "n8n-nodes-resend.resendTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "resend-contact-sync"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputKey": "created",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "contact.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "updated",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "contact.updated",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "deleted",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "contact.deleted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            }
+          ]
+        }
+      },
+      "id": "switch-1",
+      "name": "Route by Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://your-crm.com/api/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CRM_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.data.email }}"
+            },
+            {
+              "name": "first_name",
+              "value": "={{ $json.data.first_name }}"
+            },
+            {
+              "name": "last_name",
+              "value": "={{ $json.data.last_name }}"
+            },
+            {
+              "name": "source",
+              "value": "resend"
+            },
+            {
+              "name": "resend_id",
+              "value": "={{ $json.data.id }}"
+            }
+          ]
+        }
+      },
+      "id": "http-create-1",
+      "name": "Create in CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 160],
+      "notes": "Replace with your CRM API endpoint"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://your-crm.com/api/contacts/{{ encodeURIComponent($json.data.email) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CRM_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "first_name",
+              "value": "={{ $json.data.first_name }}"
+            },
+            {
+              "name": "last_name",
+              "value": "={{ $json.data.last_name }}"
+            },
+            {
+              "name": "unsubscribed",
+              "value": "={{ $json.data.unsubscribed }}"
+            },
+            {
+              "name": "updated_at",
+              "value": "={{ $json.created_at }}"
+            }
+          ]
+        }
+      },
+      "id": "http-update-1",
+      "name": "Update in CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 300],
+      "notes": "Replace with your CRM API endpoint"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://your-crm.com/api/contacts/{{ encodeURIComponent($json.data.email) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CRM_API_KEY }}"
+            }
+          ]
+        }
+      },
+      "id": "http-delete-1",
+      "name": "Delete from CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 440],
+      "notes": "Replace with your CRM API endpoint"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log the sync operation for monitoring\nconst event = $input.first().json;\n\nreturn [{\n  json: {\n    operation: event.type.split('.')[1],\n    email: event.data?.email,\n    timestamp: new Date().toISOString(),\n    success: true,\n    resend_event_id: event.id\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Log Sync Operation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Contact Sync Workflow\n\nThis workflow synchronizes contact changes from Resend to your CRM or external system in real-time.\n\n### Events Handled:\n- **contact.created** → Creates contact in CRM\n- **contact.updated** → Updates contact in CRM\n- **contact.deleted** → Removes contact from CRM\n\n### Setup:\n1. Configure webhook signing secret from Resend dashboard\n2. Replace HTTP Request URLs with your CRM endpoints\n3. Set up environment variable for CRM_API_KEY\n4. Activate and register webhook URL in Resend"
+      },
+      "id": "note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [200, 40]
+    }
+  ],
+  "connections": {
+    "Resend Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route by Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Event Type": {
+      "main": [
+        [
+          {
+            "node": "Create in CRM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update in CRM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete from CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create in CRM": {
+      "main": [
+        [
+          {
+            "node": "Log Sync Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update in CRM": {
+      "main": [
+        [
+          {
+            "node": "Log Sync Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete from CRM": {
+      "main": [
+        [
+          {
+            "node": "Log Sync Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "pinData": {}
+}

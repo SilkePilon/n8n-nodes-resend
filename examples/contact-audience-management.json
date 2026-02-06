@@ -1,0 +1,298 @@
+{
+  "name": "Resend - Contact & Audience Management",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "newsletter-signup",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Newsletter Signup Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "newsletter-signup"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate and process signup data\nconst body = $input.first().json.body;\n\nif (!body.email || !body.email.includes('@')) {\n  throw new Error('Valid email is required');\n}\n\nreturn [{\n  json: {\n    email: body.email.toLowerCase().trim(),\n    first_name: body.first_name || '',\n    last_name: body.last_name || '',\n    interests: body.interests || [],\n    source: body.source || 'website',\n    subscribed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Validate Signup Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "audiences",
+        "operation": "list"
+      },
+      "id": "resend-audience-1",
+      "name": "Get Audiences",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Find the Newsletter audience or use the first one\nconst audiences = $input.first().json.data;\nconst signupData = $('Validate Signup Data').first().json;\n\nlet targetAudience = audiences.find(a => \n  a.name.toLowerCase().includes('newsletter') || \n  a.name.toLowerCase().includes('subscribers')\n);\n\n// Fall back to first audience if no newsletter audience found\nif (!targetAudience && audiences.length > 0) {\n  targetAudience = audiences[0];\n}\n\nif (!targetAudience) {\n  throw new Error('No audience found. Please create an audience in Resend first.');\n}\n\nreturn [{\n  json: {\n    ...signupData,\n    audience_id: targetAudience.id,\n    audience_name: targetAudience.name\n  }\n}];"
+      },
+      "id": "code-2",
+      "name": "Select Target Audience",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "resource": "contacts",
+        "operation": "create",
+        "audienceId": "={{ $json.audience_id }}",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "firstName": "={{ $json.first_name }}",
+          "lastName": "={{ $json.last_name }}",
+          "unsubscribed": false
+        }
+      },
+      "id": "resend-contact-1",
+      "name": "Create Contact",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [1120, 300],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-1",
+      "name": "Contact Created?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "resource": "segments",
+        "operation": "list",
+        "audienceId": "={{ $('Select Target Audience').item.json.audience_id }}"
+      },
+      "id": "resend-segments-1",
+      "name": "Get Available Segments",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [1560, 180],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "fromEmail": "welcome@yourdomain.com",
+        "toEmail": "={{ $('Select Target Audience').item.json.email }}",
+        "subject": "Welcome to our Newsletter! 🎉",
+        "emailType": "html",
+        "htmlBody": "={{ `<h1>Welcome, ${$('Select Target Audience').item.json.first_name || 'Friend'}!</h1><p>Thank you for subscribing to our newsletter. We're excited to have you!</p><p>Here's what you can expect:</p><ul><li>Weekly updates and insights</li><li>Exclusive content and offers</li><li>Early access to new features</li></ul><p>Stay tuned for our next update!</p><p>Best regards,<br>The Team</p>` }}"
+      },
+      "id": "resend-welcome-1",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [1780, 180],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Successfully subscribed!', email: $('Select Target Audience').item.json.email }) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-success-1",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2000, 180]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"Email already subscribed or invalid\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-error-1",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1560, 420]
+    },
+    {
+      "parameters": {
+        "content": "## Contact & Audience Management Workflow\n\nThis workflow handles newsletter signups through a webhook and manages contacts in Resend.\n\n### Flow:\n1. **Webhook**: Receives signup from website form\n2. **Validate**: Checks email format and cleans data\n3. **Get Audiences**: Lists available audiences\n4. **Select Audience**: Picks the newsletter audience\n5. **Create Contact**: Adds contact to Resend\n6. **Send Welcome**: Sends welcome email to new subscriber\n7. **Respond**: Returns success/error to the website\n\n### Integration Points:\n- Works with any frontend form\n- Returns JSON response for AJAX handling\n- Handles duplicate emails gracefully\n\n### Setup:\n1. Configure Resend credentials\n2. Create an audience in Resend dashboard\n3. Update sender email (must be verified domain)\n4. Get the webhook URL and use in your signup form"
+      },
+      "id": "note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [200, 40]
+    }
+  ],
+  "connections": {
+    "Newsletter Signup Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Signup Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Signup Data": {
+      "main": [
+        [
+          {
+            "node": "Get Audiences",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audiences": {
+      "main": [
+        [
+          {
+            "node": "Select Target Audience",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Target Audience": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Contact Created?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Created?": {
+      "main": [
+        [
+          {
+            "node": "Get Available Segments",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Available Segments": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "pinData": {}
+}
