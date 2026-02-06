@@ -157,6 +157,28 @@
                 "combinator": "and"
               },
               "renameOutput": true
+            },
+            {
+              "outputKey": "delivery_delayed",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "email.delivery_delayed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
             }
           ]
         }
@@ -213,6 +235,14 @@
             {
               "leftValue": "={{ $json.type }}",
               "rightValue": "email.bounced",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "email.complained",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -290,6 +320,13 @@
         [
           {
             "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Bounce or Complaint?",
             "type": "main",
             "index": 0
           }

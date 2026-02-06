@@ -135,7 +135,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={\n  \"request_id\": \"{{ $('Get Approval Request').item.json.request_id }}\",\n  \"status\": \"{{ $json.data.approved ? 'approved' : 'declined' }}\",\n  \"processed_at\": \"{{ new Date().toISOString() }}\",\n  \"requester\": \"{{ $('Get Approval Request').item.json.requester_name }}\"\n}",
+        "jsonOutput": "={\n  \"request_id\": \"{{ $('Get Approval Request').item.json.request_id }}\",\n  \"status\": \"{{ $('Send Approval Email').item.json.data.approved ? 'approved' : 'declined' }}\",\n  \"processed_at\": \"{{ new Date().toISOString() }}\",\n  \"requester\": \"{{ $('Get Approval Request').item.json.requester_name }}\"\n}",
         "options": {}
       },
       "id": "set-1",

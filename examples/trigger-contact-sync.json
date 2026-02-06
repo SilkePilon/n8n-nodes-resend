@@ -150,7 +150,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "=https://your-crm.com/api/contacts/{{ $json.data.email }}",
+        "url": "=https://your-crm.com/api/contacts/{{ encodeURIComponent($json.data.email) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -196,7 +196,7 @@
     {
       "parameters": {
         "method": "DELETE",
-        "url": "=https://your-crm.com/api/contacts/{{ $json.data.email }}",
+        "url": "=https://your-crm.com/api/contacts/{{ encodeURIComponent($json.data.email) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

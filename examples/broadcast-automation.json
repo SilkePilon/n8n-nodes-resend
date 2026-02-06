@@ -49,11 +49,12 @@
     },
     {
       "parameters": {
-        "resource": "templates",
-        "operation": "list"
+        "resource": "segments",
+        "operation": "list",
+        "audienceId": "={{ $json.audience_id }}"
       },
-      "id": "resend-templates-1",
-      "name": "Get Templates",
+      "id": "resend-segments-1",
+      "name": "Get Segments",
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
       "position": [900, 300],
@@ -66,10 +67,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Select the weekly newsletter template\nconst templates = $input.first().json.data || [];\nconst audienceData = $('Select Audience').first().json;\n\nif (templates.length === 0) {\n  // No template found, we'll use inline HTML\n  return [{\n    json: {\n      ...audienceData,\n      use_template: false,\n      template_id: null,\n      html_content: `\n        <h1>Weekly Update - ${new Date().toLocaleDateString()}</h1>\n        <p>Hello there!</p>\n        <p>Here's what's new this week:</p>\n        <ul>\n          <li>Feature updates and improvements</li>\n          <li>Tips and best practices</li>\n          <li>Community highlights</li>\n        </ul>\n        <p>Stay tuned for more updates!</p>\n        <p>Best,<br>The Team</p>\n      `\n    }\n  }];\n}\n\n// Find weekly newsletter template\nlet template = templates.find(t => \n  t.name.toLowerCase().includes('weekly') || \n  t.name.toLowerCase().includes('newsletter')\n);\n\n// Fallback to first template\nif (!template) {\n  template = templates[0];\n}\n\nreturn [{\n  json: {\n    ...audienceData,\n    use_template: true,\n    template_id: template.id,\n    template_name: template.name\n  }\n}];"
+        "jsCode": "// Select a segment for the broadcast\nconst segments = $input.first().json.data || [];\nconst audienceData = $('Select Audience').first().json;\n\nif (segments.length === 0) {\n  throw new Error('No segments found. Please create a segment in your audience first.');\n}\n\n// Find newsletter or weekly segment, or use first available\nlet targetSegment = segments.find(s => \n  s.name.toLowerCase().includes('newsletter') || \n  s.name.toLowerCase().includes('weekly') ||\n  s.name.toLowerCase().includes('all')\n);\n\n// Fallback to first segment\nif (!targetSegment) {\n  targetSegment = segments[0];\n}\n\nreturn [{\n  json: {\n    ...audienceData,\n    segment_id: targetSegment.id,\n    segment_name: targetSegment.name\n  }\n}];"
       },
-      "id": "code-2",
-      "name": "Select Template",
+      "id": "code-segments-1",
+      "name": "Select Segment",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1120, 300]
@@ -78,13 +79,12 @@
       "parameters": {
         "resource": "broadcasts",
         "operation": "create",
-        "audienceId": "={{ $json.audience_id }}",
-        "from": "newsletter@yourdomain.com",
-        "subject": "={{ $json.campaign_name }}",
-        "additionalFields": {
-          "name": "={{ $json.campaign_name }}",
-          "previewText": "Your weekly dose of updates and insights",
-          "html": "={{ $json.use_template ? undefined : $json.html_content }}"
+        "segmentId": "={{ $json.segment_id }}",
+        "broadcastFrom": "newsletter@yourdomain.com",
+        "broadcastSubject": "={{ $json.campaign_name }}",
+        "broadcastHtml": "={{ $json.html_content || '<h1>Weekly Update - ' + new Date().toLocaleDateString() + '</h1><p>Hello there!</p><p>Here\\'s what\\'s new this week.</p><p><a href=\"{{{RESEND_UNSUBSCRIBE_URL}}}\">Unsubscribe</a></p>' }}",
+        "broadcastCreateOptions": {
+          "name": "={{ $json.campaign_name }}"
         }
       },
       "id": "resend-broadcast-create-1",
@@ -97,7 +97,8 @@
           "id": "",
           "name": "Resend API"
         }
-      }
+      },
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -172,7 +173,7 @@
     },
     {
       "parameters": {
-        "content": "## Broadcast Campaign Automation\n\nThis workflow automates weekly newsletter broadcasts using Resend.\n\n### Flow:\n1. **Schedule**: Triggers every Friday at 9 AM\n2. **Get Audiences**: Fetches available audiences\n3. **Select Audience**: Picks newsletter audience\n4. **Get Templates**: Lists available templates\n5. **Select Template**: Picks newsletter template (or uses inline HTML)\n6. **Create Broadcast**: Creates the campaign\n7. **Send Broadcast**: Sends to all contacts in audience\n8. **Notify**: Alerts team on Slack\n\n### Configuration:\n1. Set up Resend credentials\n2. Create an audience and add contacts\n3. Optionally create a reusable template\n4. Update sender email (verified domain)\n5. Configure Slack for notifications (optional)\n\n### Customization:\n- Change schedule trigger for different timing\n- Add content from external sources (CMS, RSS)\n- Include dynamic content per recipient"
+        "content": "## Broadcast Campaign Automation\n\nThis workflow automates weekly newsletter broadcasts using Resend.\n\n### Flow:\n1. **Schedule**: Triggers every Friday at 9 AM\n2. **Get Audiences**: Fetches available audiences\n3. **Select Audience**: Picks newsletter audience\n4. **Get Segments**: Lists segments in that audience\n5. **Select Segment**: Picks target segment (required for broadcasts)\n6. **Create Broadcast**: Creates the campaign with HTML content\n7. **Send Broadcast**: Sends to all contacts in segment\n8. **Notify**: Alerts team on Slack\n\n### Configuration:\n1. Set up Resend credentials\n2. Create an audience with contacts\n3. Create a segment in the audience\n4. Update sender email (verified domain)\n5. Include {{{RESEND_UNSUBSCRIBE_URL}}} in HTML content\n\n### Customization:\n- Change schedule trigger for different timing\n- Modify HTML content or add dynamic content\n- Connect to CMS for content sourcing"
       },
       "id": "note-1",
       "name": "Sticky Note",
@@ -208,25 +209,25 @@
       "main": [
         [
           {
-            "node": "Get Templates",
+            "node": "Get Segments",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Templates": {
+    "Get Segments": {
       "main": [
         [
           {
-            "node": "Select Template",
+            "node": "Select Segment",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Select Template": {
+    "Select Segment": {
       "main": [
         [
           {

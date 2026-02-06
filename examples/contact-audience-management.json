@@ -130,7 +130,7 @@
         "toEmail": "={{ $('Select Target Audience').item.json.email }}",
         "subject": "Welcome to our Newsletter! 🎉",
         "emailType": "html",
-        "htmlBody": "=<h1>Welcome, {{ $('Select Target Audience').item.json.first_name || 'Friend' }}!</h1>\n<p>Thank you for subscribing to our newsletter. We're excited to have you!</p>\n<p>Here's what you can expect:</p>\n<ul>\n<li>Weekly updates and insights</li>\n<li>Exclusive content and offers</li>\n<li>Early access to new features</li>\n</ul>\n<p>Stay tuned for our next update!</p>\n<p>Best regards,<br>The Team</p>"
+        "htmlBody": "={{ `<h1>Welcome, ${$('Select Target Audience').item.json.first_name || 'Friend'}!</h1><p>Thank you for subscribing to our newsletter. We're excited to have you!</p><p>Here's what you can expect:</p><ul><li>Weekly updates and insights</li><li>Exclusive content and offers</li><li>Early access to new features</li></ul><p>Stay tuned for our next update!</p><p>Best regards,<br>The Team</p>` }}"
       },
       "id": "resend-welcome-1",
       "name": "Send Welcome Email",
@@ -147,7 +147,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Successfully subscribed!\",\n  \"email\": \"{{ $('Select Target Audience').item.json.email }}\"\n}",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Successfully subscribed!', email: $('Select Target Audience').item.json.email }) }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
