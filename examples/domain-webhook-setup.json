@@ -1,0 +1,345 @@
+{
+  "name": "Resend - Domain & Webhook Setup",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"domain\": \"yourdomain.com\",\n  \"webhook_endpoint\": \"https://your-n8n-instance.com/webhook/resend-events\",\n  \"events_to_subscribe\": [\n    \"email.sent\",\n    \"email.delivered\",\n    \"email.opened\",\n    \"email.clicked\",\n    \"email.bounced\",\n    \"email.complained\"\n  ]\n}",
+        "options": {}
+      },
+      "id": "set-1",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [460, 300],
+      "notes": "Edit these values for your setup"
+    },
+    {
+      "parameters": {
+        "resource": "domains",
+        "operation": "list"
+      },
+      "id": "resend-domains-list-1",
+      "name": "List Existing Domains",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if domain already exists\nconst domains = $input.first().json.data || [];\nconst config = $('Configuration').first().json;\nconst targetDomain = config.domain;\n\nconst existingDomain = domains.find(d => d.name === targetDomain);\n\nif (existingDomain) {\n  return [{\n    json: {\n      ...config,\n      domain_exists: true,\n      domain_id: existingDomain.id,\n      domain_status: existingDomain.status,\n      domain_records: existingDomain.records || []\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...config,\n    domain_exists: false,\n    domain_id: null,\n    domain_status: 'not_created'\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Check Domain Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.domain_exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-domain-1",
+      "name": "Domain Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "resource": "domains",
+        "operation": "create",
+        "name": "={{ $('Configuration').item.json.domain }}"
+      },
+      "id": "resend-domain-create-1",
+      "name": "Create Domain",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [1340, 420],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare DNS records for output\nconst domainData = $input.first().json;\nconst config = $('Configuration').first().json;\n\n// Handle both existing domain and newly created domain\nlet records = domainData.records || domainData.domain_records || [];\nlet domainId = domainData.id || domainData.domain_id;\nlet status = domainData.status || domainData.domain_status;\n\nreturn [{\n  json: {\n    domain: config.domain,\n    domain_id: domainId,\n    status: status,\n    dns_records: records,\n    setup_instructions: records.length > 0 ? \n      'Add the following DNS records to your domain provider' : \n      'DNS records will be available once the domain is processed'\n  }\n}];"
+      },
+      "id": "code-2",
+      "name": "Format Domain Info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "resource": "webhooks",
+        "operation": "list"
+      },
+      "id": "resend-webhooks-list-1",
+      "name": "List Existing Webhooks",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [1780, 300],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if webhook already exists for our endpoint\nconst webhooks = $input.first().json.data || [];\nconst config = $('Configuration').first().json;\nconst domainInfo = $('Format Domain Info').first().json;\nconst targetEndpoint = config.webhook_endpoint;\n\nconst existingWebhook = webhooks.find(w => w.endpoint_url === targetEndpoint);\n\nreturn [{\n  json: {\n    ...domainInfo,\n    webhook_endpoint: targetEndpoint,\n    events_to_subscribe: config.events_to_subscribe,\n    webhook_exists: !!existingWebhook,\n    existing_webhook_id: existingWebhook?.id || null\n  }\n}];"
+      },
+      "id": "code-3",
+      "name": "Check Webhook Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.webhook_exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-webhook-1",
+      "name": "Webhook Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2220, 300]
+    },
+    {
+      "parameters": {
+        "resource": "webhooks",
+        "operation": "create",
+        "endpointUrl": "={{ $json.webhook_endpoint }}",
+        "events": "={{ $json.events_to_subscribe }}"
+      },
+      "id": "resend-webhook-create-1",
+      "name": "Create Webhook",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [2440, 420],
+      "credentials": {
+        "resendApi": {
+          "id": "",
+          "name": "Resend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate final setup report\nconst input = $input.first().json;\nconst config = $('Configuration').first().json;\nconst domainInfo = $('Format Domain Info').first().json;\n\n// Check if this is from the webhook creation or the existing webhook path\nconst webhookId = input.id || input.existing_webhook_id;\nconst webhookSecret = input.signing_secret || 'Use existing webhook secret';\n\nconst report = {\n  setup_complete: true,\n  timestamp: new Date().toISOString(),\n  domain: {\n    name: config.domain,\n    id: domainInfo.domain_id,\n    status: domainInfo.status,\n    dns_records: domainInfo.dns_records\n  },\n  webhook: {\n    id: webhookId,\n    endpoint: config.webhook_endpoint,\n    events: config.events_to_subscribe,\n    signing_secret: webhookSecret\n  },\n  next_steps: [\n    'Add DNS records to your domain provider',\n    'Wait for domain verification (usually 24-48 hours)',\n    'Store the webhook signing secret securely',\n    'Configure your Resend Trigger node with the signing secret'\n  ]\n};\n\nreturn [{ json: report }];"
+      },
+      "id": "code-4",
+      "name": "Generate Setup Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2660, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Domain & Webhook Setup Workflow\n\nThis workflow automates the initial setup of domains and webhooks in Resend.\n\n### What It Does:\n1. **Check Domain**: Lists existing domains, creates if needed\n2. **DNS Records**: Returns DNS records to configure at your registrar\n3. **Check Webhook**: Lists existing webhooks\n4. **Create Webhook**: Sets up webhook for event notifications\n5. **Report**: Generates setup summary with next steps\n\n### Configuration:\nEdit the 'Configuration' node to set:\n- Your sending domain\n- Your n8n webhook endpoint URL\n- Events to subscribe to\n\n### After Running:\n1. Copy DNS records to your domain registrar\n2. Save the webhook signing secret\n3. Wait for domain verification\n4. Start using Resend for sending emails!\n\n### Note:\nDomain verification typically takes 24-48 hours after adding DNS records."
+      },
+      "id": "note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [200, 40]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "List Existing Domains",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Existing Domains": {
+      "main": [
+        [
+          {
+            "node": "Check Domain Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Domain Status": {
+      "main": [
+        [
+          {
+            "node": "Domain Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Domain Exists?": {
+      "main": [
+        [
+          {
+            "node": "Format Domain Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Domain": {
+      "main": [
+        [
+          {
+            "node": "Format Domain Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Domain Info": {
+      "main": [
+        [
+          {
+            "node": "List Existing Webhooks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Existing Webhooks": {
+      "main": [
+        [
+          {
+            "node": "Check Webhook Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Webhook Status": {
+      "main": [
+        [
+          {
+            "node": "Webhook Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Exists?": {
+      "main": [
+        [
+          {
+            "node": "Generate Setup Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Setup Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "pinData": {}
+}
