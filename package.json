@@ -15,14 +15,14 @@
     "contacts"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/SilkePilon/n8n-nodes-resend/",
+  "homepage": "https://github.com/resend/n8n-nodes-resend",
   "author": {
-    "name": "SilkePilon",
+    "name": "Resend",
     "email": "silkepilon@users.noreply.github.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SilkePilon/n8n-nodes-resend.git"
+    "url": "git+https://github.com/resend/n8n-nodes-resend.git"
   },
   "engines": {
     "node": ">=20.15"

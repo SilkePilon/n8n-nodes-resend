@@ -6,7 +6,7 @@
 
 <p align="center">
 	<img alt="NPM Version" src="https://img.shields.io/npm/v/n8n-nodes-resend">
-	<img alt="GitHub License" src="https://img.shields.io/github/license/SilkePilon/n8n-nodes-resend">
+	<img alt="GitHub License" src="https://img.shields.io/github/license/resend/n8n-nodes-resend">
 	<img alt="NPM Downloads" src="https://img.shields.io/npm/dm/n8n-nodes-resend">
 	<img alt="NPM Last Update" src="https://img.shields.io/npm/last-update/n8n-nodes-resend">
 	<img alt="n8n community node" src="https://img.shields.io/badge/n8n-community_node-blue?logo=n8n">
@@ -261,7 +261,7 @@ The **Resend Trigger** node receives webhooks for real-time email events. Signat
 ## Development
 
 ```bash
-git clone https://github.com/SilkePilon/n8n-nodes-resend.git
+git clone https://github.com/resend/n8n-nodes-resend.git
 cd n8n-nodes-resend
 npm install
 npm run build
@@ -279,7 +279,7 @@ Enhanced with contributions from [jannispkz/n8n-nodes-resend-complete](https://g
 ---
 
 <p align="center">
-  <a href="https://github.com/SilkePilon/n8n-nodes-resend">GitHub</a> |
-  <a href="https://github.com/SilkePilon/n8n-nodes-resend/issues">Issues</a> |
+  <a href="https://github.com/resend/n8n-nodes-resend">GitHub</a> |
+  <a href="https://github.com/resend/n8n-nodes-resend/issues">Issues</a> |
   <a href="https://resend.com/docs">Resend Docs</a>
 </p>
