@@ -38,6 +38,7 @@ import {
 	getReceivedEmailsListSearch,
 	getSegmentsListSearch,
 	getTemplatesListSearch,
+	getTemplateVariablesListSearch,
 	getTopicsListSearch,
 	getWebhooksListSearch,
 } from './methods';
@@ -189,6 +190,7 @@ export class Resend implements INodeType {
 			getReceivedEmails: getReceivedEmailsListSearch,
 			getSegments: getSegmentsListSearch,
 			getTemplates: getTemplatesListSearch,
+			getTemplateVariables: getTemplateVariablesListSearch,
 			getTopics: getTopicsListSearch,
 			getWebhooks: getWebhooksListSearch,
 		},
