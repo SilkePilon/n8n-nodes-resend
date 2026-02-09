@@ -144,18 +144,29 @@ export const description: INodeProperties[] = [
 				displayName: 'Variable',
 				values: [
 					{
-						displayName: 'Key Name or ID',
+						displayName: 'Key',
 						name: 'key',
-						type: 'options',
+						type: 'resourceLocator',
+						default: { mode: 'list', value: '' },
 						required: true,
-						default: '',
-						typeOptions: {
-							loadOptionsMethod: 'getTemplateVariables',
-							loadOptionsDependsOn: ['emailTemplateId'],
-							allowCustomValues: true,
-						},
-						description:
-							'Template variable name. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+						description: 'Template variable name. Select from the template or enter a custom key.',
+						modes: [
+							{
+								displayName: 'From List',
+								name: 'list',
+								type: 'list',
+								placeholder: 'Select variable...',
+								typeOptions: {
+									searchListMethod: 'getTemplateVariables',
+								},
+							},
+							{
+								displayName: 'By Key',
+								name: 'id',
+								type: 'string',
+								placeholder: 'Enter variable key...',
+							},
+						],
 					},
 					{
 						displayName: 'Value',

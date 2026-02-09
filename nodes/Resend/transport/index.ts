@@ -180,19 +180,36 @@ export function parseTemplateVariables(
 
 /**
  * Build template send variables object.
+ * Handles both plain string keys and resourceLocator format keys.
  */
 export function buildTemplateSendVariables(
-	variablesInput: { variables?: Array<{ key: string; value?: unknown }> } | undefined,
+	variablesInput: { variables?: Array<{ key: string | { mode?: string; value?: unknown }; value?: unknown }> } | undefined,
 ): Record<string, unknown> | undefined {
 	if (!variablesInput?.variables?.length) {
 		return undefined;
 	}
 	const variables: Record<string, unknown> = {};
 	for (const variable of variablesInput.variables) {
-		if (!variable.key) {
+		let keyValue: string | undefined;
+		if (typeof variable.key === 'object' && variable.key !== null && 'value' in variable.key) {
+			const extracted = variable.key.value;
+			if (typeof extracted === 'string') {
+				const trimmed = extracted.trim();
+				if (trimmed) {
+					keyValue = trimmed;
+				}
+			}
+		} else if (typeof variable.key === 'string') {
+			const trimmed = variable.key.trim();
+			if (trimmed) {
+				keyValue = trimmed;
+			}
+		}
+
+		if (!keyValue) {
 			continue;
 		}
-		variables[variable.key] = variable.value ?? '';
+		variables[keyValue] = variable.value ?? '';
 	}
 
 	return Object.keys(variables).length ? variables : undefined;

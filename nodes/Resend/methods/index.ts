@@ -44,9 +44,15 @@ export async function getTemplateVariables(
 			return undefined;
 		}
 	};
-	const getParameterValue = (name: string) => {
+	const getParameterValue = (name: string): string | undefined => {
 		const currentParameters = this.getCurrentNodeParameters();
-		const fromCurrentParameters = getStringValue(currentParameters?.[name]);
+
+		const paramValue = currentParameters?.[name];
+		if (paramValue && typeof paramValue === 'object' && 'value' in paramValue) {
+			return getStringValue((paramValue as { value: unknown }).value);
+		}
+
+		const fromCurrentParameters = getStringValue(paramValue);
 		if (fromCurrentParameters) {
 			return fromCurrentParameters;
 		}
@@ -477,4 +483,11 @@ export async function getWebhooksListSearch(
 	filter?: string,
 ): Promise<INodeListSearchResult> {
 	return wrapForListSearch(this, getWebhooks, filter);
+}
+
+export async function getTemplateVariablesListSearch(
+	this: ILoadOptionsFunctions,
+	filter?: string,
+): Promise<INodeListSearchResult> {
+	return wrapForListSearch(this, getTemplateVariables, filter);
 }
