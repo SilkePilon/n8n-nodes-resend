@@ -194,7 +194,6 @@ export class ResendTrigger implements INodeType {
 					'';
 
 				if (!svixId || !svixTimestamp || !svixSignature) {
-					console.error('Missing required Svix headers for webhook verification');
 					return {
 						workflowData: [[]],
 					};
@@ -210,8 +209,6 @@ export class ResendTrigger implements INodeType {
 					this.getNode(),
 				);
 			} catch (error) {
-				// Signature verification failed
-				console.error('Resend webhook signature verification failed:', error);
 				return {
 					workflowData: [[]],
 				};
@@ -219,8 +216,6 @@ export class ResendTrigger implements INodeType {
 		}
 
 		if (!bodyData || typeof bodyData !== 'object' || !('type' in bodyData)) {
-			// Resend should always send a JSON object with a 'type' field
-			console.warn('Received webhook data that was not in the expected format.');
 			return {
 				workflowData: [[]],
 			};
@@ -233,8 +228,6 @@ export class ResendTrigger implements INodeType {
 				workflowData: [this.helpers.returnJsonArray([bodyData])],
 			};
 		} else {
-			// Event type not subscribed to, log and ignore
-			console.log(`Received event type "${eventType}" but not subscribed, ignoring.`);
 			return {
 				workflowData: [[]],
 			};
