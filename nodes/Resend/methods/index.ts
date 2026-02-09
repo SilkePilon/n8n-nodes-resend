@@ -489,21 +489,5 @@ export async function getTemplateVariablesListSearch(
 	this: ILoadOptionsFunctions,
 	filter?: string,
 ): Promise<INodeListSearchResult> {
-	const options = await getTemplateVariables.call(this);
-
-	let filteredOptions = options;
-	if (filter) {
-		const filterLower = filter.toLowerCase();
-		filteredOptions = options.filter(option =>
-			option.name.toLowerCase().includes(filterLower) ||
-			option.value.toString().toLowerCase().includes(filterLower)
-		);
-	}
-
-	return {
-		results: filteredOptions.map(option => ({
-			name: option.name,
-			value: option.value,
-		}))
-	};
+	return wrapForListSearch(this, getTemplateVariables, filter);
 }

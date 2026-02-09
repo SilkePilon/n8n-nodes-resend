@@ -192,9 +192,18 @@ export function buildTemplateSendVariables(
 	for (const variable of variablesInput.variables) {
 		let keyValue: string | undefined;
 		if (typeof variable.key === 'object' && variable.key !== null && 'value' in variable.key) {
-			keyValue = variable.key.value as string;
+			const extracted = variable.key.value;
+			if (typeof extracted === 'string') {
+				const trimmed = extracted.trim();
+				if (trimmed) {
+					keyValue = trimmed;
+				}
+			}
 		} else if (typeof variable.key === 'string') {
-			keyValue = variable.key;
+			const trimmed = variable.key.trim();
+			if (trimmed) {
+				keyValue = trimmed;
+			}
 		}
 
 		if (!keyValue) {
