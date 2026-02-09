@@ -7,7 +7,10 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -17,7 +20,10 @@
       "name": "Get Approval Request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 300],
+      "position": [
+        440,
+        300
+      ],
       "notes": "Replace with your data source (form, database, API, etc.)"
     },
     {
@@ -53,7 +59,10 @@
       "name": "Send Approval Email",
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
-      "position": [660, 300],
+      "position": [
+        660,
+        300
+      ],
       "credentials": {
         "resendApi": {
           "id": "",
@@ -86,7 +95,10 @@
       "name": "Was Approved?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [880, 300]
+      "position": [
+        880,
+        300
+      ]
     },
     {
       "parameters": {
@@ -102,7 +114,10 @@
       "name": "Send Approved Notification",
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
-      "position": [1120, 180],
+      "position": [
+        1120,
+        180
+      ],
       "credentials": {
         "resendApi": {
           "id": "",
@@ -124,7 +139,10 @@
       "name": "Send Declined Notification",
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
-      "position": [1120, 420],
+      "position": [
+        1120,
+        420
+      ],
       "credentials": {
         "resendApi": {
           "id": "",
@@ -142,7 +160,10 @@
       "name": "Update Database",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
-      "position": [1340, 300],
+      "position": [
+        1340,
+        300
+      ],
       "notes": "Replace with actual database update (e.g., Postgres, Airtable)"
     },
     {
@@ -153,7 +174,10 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [200, 40]
+      "position": [
+        200,
+        40
+      ]
     }
   ],
   "connections": {

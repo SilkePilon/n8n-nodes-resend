@@ -15,7 +15,10 @@
       "name": "Resend Trigger",
       "type": "n8n-nodes-resend.resendTrigger",
       "typeVersion": 1,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "resend-contact-sync"
     },
     {
@@ -95,7 +98,10 @@
       "name": "Route by Event Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [480, 300]
+      "position": [
+        480,
+        300
+      ]
     },
     {
       "parameters": {
@@ -144,7 +150,10 @@
       "name": "Create in CRM",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [720, 160],
+      "position": [
+        720,
+        160
+      ],
       "notes": "Replace with your CRM API endpoint"
     },
     {
@@ -190,7 +199,10 @@
       "name": "Update in CRM",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [720, 300],
+      "position": [
+        720,
+        300
+      ],
       "notes": "Replace with your CRM API endpoint"
     },
     {
@@ -211,7 +223,10 @@
       "name": "Delete from CRM",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [720, 440],
+      "position": [
+        720,
+        440
+      ],
       "notes": "Replace with your CRM API endpoint"
     },
     {
@@ -222,7 +237,10 @@
       "name": "Log Sync Operation",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 300]
+      "position": [
+        960,
+        300
+      ]
     },
     {
       "parameters": {
@@ -232,7 +250,10 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [200, 40]
+      "position": [
+        200,
+        40
+      ]
     }
   ],
   "connections": {

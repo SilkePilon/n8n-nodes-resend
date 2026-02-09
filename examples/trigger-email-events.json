@@ -19,7 +19,10 @@
       "name": "Resend Trigger",
       "type": "n8n-nodes-resend.resendTrigger",
       "typeVersion": 1,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "resend-email-events"
     },
     {
@@ -187,7 +190,10 @@
       "name": "Route by Event Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [480, 300]
+      "position": [
+        480,
+        300
+      ]
     },
     {
       "parameters": {
@@ -220,7 +226,10 @@
       "name": "Log to Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [720, 160],
+      "position": [
+        720,
+        160
+      ],
       "notes": "Configure your Google Sheets document ID and sheet name"
     },
     {
@@ -256,7 +265,10 @@
       "name": "Is Bounce or Complaint?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [720, 400]
+      "position": [
+        720,
+        400
+      ]
     },
     {
       "parameters": {
@@ -268,7 +280,10 @@
       "name": "Alert on Slack",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
-      "position": [960, 380],
+      "position": [
+        960,
+        380
+      ],
       "notes": "Configure Slack credentials and channel"
     },
     {
@@ -279,7 +294,10 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [200, 40]
+      "position": [
+        200,
+        40
+      ]
     }
   ],
   "connections": {
