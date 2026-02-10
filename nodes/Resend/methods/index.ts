@@ -1,6 +1,5 @@
 import type { ILoadOptionsFunctions, INodePropertyOptions, INodeListSearchResult } from 'n8n-workflow';
-
-const RESEND_API_BASE = 'https://api.resend.com';
+import { RESEND_API_BASE, handleResendApiError } from '../transport';
 
 /**
  * Load options for dropdown fields (max 100 items).
@@ -10,16 +9,21 @@ async function loadDropdownOptions(
 	loadOptionsFunctions: ILoadOptionsFunctions,
 	endpoint: string,
 ): Promise<INodePropertyOptions[]> {
-	const response = await loadOptionsFunctions.helpers.httpRequestWithAuthentication.call(
-		loadOptionsFunctions,
-		'resendApi',
-		{
-			url: `${RESEND_API_BASE}${endpoint}`,
-			method: 'GET',
-			qs: { limit: 100 },
-			json: true,
-		},
-	);
+	let response;
+	try {
+		response = await loadOptionsFunctions.helpers.httpRequestWithAuthentication.call(
+			loadOptionsFunctions,
+			'resendApi',
+			{
+				url: `${RESEND_API_BASE}${endpoint}`,
+				method: 'GET',
+				qs: { limit: 100 },
+				json: true,
+			},
+		);
+	} catch (error) {
+		handleResendApiError(loadOptionsFunctions.getNode(), error);
+	}
 
 	const items = response?.data ?? [];
 	return items
@@ -84,15 +88,20 @@ export async function getTemplateVariables(
 		return [];
 	}
 
-	const response = await this.helpers.httpRequestWithAuthentication.call(
-		this,
-		'resendApi',
-		{
-			url: `${RESEND_API_BASE}/templates/${encodeURIComponent(normalizedTemplateId)}`,
-			method: 'GET',
-			json: true,
-		},
-	);
+	let response;
+	try {
+		response = await this.helpers.httpRequestWithAuthentication.call(
+			this,
+			'resendApi',
+			{
+				url: `${RESEND_API_BASE}/templates/${encodeURIComponent(normalizedTemplateId)}`,
+				method: 'GET',
+				json: true,
+			},
+		);
+	} catch (error) {
+		handleResendApiError(this.getNode(), error);
+	}
 
 	const variables = response?.variables ?? [];
 
@@ -127,8 +136,9 @@ export async function getBroadcasts(this: ILoadOptionsFunctions): Promise<INodeP
  * Contacts are now fetched directly from /contacts endpoint.
  */
 export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+	let response;
 	try {
-		const response = await this.helpers.httpRequestWithAuthentication.call(
+		response = await this.helpers.httpRequestWithAuthentication.call(
 			this,
 			'resendApi',
 			{
@@ -138,30 +148,29 @@ export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePro
 				json: true,
 			},
 		);
-
-		const items = response?.data ?? [];
-		return items
-			.filter((item: { id?: string }) => item?.id)
-			.map((item: { id: string; email?: string; first_name?: string; last_name?: string }) => {
-				const displayParts: string[] = [];
-				if (item.first_name || item.last_name) {
-					displayParts.push([item.first_name, item.last_name].filter(Boolean).join(' '));
-				}
-				if (item.email) {
-					displayParts.push(item.email);
-				}
-				const displayName = displayParts.length > 0
-					? `${displayParts.join(' - ')} (${item.id})`
-					: item.id;
-				return {
-					name: displayName,
-					value: item.id,
-				};
-			});
-	} catch {
-		// If API call fails, return empty list
-		return [];
+	} catch (error) {
+		handleResendApiError(this.getNode(), error);
 	}
+
+	const items = response?.data ?? [];
+	return items
+		.filter((item: { id?: string }) => item?.id)
+		.map((item: { id: string; email?: string; first_name?: string; last_name?: string }) => {
+			const displayParts: string[] = [];
+			if (item.first_name || item.last_name) {
+				displayParts.push([item.first_name, item.last_name].filter(Boolean).join(' '));
+			}
+			if (item.email) {
+				displayParts.push(item.email);
+			}
+			const displayName = displayParts.length > 0
+				? `${displayParts.join(' - ')} (${item.id})`
+				: item.id;
+			return {
+				name: displayName,
+				value: item.id,
+			};
+		});
 }
 
 export async function getDomains(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
@@ -172,16 +181,21 @@ export async function getDomains(this: ILoadOptionsFunctions): Promise<INodeProp
  * Load webhooks with endpoint URL in display name.
  */
 export async function getWebhooks(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	const response = await this.helpers.httpRequestWithAuthentication.call(
-		this,
-		'resendApi',
-		{
-			url: `${RESEND_API_BASE}/webhooks`,
-			method: 'GET',
-			qs: { limit: 100 },
-			json: true,
-		},
-	);
+	let response;
+	try {
+		response = await this.helpers.httpRequestWithAuthentication.call(
+			this,
+			'resendApi',
+			{
+				url: `${RESEND_API_BASE}/webhooks`,
+				method: 'GET',
+				qs: { limit: 100 },
+				json: true,
+			},
+		);
+	} catch (error) {
+		handleResendApiError(this.getNode(), error);
+	}
 
 	const items = response?.data ?? [];
 	return items
@@ -208,16 +222,21 @@ export async function getContactProperties(this: ILoadOptionsFunctions): Promise
  * Load sent emails with subject and date in display name.
  */
 export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	const response = await this.helpers.httpRequestWithAuthentication.call(
-		this,
-		'resendApi',
-		{
-			url: `${RESEND_API_BASE}/emails`,
-			method: 'GET',
-			qs: { limit: 100 },
-			json: true,
-		},
-	);
+	let response;
+	try {
+		response = await this.helpers.httpRequestWithAuthentication.call(
+			this,
+			'resendApi',
+			{
+				url: `${RESEND_API_BASE}/emails`,
+				method: 'GET',
+				qs: { limit: 100 },
+				json: true,
+			},
+		);
+	} catch (error) {
+		handleResendApiError(this.getNode(), error);
+	}
 
 	const items = response?.data ?? [];
 	return items
@@ -247,16 +266,21 @@ export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePrope
  * Load received emails with subject and date in display name.
  */
 export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	const response = await this.helpers.httpRequestWithAuthentication.call(
-		this,
-		'resendApi',
-		{
-			url: `${RESEND_API_BASE}/emails/receiving`,
-			method: 'GET',
-			qs: { limit: 100 },
-			json: true,
-		},
-	);
+	let response;
+	try {
+		response = await this.helpers.httpRequestWithAuthentication.call(
+			this,
+			'resendApi',
+			{
+				url: `${RESEND_API_BASE}/emails/receiving`,
+				method: 'GET',
+				qs: { limit: 100 },
+				json: true,
+			},
+		);
+	} catch (error) {
+		handleResendApiError(this.getNode(), error);
+	}
 
 	const items = response?.data ?? [];
 	return items

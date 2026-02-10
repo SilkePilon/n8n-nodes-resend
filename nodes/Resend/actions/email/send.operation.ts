@@ -1,6 +1,6 @@
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
-import { normalizeEmailList, buildTemplateSendVariables, RESEND_API_BASE } from '../../transport';
+import { normalizeEmailList, buildTemplateSendVariables, RESEND_API_BASE, handleResendApiError } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
@@ -676,13 +676,18 @@ export async function execute(
 		requestHeaders['Idempotency-Key'] = additionalOptions.idempotencyKey;
 	}
 
-	const response = await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
-		url: `${RESEND_API_BASE}/emails`,
-		method: 'POST',
-		headers: requestHeaders,
-		body: requestBody,
-		json: true,
-	});
+	let response;
+	try {
+		response = await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
+			url: `${RESEND_API_BASE}/emails`,
+			method: 'POST',
+			headers: requestHeaders,
+			body: requestBody,
+			json: true,
+		});
+	} catch (error) {
+		handleResendApiError(this.getNode(), error, index);
+	}
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

@@ -1,5 +1,6 @@
 import {
 	NodeOperationError,
+
 	SEND_AND_WAIT_OPERATION,
 	updateDisplayOptions,
 	WAIT_INDEFINITELY,
@@ -21,7 +22,7 @@ import {
 	createEmailBodyWithoutN8nAttribution,
 } from './email-templates';
 import type { IEmail, SendAndWaitConfig } from './interfaces';
-import { RESEND_API_BASE } from '../../transport';
+import { RESEND_API_BASE, handleResendApiError } from '../../transport';
 
 const appendAttributionOption: INodeProperties = {
 	displayName: 'Append N8n Attribution',
@@ -674,13 +675,17 @@ export async function sendResendEmail(context: IExecuteFunctions, email: IEmail)
 		requestBody.replyTo = email.replyTo;
 	}
 
-	await context.helpers.httpRequestWithAuthentication.call(context, 'resendApi', {
-		url: `${RESEND_API_BASE}/emails`,
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: requestBody,
-		json: true,
-	});
+	try {
+		await context.helpers.httpRequestWithAuthentication.call(context, 'resendApi', {
+			url: `${RESEND_API_BASE}/emails`,
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: requestBody,
+			json: true,
+		});
+	} catch (error) {
+		handleResendApiError(context.getNode(), error);
+	}
 }

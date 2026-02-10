@@ -1,5 +1,5 @@
-import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import type { IExecuteFunctions, IDataObject, INodeExecutionData } from 'n8n-workflow';
+import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
 import * as email from './email';
 import * as templates from './template';
@@ -63,7 +63,20 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 			returnData.push(...executionData);
 		} catch (error) {
 			if (this.continueOnFail()) {
-				returnData.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
+				const errorData: IDataObject = {
+					error: (error as Error).message,
+				};
+
+				if (error instanceof NodeApiError) {
+					if (error.httpCode) {
+						errorData.statusCode = error.httpCode;
+					}
+					if (error.description) {
+						errorData.description = error.description;
+					}
+				}
+
+				returnData.push({ json: errorData, pairedItem: { item: i } });
 				continue;
 			}
 			throw error;
