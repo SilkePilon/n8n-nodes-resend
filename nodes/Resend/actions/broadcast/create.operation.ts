@@ -121,14 +121,14 @@ export const description: INodeProperties[] = [
 				description: 'Plain text version of the email for clients that do not support HTML. If omitted, Resend will auto-generate from the HTML content.',
 			},
 			{
-				displayName: 'Topic',
+				displayName: 'Topic Name or ID',
 				name: 'topicId',
 				type: 'options',
 				default: '',
 				typeOptions: {
 					loadOptionsMethod: 'getTopics',
 				},
-				description: 'Topic to scope the broadcast to',
+				description: 'Topic to scope the broadcast to. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	},

@@ -92,7 +92,7 @@ export const description: INodeProperties[] = [
 						displayName: 'Segment',
 						values: [
 							{
-								displayName: 'Segment',
+								displayName: 'Segment Name or ID',
 								name: 'id',
 								type: 'options',
 								required: true,
@@ -121,7 +121,7 @@ export const description: INodeProperties[] = [
 						displayName: 'Topic',
 						values: [
 							{
-								displayName: 'Topic',
+								displayName: 'Topic Name or ID',
 								name: 'id',
 								type: 'options',
 								required: true,

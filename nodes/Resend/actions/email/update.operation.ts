@@ -19,7 +19,7 @@ export const description: INodeProperties[] = [
 	}),
 	{
 		displayName: 'Scheduled At',
-		name: 'scheduled_at',
+		name: 'scheduledAt',
 		type: 'string',
 		default: '',
 		placeholder: '2024-08-05T11:52:01.858Z',
@@ -39,11 +39,11 @@ export async function execute(
 	index: number,
 ): Promise<INodeExecutionData[]> {
 	const emailId = resolveDynamicIdValue(this, 'emailId', index);
-	const scheduledAt = this.getNodeParameter('scheduled_at', index) as string;
+	const scheduledAt = this.getNodeParameter('scheduledAt', index) as string;
 
 	const body: IDataObject = {};
 	if (scheduledAt) {
-		body.scheduled_at = scheduledAt;
+		body.scheduledAt = scheduledAt;
 	}
 
 	const response = await apiRequest.call(this, 'PATCH', `/emails/${encodeURIComponent(emailId)}`, body);

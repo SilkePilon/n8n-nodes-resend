@@ -43,17 +43,11 @@ export const description: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Region',
-				name: 'region',
-				type: 'options',
-				options: [
-					{ name: 'US East 1', value: 'us-east-1' },
-					{ name: 'EU West 1', value: 'eu-west-1' },
-					{ name: 'South America East 1', value: 'sa-east-1' },
-					{ name: 'Asia Pacific Northeast 1', value: 'ap-northeast-1' },
-				],
-				default: 'us-east-1',
-				description: 'The AWS region where emails will be sent from. Choose a region closest to your recipients for better deliverability.',
+				displayName: 'Click Tracking',
+				name: 'clickTracking',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to track clicks within the body of each HTML email sent from this domain',
 			},
 			{
 				displayName: 'Custom Return Path',
@@ -70,11 +64,17 @@ export const description: INodeProperties[] = [
 				description: 'Whether to track the open rate of each email sent from this domain',
 			},
 			{
-				displayName: 'Click Tracking',
-				name: 'clickTracking',
-				type: 'boolean',
-				default: false,
-				description: 'Whether to track clicks within the body of each HTML email sent from this domain',
+				displayName: 'Region',
+				name: 'region',
+				type: 'options',
+				options: [
+					{ name: 'US East 1', value: 'us-east-1' },
+					{ name: 'EU West 1', value: 'eu-west-1' },
+					{ name: 'South America East 1', value: 'sa-east-1' },
+					{ name: 'Asia Pacific Northeast 1', value: 'ap-northeast-1' },
+				],
+				default: 'us-east-1',
+				description: 'The AWS region where emails will be sent from. Choose a region closest to your recipients for better deliverability.',
 			},
 			{
 				displayName: 'TLS',

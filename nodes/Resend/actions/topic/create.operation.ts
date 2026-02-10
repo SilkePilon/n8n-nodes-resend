@@ -83,7 +83,7 @@ export async function execute(
 
 	const body: IDataObject = {
 		name,
-		default_subscription: defaultSubscription,
+		defaultSubscription,
 	};
 
 	if (createOptions.description) {

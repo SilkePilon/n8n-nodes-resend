@@ -74,14 +74,14 @@ export const description: INodeProperties[] = [
 				description: 'Email subject line. Keep concise and compelling to maximize open rates.',
 			},
 			{
-				displayName: 'Target Segment',
+				displayName: 'Target Segment Name or ID',
 				name: 'segmentId',
 				type: 'options',
 				default: '',
 				typeOptions: {
 					loadOptionsMethod: 'getSegments',
 				},
-				description: 'The segment to target. All contacts in this segment will receive the broadcast.',
+				description: 'The segment to target. All contacts in this segment will receive the broadcast. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Text Content',
@@ -95,14 +95,14 @@ export const description: INodeProperties[] = [
 				description: 'Plain text version of the email for clients that do not support HTML. If omitted, Resend will auto-generate from HTML.',
 			},
 			{
-				displayName: 'Topic',
+				displayName: 'Topic Name or ID',
 				name: 'topicId',
 				type: 'options',
 				default: '',
 				typeOptions: {
 					loadOptionsMethod: 'getTopics',
 				},
-				description: 'Topic to scope the broadcast to',
+				description: 'Topic to scope the broadcast to. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	},
