@@ -136,7 +136,7 @@ After importing a workflow, you'll need to:
 **Nodes Used**:
 
 - Schedule Trigger (weekly trigger)
-- Resend (Broadcast: create, update, send)
+- Resend (Broadcast: create, send)
 - Resend (Segment: list)
 
 **Key Features**:
