@@ -11,10 +11,8 @@ import * as topics from './actions/topic';
 import * as contacts from './actions/contact';
 import * as contactProperties from './actions/contactProperty';
 import * as webhooks from './actions/webhook';
-import * as audiences from './actions/audience';
 import * as receivingEmails from './actions/receivingEmail';
 import {
-	getAudiences,
 	getBroadcasts,
 	getContactProperties,
 	getContacts,
@@ -26,7 +24,6 @@ import {
 	getTemplates,
 	getTopics,
 	getWebhooks,
-	getAudiencesListSearch,
 	getBroadcastsListSearch,
 	getContactPropertiesListSearch,
 	getContactsListSearch,
@@ -59,7 +56,7 @@ export class Resend implements INodeType {
 		description:
 			'Send emails, manage contacts, create broadcasts, handle templates, domains, segments, topics, and webhooks using the Resend email platform',
 		subtitle:
-			'={{(() => { const resourceLabels = { audiences: "audience", broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
+			'={{(() => { const resourceLabels = { broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
 		defaults: {
 			name: 'Resend',
 		},
@@ -81,11 +78,6 @@ export class Resend implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{
-						name: 'Audience',
-						value: 'audiences',
-						description: 'Create, get, list, or delete audiences (contact lists) for organizing email recipients',
-					},
 					{
 						name: 'Broadcast',
 						value: 'broadcasts',
@@ -149,14 +141,12 @@ export class Resend implements INodeType {
 			...contacts.descriptions,
 			...contactProperties.descriptions,
 			...webhooks.descriptions,
-			...audiences.descriptions,
 			...receivingEmails.descriptions,
 		],
 	};
 
 	methods = {
 		loadOptions: {
-			getAudiences,
 			getBroadcasts,
 			getContactProperties,
 			getContacts,
@@ -170,7 +160,6 @@ export class Resend implements INodeType {
 			getWebhooks,
 		},
 		listSearch: {
-			getAudiences: getAudiencesListSearch,
 			getBroadcasts: getBroadcastsListSearch,
 			getContactProperties: getContactPropertiesListSearch,
 			getContacts: getContactsListSearch,

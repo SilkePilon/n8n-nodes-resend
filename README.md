@@ -35,7 +35,6 @@ Comprehensive coverage of the Resend API (v1.1.0). The table below shows which e
 | **Receiving Emails**   | `/emails/receiving`   | ✅ Full | List, Get, List Attachments, Get Attachment                                                                      |
 | **Domains**            | `/domains`            | ✅ Full | Create, List, Get, Update, Delete, Verify                                                                        |
 | **Templates**          | `/templates`          | ✅ Full | Create, List, Get, Update, Delete, Publish, Duplicate                                                            |
-| **Audiences**          | `/audiences`          | ✅ Full | Create, List, Get, Delete                                                                                        |
 | **Contacts**           | `/contacts`           | ✅ Full | Create, List, Get, Update, Delete, Add to Segment, List Segments, Remove from Segment, Get Topics, Update Topics |
 | **Broadcasts**         | `/broadcasts`         | ✅ Full | Create, List, Get, Update, Delete, Send                                                                          |
 | **Segments**           | `/segments`           | ✅ Full | Create, List, Get, Delete                                                                                        |
@@ -141,15 +140,6 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Get              | Retrieve a received email                       |
 | List Attachments | List attachments for a received email           |
 | Get Attachment   | Get a specific attachment from a received email |
-
-### Audience
-
-| Operation | Description               |
-| --------- | ------------------------- |
-| Create    | Create a new audience     |
-| Get       | Retrieve audience details |
-| Delete    | Delete an audience        |
-| List      | List all audiences        |
 
 ### Contact
 

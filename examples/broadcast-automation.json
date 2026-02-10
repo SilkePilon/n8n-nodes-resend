@@ -27,11 +27,11 @@
     },
     {
       "parameters": {
-        "resource": "audiences",
+        "resource": "segments",
         "operation": "list"
       },
-      "id": "resend-audience-1",
-      "name": "Get Audiences",
+      "id": "resend-segments-1",
+      "name": "Get Segments",
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
       "position": [
@@ -47,48 +47,14 @@
     },
     {
       "parameters": {
-        "jsCode": "// Select the primary newsletter audience\nconst audiences = $input.first().json.data || [];\n\nif (audiences.length === 0) {\n  throw new Error('No audiences found. Please create an audience in Resend first.');\n}\n\n// Find newsletter or subscribers audience\nlet targetAudience = audiences.find(a => \n  a.name.toLowerCase().includes('newsletter') || \n  a.name.toLowerCase().includes('weekly')\n);\n\n// Fallback to first audience\nif (!targetAudience) {\n  targetAudience = audiences[0];\n}\n\nreturn [{\n  json: {\n    audience_id: targetAudience.id,\n    audience_name: targetAudience.name,\n    campaign_date: new Date().toISOString().split('T')[0],\n    campaign_name: `Weekly Update - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`\n  }\n}];"
-      },
-      "id": "code-1",
-      "name": "Select Audience",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        680,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "resource": "segments",
-        "operation": "list",
-        "audienceId": "={{ $json.audience_id }}"
-      },
-      "id": "resend-segments-1",
-      "name": "Get Segments",
-      "type": "n8n-nodes-resend.resend",
-      "typeVersion": 1,
-      "position": [
-        900,
-        300
-      ],
-      "credentials": {
-        "resendApi": {
-          "id": "",
-          "name": "Resend API"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Select a segment for the broadcast\nconst segments = $input.first().json.data || [];\nconst audienceData = $('Select Audience').first().json;\n\nif (segments.length === 0) {\n  throw new Error('No segments found. Please create a segment in your audience first.');\n}\n\n// Find newsletter or weekly segment, or use first available\nlet targetSegment = segments.find(s => \n  s.name.toLowerCase().includes('newsletter') || \n  s.name.toLowerCase().includes('weekly') ||\n  s.name.toLowerCase().includes('all')\n);\n\n// Fallback to first segment\nif (!targetSegment) {\n  targetSegment = segments[0];\n}\n\nreturn [{\n  json: {\n    ...audienceData,\n    segment_id: targetSegment.id,\n    segment_name: targetSegment.name\n  }\n}];"
+        "jsCode": "// Select a segment for the broadcast\nconst segments = $input.first().json.data || [];\n\nif (segments.length === 0) {\n  throw new Error('No segments found. Please create a segment in Resend first.');\n}\n\n// Find newsletter or weekly segment, or use first available\nlet targetSegment = segments.find(s => \n  s.name.toLowerCase().includes('newsletter') || \n  s.name.toLowerCase().includes('weekly') ||\n  s.name.toLowerCase().includes('all')\n);\n\n// Fallback to first segment\nif (!targetSegment) {\n  targetSegment = segments[0];\n}\n\nconst campaignName = `Weekly Update - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;\n\nreturn [{\n  json: {\n    segment_id: targetSegment.id,\n    segment_name: targetSegment.name,\n    campaign_date: new Date().toISOString().split('T')[0],\n    campaign_name: campaignName\n  }\n}];"
       },
       "id": "code-segments-1",
       "name": "Select Segment",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
+        680,
         300
       ]
     },
@@ -109,7 +75,7 @@
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
       "position": [
-        1340,
+        900,
         300
       ],
       "credentials": {
@@ -146,7 +112,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        1560,
+        1120,
         300
       ]
     },
@@ -161,7 +127,7 @@
       "type": "n8n-nodes-resend.resend",
       "typeVersion": 1,
       "position": [
-        1780,
+        1340,
         180
       ],
       "credentials": {
@@ -174,7 +140,7 @@
     {
       "parameters": {
         "channel": "#marketing",
-        "text": "=📨 *Weekly Newsletter Sent!*\n\n*Campaign:* {{ $('Select Audience').item.json.campaign_name }}\n*Audience:* {{ $('Select Audience').item.json.audience_name }}\n*Broadcast ID:* {{ $('Create Broadcast').item.json.id }}\n*Sent at:* {{ new Date().toISOString() }}",
+        "text": "=\ud83d\udce8 *Weekly Newsletter Sent!*\n\n*Campaign:* {{ $('Select Segment').item.json.campaign_name }}\n*Segment:* {{ $('Select Segment').item.json.segment_name }}\n*Broadcast ID:* {{ $('Create Broadcast').item.json.id }}\n*Sent at:* {{ new Date().toISOString() }}",
         "otherOptions": {}
       },
       "id": "slack-1",
@@ -182,7 +148,7 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
       "position": [
-        2000,
+        1560,
         180
       ],
       "notes": "Optional: Configure Slack credentials"
@@ -190,7 +156,7 @@
     {
       "parameters": {
         "channel": "#marketing",
-        "text": "=⚠️ *Broadcast Creation Failed*\n\nCampaign: {{ $('Select Audience').item.json.campaign_name }}\nError: Check execution logs for details",
+        "text": "=\u26a0\ufe0f *Broadcast Creation Failed*\n\nCampaign: {{ $('Select Segment').item.json.campaign_name }}\nError: Check execution logs for details",
         "otherOptions": {}
       },
       "id": "slack-error-1",
@@ -198,14 +164,14 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.1,
       "position": [
-        1780,
+        1340,
         420
       ],
       "notes": "Optional: Configure Slack credentials"
     },
     {
       "parameters": {
-        "content": "## Broadcast Campaign Automation\n\nThis workflow automates weekly newsletter broadcasts using Resend.\n\n### Flow:\n1. **Schedule**: Triggers every Friday at 9 AM\n2. **Get Audiences**: Fetches available audiences\n3. **Select Audience**: Picks newsletter audience\n4. **Get Segments**: Lists segments in that audience\n5. **Select Segment**: Picks target segment (required for broadcasts)\n6. **Create Broadcast**: Creates the campaign with HTML content\n7. **Send Broadcast**: Sends to all contacts in segment\n8. **Notify**: Alerts team on Slack\n\n### Configuration:\n1. Set up Resend credentials\n2. Create an audience with contacts\n3. Create a segment in the audience\n4. Update sender email (verified domain)\n5. Include {{{RESEND_UNSUBSCRIBE_URL}}} in HTML content\n\n### Customization:\n- Change schedule trigger for different timing\n- Modify HTML content or add dynamic content\n- Connect to CMS for content sourcing"
+        "content": "## Broadcast Campaign Automation\n\nThis workflow automates weekly newsletter broadcasts using Resend.\n\n### Flow:\n1. **Schedule**: Triggers every Friday at 9 AM\n2. **Get Segments**: Fetches available segments\n3. **Select Segment**: Picks target segment (required for broadcasts)\n4. **Create Broadcast**: Creates the campaign with HTML content\n5. **Send Broadcast**: Sends to all contacts in segment\n6. **Notify**: Alerts team on Slack\n\n### Configuration:\n1. Set up Resend credentials\n2. Create contacts and a segment\n3. Update sender email (verified domain)\n4. Include {{{RESEND_UNSUBSCRIBE_URL}}} in HTML content\n\n### Customization:\n- Change schedule trigger for different timing\n- Modify HTML content or add dynamic content\n- Connect to CMS for content sourcing"
       },
       "id": "note-1",
       "name": "Sticky Note",
@@ -219,28 +185,6 @@
   ],
   "connections": {
     "Weekly Friday 9 AM": {
-      "main": [
-        [
-          {
-            "node": "Get Audiences",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Audiences": {
-      "main": [
-        [
-          {
-            "node": "Select Audience",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Select Audience": {
       "main": [
         [
           {

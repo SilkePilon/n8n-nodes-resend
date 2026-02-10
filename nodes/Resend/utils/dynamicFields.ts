@@ -5,7 +5,6 @@ import type { INodeProperties, IExecuteFunctions, INodeParameterResourceLocator 
  * Used to dynamically determine which method to call for each resource type.
  */
 export const RESOURCE_METHOD_MAP = {
-	audience: 'getAudiences',
 	broadcast: 'getBroadcasts',
 	contact: 'getContacts',
 	domain: 'getDomains',
@@ -23,7 +22,6 @@ export const RESOURCE_METHOD_MAP = {
  * Used for generating consistent field labels across the application.
  */
 export const RESOURCE_DISPLAY_MAP = {
-	audience: 'Audience',
 	broadcast: 'Broadcast',
 	contact: 'Contact',
 	domain: 'Domain',

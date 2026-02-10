@@ -68,7 +68,7 @@ After importing a workflow, you'll need to:
 
 **Description**: Automatically syncs contact changes from Resend to external systems when contacts are created, updated, or deleted.
 
-**Use Case**: Keep your CRM, database, or marketing tools in sync with your Resend audience.
+**Use Case**: Keep your CRM, database, or marketing tools in sync with your Resend contacts.
 
 **Nodes Used**:
 
@@ -127,49 +127,28 @@ After importing a workflow, you'll need to:
 
 ---
 
-### 5. Contact & Audience Management (`contact-audience-management.json`)
+### 5. Broadcast Campaign Automation (`broadcast-automation.json`)
 
-**Description**: Demonstrates comprehensive contact management including creating audiences, adding contacts, managing segments, and handling topic subscriptions.
-
-**Use Case**: Newsletter signup automation, contact segmentation, preference management.
-
-**Nodes Used**:
-
-- Webhook (receives signup data)
-- Resend (Audience: list, Contact: create, Segment: add)
-- Resend (Topic: update subscriptions)
-
-**Key Features**:
-
-- Dynamic audience selection
-- Segment-based grouping
-- Topic subscription management
-- Contact property handling
-
----
-
-### 6. Broadcast Campaign Automation (`broadcast-automation.json`)
-
-**Description**: Creates and schedules broadcast email campaigns using templates, with automatic audience targeting and scheduling.
+**Description**: Creates and schedules broadcast email campaigns using templates, with automatic segment targeting and scheduling.
 
 **Use Case**: Newsletter distribution, marketing campaigns, product announcements.
 
 **Nodes Used**:
 
 - Schedule Trigger (weekly trigger)
-- Resend (Broadcast: create, update, send)
-- Resend (Template: get)
+- Resend (Broadcast: create, send)
+- Resend (Segment: list)
 
 **Key Features**:
 
 - Template-based content
 - Scheduled sending
-- Audience targeting
+- Segment targeting
 - Broadcast status tracking
 
 ---
 
-### 7. Domain & Webhook Management (`domain-webhook-setup.json`)
+### 6. Domain & Webhook Management (`domain-webhook-setup.json`)
 
 **Description**: Automates domain verification and webhook configuration for new Resend accounts or domain additions.
 
