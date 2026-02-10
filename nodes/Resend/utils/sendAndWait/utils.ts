@@ -655,9 +655,6 @@ export function configureWaitTillDate(
 
 // Send email via Resend API
 export async function sendResendEmail(context: IExecuteFunctions, email: IEmail): Promise<void> {
-	const credentials = await context.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
 	const requestBody: Record<string, unknown> = {
 		from: email.from,
 		to: email.to,
@@ -677,11 +674,10 @@ export async function sendResendEmail(context: IExecuteFunctions, email: IEmail)
 		requestBody.reply_to = email.replyTo;
 	}
 
-	await context.helpers.httpRequest({
+	await context.helpers.httpRequestWithAuthentication.call(context, 'resendApi', {
 		url: `${RESEND_API_BASE}/emails`,
 		method: 'POST',
 		headers: {
-			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
 		body: requestBody,

@@ -10,18 +10,16 @@ async function loadDropdownOptions(
 	loadOptionsFunctions: ILoadOptionsFunctions,
 	endpoint: string,
 ): Promise<INodePropertyOptions[]> {
-	const credentials = await loadOptionsFunctions.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const response = await loadOptionsFunctions.helpers.httpRequest({
-		url: `${RESEND_API_BASE}${endpoint}`,
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
+	const response = await loadOptionsFunctions.helpers.httpRequestWithAuthentication.call(
+		loadOptionsFunctions,
+		'resendApi',
+		{
+			url: `${RESEND_API_BASE}${endpoint}`,
+			method: 'GET',
+			qs: { limit: 100 },
+			json: true,
 		},
-		qs: { limit: 100 },
-		json: true,
-	});
+	);
 
 	const items = response?.data ?? [];
 	return items
@@ -86,17 +84,15 @@ export async function getTemplateVariables(
 		return [];
 	}
 
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const response = await this.helpers.httpRequest({
-		url: `${RESEND_API_BASE}/templates/${encodeURIComponent(normalizedTemplateId)}`,
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
+	const response = await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'resendApi',
+		{
+			url: `${RESEND_API_BASE}/templates/${encodeURIComponent(normalizedTemplateId)}`,
+			method: 'GET',
+			json: true,
 		},
-		json: true,
-	});
+	);
 
 	const variables = response?.variables ?? [];
 
@@ -204,19 +200,17 @@ export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePro
 		return [];
 	}
 
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
 	try {
-		const response = await this.helpers.httpRequest({
-			url: `${RESEND_API_BASE}/audiences/${encodeURIComponent(audienceId)}/contacts`,
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${apiKey}`,
+		const response = await this.helpers.httpRequestWithAuthentication.call(
+			this,
+			'resendApi',
+			{
+				url: `${RESEND_API_BASE}/audiences/${encodeURIComponent(audienceId)}/contacts`,
+				method: 'GET',
+				qs: { limit: 100 },
+				json: true,
 			},
-			qs: { limit: 100 },
-			json: true,
-		});
+		);
 
 		const items = response?.data ?? [];
 		return items
@@ -251,18 +245,16 @@ export async function getDomains(this: ILoadOptionsFunctions): Promise<INodeProp
  * Load webhooks with endpoint URL in display name.
  */
 export async function getWebhooks(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const response = await this.helpers.httpRequest({
-		url: `${RESEND_API_BASE}/webhooks`,
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
+	const response = await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'resendApi',
+		{
+			url: `${RESEND_API_BASE}/webhooks`,
+			method: 'GET',
+			qs: { limit: 100 },
+			json: true,
 		},
-		qs: { limit: 100 },
-		json: true,
-	});
+	);
 
 	const items = response?.data ?? [];
 	return items
@@ -281,10 +273,6 @@ export async function getWebhooks(this: ILoadOptionsFunctions): Promise<INodePro
 		});
 }
 
-export async function getApiKeys(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	return loadDropdownOptions(this, '/api-keys');
-}
-
 export async function getContactProperties(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	return loadDropdownOptions(this, '/contact-properties');
 }
@@ -293,18 +281,16 @@ export async function getContactProperties(this: ILoadOptionsFunctions): Promise
  * Load sent emails with subject and date in display name.
  */
 export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const response = await this.helpers.httpRequest({
-		url: `${RESEND_API_BASE}/emails`,
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
+	const response = await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'resendApi',
+		{
+			url: `${RESEND_API_BASE}/emails`,
+			method: 'GET',
+			qs: { limit: 100 },
+			json: true,
 		},
-		qs: { limit: 100 },
-		json: true,
-	});
+	);
 
 	const items = response?.data ?? [];
 	return items
@@ -334,18 +320,16 @@ export async function getEmails(this: ILoadOptionsFunctions): Promise<INodePrope
  * Load received emails with subject and date in display name.
  */
 export async function getReceivedEmails(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const response = await this.helpers.httpRequest({
-		url: `${RESEND_API_BASE}/emails/receiving`,
-		method: 'GET',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
+	const response = await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'resendApi',
+		{
+			url: `${RESEND_API_BASE}/emails/receiving`,
+			method: 'GET',
+			qs: { limit: 100 },
+			json: true,
 		},
-		qs: { limit: 100 },
-		json: true,
-	});
+	);
 
 	const items = response?.data ?? [];
 	return items
@@ -399,13 +383,6 @@ async function wrapForListSearch(
 			value: option.value,
 		}))
 	};
-}
-
-export async function getApiKeysListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getApiKeys, filter);
 }
 
 export async function getAudiencesListSearch(

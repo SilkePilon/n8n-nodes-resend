@@ -579,23 +579,19 @@ export async function execute(
 		return emailObj;
 	});
 
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
 	const qs: Record<string, string> = {};
 	if (batchOptions.validation_mode) {
 		qs.validation_mode = batchOptions.validation_mode;
 	}
 
 	const headers: Record<string, string> = {
-		Authorization: `Bearer ${apiKey}`,
 		'Content-Type': 'application/json',
 	};
 	if (batchOptions.idempotency_key) {
 		headers['Idempotency-Key'] = batchOptions.idempotency_key;
 	}
 
-	const response = await this.helpers.httpRequest({
+	const response = await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
 		url: `${RESEND_API_BASE}/emails/batch`,
 		method: 'POST',
 		headers,

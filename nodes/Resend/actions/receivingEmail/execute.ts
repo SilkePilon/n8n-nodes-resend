@@ -1,4 +1,5 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 
 import * as get from './get.operation';
 import * as list from './list.operation';
@@ -20,6 +21,9 @@ export async function execute(
 		case 'getAttachment':
 			return getAttachment.execute.call(this, index);
 		default:
-			throw new Error(`Unknown operation: ${operation}`);
+			throw new NodeOperationError(
+				this.getNode(),
+				`Unknown operation: ${operation}`,
+			);
 	}
 }

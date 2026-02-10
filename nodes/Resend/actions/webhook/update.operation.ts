@@ -74,7 +74,7 @@ export async function execute(
 	};
 
 	if (updateFields.endpoint) {
-		assertHttpsEndpoint(updateFields.endpoint);
+		assertHttpsEndpoint(this.getNode(), updateFields.endpoint);
 	}
 
 	const response = await apiRequest.call(this, 'PATCH', `/webhooks/${webhookId}`, updateFields);

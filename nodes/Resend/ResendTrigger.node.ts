@@ -5,7 +5,7 @@ import {
 	INode,
 	INodeType,
 	INodeTypeDescription,
-	NodeConnectionType,
+	NodeConnectionTypes,
 	NodeOperationError,
 } from 'n8n-workflow';
 import { createHmac, timingSafeEqual } from 'crypto';
@@ -82,6 +82,12 @@ export class ResendTrigger implements INodeType {
 		defaults: {
 			name: 'Resend Trigger',
 		},
+		credentials: [
+			{
+				name: 'resendWebhookSigningSecretApi',
+				required: true,
+			},
+		],
 		triggerPanel: {
 			header:
 				'Copy the webhook URL below and paste it into your Resend dashboard webhook configuration.',
@@ -95,7 +101,7 @@ export class ResendTrigger implements INodeType {
 				"Once you've finished building your workflow, activate it to use the production webhook URL in your Resend dashboard.",
 		},
 		inputs: [],
-		outputs: ['main' as NodeConnectionType],
+		outputs: [NodeConnectionTypes.Main],
 		webhooks: [
 			{
 				name: 'default',
@@ -115,17 +121,6 @@ export class ResendTrigger implements INodeType {
 				required: true,
 				description:
 					'The path for the webhook URL. This will completely replace the UUID segment in the webhook URL. For example, if you set this to "test1", your webhook URL will be https://your-n8n-domain/webhook-test/test1',
-			},
-			{
-				displayName: 'Webhook Signing Secret',
-				name: 'webhookSigningSecret',
-				type: 'string',
-				placeholder: 'whsec_...',
-				required: true,
-				typeOptions: { password: true },
-
-				default: '',
-				description: 'Found in your Resend webhook configuration page (whsec_... value).',
 			},
 			{
 				displayName: 'Events',
@@ -157,7 +152,8 @@ export class ResendTrigger implements INodeType {
 		const headers = this.getHeaderData();
 		const request = this.getRequestObject();
 		const subscribedEvents = this.getNodeParameter('events') as string[];
-		const webhookSigningSecret = this.getNodeParameter('webhookSigningSecret') as string;
+		const credentials = await this.getCredentials('resendWebhookSigningSecretApi');
+		const webhookSigningSecret = credentials.webhookSigningSecret as string;
 		// Verify webhook signature if secret is provided
 		if (webhookSigningSecret && webhookSigningSecret.trim() !== '') {
 			try {
@@ -195,7 +191,7 @@ export class ResendTrigger implements INodeType {
 
 				if (!svixId || !svixTimestamp || !svixSignature) {
 					return {
-						workflowData: [[]],
+						noWebhookResponse: true,
 					};
 				}
 
@@ -210,14 +206,14 @@ export class ResendTrigger implements INodeType {
 				);
 			} catch (error) {
 				return {
-					workflowData: [[]],
+					noWebhookResponse: true,
 				};
 			}
 		}
 
 		if (!bodyData || typeof bodyData !== 'object' || !('type' in bodyData)) {
 			return {
-				workflowData: [[]],
+				noWebhookResponse: true,
 			};
 		}
 
@@ -229,7 +225,7 @@ export class ResendTrigger implements INodeType {
 			};
 		} else {
 			return {
-				workflowData: [[]],
+				noWebhookResponse: true,
 			};
 		}
 	}

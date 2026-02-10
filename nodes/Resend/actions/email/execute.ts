@@ -1,5 +1,5 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
-import { SEND_AND_WAIT_OPERATION } from 'n8n-workflow';
+import { NodeOperationError, SEND_AND_WAIT_OPERATION } from 'n8n-workflow';
 
 import * as send from './send.operation';
 import * as sendAndWait from './sendAndWait.operation';
@@ -36,6 +36,9 @@ export async function execute(
 		case 'getAttachment':
 			return getAttachment.execute.call(this, index);
 		default:
-			throw new Error(`Unsupported operation: ${operation}`);
+			throw new NodeOperationError(
+				this.getNode(),
+				`Unsupported operation: ${operation}`,
+			);
 	}
 }

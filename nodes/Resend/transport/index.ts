@@ -3,6 +3,8 @@ import type {
 	IHttpRequestMethods,
 	IDataObject,
 	INodeExecutionData,
+	IHttpRequestOptions,
+	INode,
 } from 'n8n-workflow';
 import { NodeOperationError, sleep } from 'n8n-workflow';
 
@@ -18,21 +20,10 @@ export async function apiRequest(
 	body?: IDataObject | IDataObject[],
 	qs?: IDataObject,
 ): Promise<IDataObject> {
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const options: {
-		url: string;
-		method: IHttpRequestMethods;
-		headers: Record<string, string>;
-		body?: IDataObject | IDataObject[];
-		qs?: IDataObject;
-		json: boolean;
-	} = {
+	const options: IHttpRequestOptions = {
 		url: `${RESEND_API_BASE}${endpoint}`,
 		method,
 		headers: {
-			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
 		json: true,
@@ -46,7 +37,11 @@ export async function apiRequest(
 		options.qs = qs;
 	}
 
-	return this.helpers.httpRequest(options);
+	return await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'resendApi',
+		options,
+	);
 }
 
 /**
@@ -60,23 +55,19 @@ export async function requestList(
 ): Promise<IDataObject[]> {
 	const returnAll = this.getNodeParameter('returnAll', 0, false) as boolean;
 	const limit = this.getNodeParameter('limit', 0, 50) as number;
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
 
 	const targetLimit = returnAll ? 1000 : (limit ?? 50);
 	const pageSize = Math.min(targetLimit, 100); // Resend API max is 100
 	const qs: Record<string, string | number> = { limit: pageSize };
 
-	const requestPage = () =>
-		this.helpers.httpRequest({
+	const requestPage = async () => {
+		return await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
 			url: `${RESEND_API_BASE}${endpoint}`,
 			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${apiKey}`,
-			},
 			qs,
 			json: true,
 		});
+	};
 
 	const allItems: IDataObject[] = [];
 	let hasMore = true;
@@ -215,10 +206,11 @@ export function buildTemplateSendVariables(
 /**
  * Assert that endpoint uses HTTPS scheme.
  */
-export function assertHttpsEndpoint(endpoint: string): void {
+export function assertHttpsEndpoint(node: INode, endpoint: string): void {
 	const normalizedEndpoint = endpoint.trim().toLowerCase();
 	if (normalizedEndpoint.startsWith('http://')) {
-		throw new Error(
+		throw new NodeOperationError(
+			node,
 			'Invalid webhook endpoint scheme. Resend requires a publicly reachable HTTPS URL.',
 		);
 	}

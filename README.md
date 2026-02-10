@@ -34,7 +34,6 @@ Comprehensive coverage of the Resend API (v1.1.0). The table below shows which e
 | **Email**              | `/emails`                  | ✅ Full | Send, Send Batch, Send and Wait, List, Get, Update, Cancel, List Attachments, Get Attachment                     |
 | **Receiving Emails**   | `/emails/receiving`        | ✅ Full | List, Get, List Attachments, Get Attachment                                                                      |
 | **Domains**            | `/domains`                 | ✅ Full | Create, List, Get, Update, Delete, Verify                                                                        |
-| **API Keys**           | `/api-keys`                | ✅ Full | Create, List, Delete                                                                                             |
 | **Templates**          | `/templates`               | ✅ Full | Create, List, Get, Update, Delete, Publish, Duplicate                                                            |
 | **Audiences**          | `/audiences`               | ✅ Full | Create, List, Get, Delete                                                                                        |
 | **Contacts**           | `/audiences/{id}/contacts` | ✅ Full | Create, List, Get, Update, Delete, Add to Segment, List Segments, Remove from Segment, Get Topics, Update Topics |
@@ -71,9 +70,24 @@ docker run -it --rm \
 
 ## Credentials
 
+This package uses two separate credentials:
+
+### Resend API
+
 1. Get your API key from [Resend Dashboard](https://resend.com/api-keys)
 2. In n8n, go to **Credentials** > **Add credential**
 3. Search for **Resend API** and paste your key
+
+This credential is used by the main **Resend** node for all API operations.
+
+### Resend Webhook Signing Secret
+
+1. Create a webhook endpoint in your [Resend Dashboard](https://resend.com/webhooks)
+2. Copy the signing secret (starts with `whsec_`)
+3. In n8n, go to **Credentials** > **Add credential**
+4. Search for **Resend Webhook Signing Secret** and paste your secret
+
+This credential is used exclusively by the **Resend Trigger** node for webhook signature verification. Each webhook endpoint in Resend has its own unique signing secret.
 
 ## Human in the Loop
 
@@ -215,14 +229,6 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a domain             |
 | List      | List all domains            |
 
-### API Key
-
-| Operation | Description            |
-| --------- | ---------------------- |
-| Create    | Generate a new API key |
-| Delete    | Revoke an API key      |
-| List      | List all API keys      |
-
 ### Webhook
 
 | Operation | Description               |
@@ -236,6 +242,8 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 ## Trigger Events
 
 The **Resend Trigger** node receives webhooks for real-time email events. Signatures are automatically verified using Svix.
+
+> **Note:** The trigger node requires the **Resend Webhook Signing Secret** credential (separate from the Resend API credential). See the [Credentials](#credentials) section for setup instructions.
 
 | Event                    | Description                  |
 | ------------------------ | ---------------------------- |
