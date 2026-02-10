@@ -57,10 +57,35 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Custom Return Path',
-				name: 'custom_return_path',
+				name: 'customReturnPath',
 				type: 'string',
 				default: 'send',
 				description: 'Custom subdomain for email bounce handling (Return-Path address). Defaults to "send". This subdomain needs to be configured in your DNS.',
+			},
+			{
+				displayName: 'Open Tracking',
+				name: 'openTracking',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to track the open rate of each email sent from this domain',
+			},
+			{
+				displayName: 'Click Tracking',
+				name: 'clickTracking',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to track clicks within the body of each HTML email sent from this domain',
+			},
+			{
+				displayName: 'TLS',
+				name: 'tls',
+				type: 'options',
+				options: [
+					{ name: 'Opportunistic', value: 'opportunistic' },
+					{ name: 'Enforced', value: 'enforced' },
+				],
+				default: 'opportunistic',
+				description: 'TLS setting for email delivery. Opportunistic attempts secure connection but falls back to unencrypted. Enforced requires TLS.',
 			},
 		],
 	},
@@ -73,7 +98,10 @@ export async function execute(
 	const name = this.getNodeParameter('domainName', index) as string;
 	const additionalOptions = this.getNodeParameter('additionalOptions', index, {}) as {
 		region?: string;
-		custom_return_path?: string;
+		customReturnPath?: string;
+		openTracking?: boolean;
+		clickTracking?: boolean;
+		tls?: string;
 	};
 
 	const body: IDataObject = { name };
@@ -81,8 +109,17 @@ export async function execute(
 	if (additionalOptions.region) {
 		body.region = additionalOptions.region;
 	}
-	if (additionalOptions.custom_return_path) {
-		body.custom_return_path = additionalOptions.custom_return_path;
+	if (additionalOptions.customReturnPath) {
+		body.customReturnPath = additionalOptions.customReturnPath;
+	}
+	if (additionalOptions.openTracking !== undefined) {
+		body.openTracking = additionalOptions.openTracking;
+	}
+	if (additionalOptions.clickTracking !== undefined) {
+		body.clickTracking = additionalOptions.clickTracking;
+	}
+	if (additionalOptions.tls) {
+		body.tls = additionalOptions.tls;
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/domains', body);

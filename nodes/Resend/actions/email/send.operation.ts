@@ -365,14 +365,14 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Reply To',
-				name: 'reply_to',
+				name: 'replyTo',
 				type: 'string',
 				default: '',
 				description: 'The email address where replies should be sent. Use this if you want replies to go to a different address than the sender. Comma-separated for multiple addresses.',
 			},
 			{
 				displayName: 'Scheduled At',
-				name: 'scheduled_at',
+				name: 'scheduledAt',
 				type: 'string',
 				default: '',
 				description: 'Schedule the email to be sent at a future time. Accepts natural language like "in 1 hour" or ISO 8601 format "2024-12-25T09:00:00Z". Note: Cannot use attachments with scheduled emails.',
@@ -411,10 +411,17 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Topic ID',
-				name: 'topic_id',
+				name: 'topicId',
 				type: 'string',
 				default: '',
 				description: 'Associate this email with a specific subscription topic. Used for managing email preferences and unsubscribe handling.',
+			},
+			{
+				displayName: 'Idempotency Key',
+				name: 'idempotencyKey',
+				type: 'string',
+				default: '',
+				description: 'A unique key to ensure the email is sent only once. Useful for retries to prevent duplicate sends.',
 			},
 		],
 	},
@@ -425,8 +432,8 @@ interface AttachmentInput {
 	binaryPropertyName?: string;
 	filename?: string;
 	fileUrl?: string;
-	content_id?: string;
-	content_type?: string;
+	contentId?: string;
+	contentType?: string;
 }
 
 interface HeaderInput {
@@ -444,10 +451,11 @@ interface AdditionalOptions {
 	bcc?: string;
 	cc?: string;
 	headers?: { headers: HeaderInput[] };
-	reply_to?: string;
-	scheduled_at?: string;
+	replyTo?: string;
+	scheduledAt?: string;
 	tags?: { tags: TagInput[] };
-	topic_id?: string;
+	topicId?: string;
+	idempotencyKey?: string;
 }
 
 export async function execute(
@@ -536,10 +544,10 @@ export async function execute(
 	}
 
 	// Handle Reply To
-	if (additionalOptions.reply_to) {
-		const replyToList = normalizeEmailList(additionalOptions.reply_to);
+	if (additionalOptions.replyTo) {
+		const replyToList = normalizeEmailList(additionalOptions.replyTo);
 		if (replyToList.length) {
-			requestBody.reply_to = replyToList;
+			requestBody.replyTo = replyToList;
 		}
 	}
 
@@ -567,19 +575,19 @@ export async function execute(
 	}
 
 	// Handle Topic ID
-	if (additionalOptions.topic_id) {
-		requestBody.topic_id = additionalOptions.topic_id;
+	if (additionalOptions.topicId) {
+		requestBody.topicId = additionalOptions.topicId;
 	}
 
 	// Handle Scheduled At
-	if (additionalOptions.scheduled_at) {
-		requestBody.scheduled_at = additionalOptions.scheduled_at;
+	if (additionalOptions.scheduledAt) {
+		requestBody.scheduledAt = additionalOptions.scheduledAt;
 	}
 
-	// Validate attachments + scheduled_at
+	// Validate attachments + scheduledAt
 	if (
 		additionalOptions.attachments?.attachments?.length &&
-		additionalOptions.scheduled_at
+		additionalOptions.scheduledAt
 	) {
 		throw new NodeOperationError(
 			this.getNode(),
@@ -592,8 +600,8 @@ export async function execute(
 	if (additionalOptions.attachments?.attachments?.length) {
 		requestBody.attachments = additionalOptions.attachments.attachments
 			.map((attachment) => {
-				const contentId = attachment.content_id;
-				const contentType = attachment.content_type;
+				const contentId = attachment.contentId;
+				const contentType = attachment.contentType;
 
 				if (attachment.attachmentType === 'binaryData') {
 					const binaryPropertyName = attachment.binaryPropertyName || 'data';
@@ -620,10 +628,10 @@ export async function execute(
 						content: binaryData.data,
 					};
 					if (contentId) {
-						attachmentEntry.content_id = contentId;
+						attachmentEntry.contentId = contentId;
 					}
 					if (contentType) {
-						attachmentEntry.content_type = contentType;
+						attachmentEntry.contentType = contentType;
 					}
 					return attachmentEntry;
 				} else if (attachment.attachmentType === 'url') {
@@ -646,10 +654,10 @@ export async function execute(
 						path: attachment.fileUrl,
 					};
 					if (contentId) {
-						attachmentEntry.content_id = contentId;
+						attachmentEntry.contentId = contentId;
 					}
 					if (contentType) {
-						attachmentEntry.content_type = contentType;
+						attachmentEntry.contentType = contentType;
 					}
 					return attachmentEntry;
 				}
@@ -658,12 +666,17 @@ export async function execute(
 			.filter((attachment): attachment is Record<string, unknown> => attachment !== null);
 	}
 
+	const requestHeaders: Record<string, string> = {
+		'Content-Type': 'application/json',
+	};
+	if (additionalOptions.idempotencyKey) {
+		requestHeaders['Idempotency-Key'] = additionalOptions.idempotencyKey;
+	}
+
 	const response = await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
 		url: `${RESEND_API_BASE}/emails`,
 		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
+		headers: requestHeaders,
 		body: requestBody,
 		json: true,
 	});

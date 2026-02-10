@@ -59,7 +59,7 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Reply To',
-				name: 'reply_to',
+				name: 'replyTo',
 				type: 'string',
 				default: '',
 				placeholder: 'noreply@example.com',
@@ -75,7 +75,7 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Target Segment',
-				name: 'segment_id',
+				name: 'segmentId',
 				type: 'string',
 				default: '',
 				placeholder: 'seg_123456',
@@ -97,7 +97,7 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Topic',
-				name: 'topic_id',
+				name: 'topicId',
 				type: 'string',
 				default: '',
 				placeholder: 'topic_123456',
@@ -120,7 +120,7 @@ export async function execute(
 	const response = await apiRequest.call(
 		this,
 		'PATCH',
-		`/broadcasts/${broadcastId}`,
+		`/broadcasts/${encodeURIComponent(broadcastId)}`,
 		updateFields,
 	);
 

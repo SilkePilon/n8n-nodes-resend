@@ -25,7 +25,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const emailId = resolveDynamicIdValue(this, 'emailId', index);
 
-	const response = await apiRequest.call(this, 'POST', `/emails/${emailId}/cancel`);
+	const response = await apiRequest.call(this, 'POST', `/emails/${encodeURIComponent(emailId)}/cancel`);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

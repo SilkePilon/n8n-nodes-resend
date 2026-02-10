@@ -4,20 +4,6 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	createDynamicIdField({
-		fieldName: 'audienceIdUpdateTopics',
-		resourceName: 'audience',
-		displayName: 'Audience',
-		required: true,
-		placeholder: 'aud_123456',
-		description: 'The audience containing the contact to update topic subscriptions.',
-		displayOptions: {
-			show: {
-				resource: ['contacts'],
-				operation: ['updateTopics'],
-			},
-		},
-	}),
-	createDynamicIdField({
 		fieldName: 'contactIdUpdateTopics',
 		resourceName: 'contact',
 		displayName: 'Contact',
@@ -64,30 +50,41 @@ export const description: INodeProperties[] = [
 						description: 'The topic to update subscription for',
 					},
 					{
-						displayName: 'Subscribed',
-						name: 'subscribed',
-						type: 'boolean',
+						displayName: 'Subscription',
+						name: 'subscription',
+						type: 'options',
 						required: true,
-						default: true,
-						description: 'Whether the contact should be subscribed (true) or unsubscribed (false) from this topic. Unsubscribed contacts will not receive emails scoped to this topic.',
+						default: 'opt_in',
+						options: [
+							{
+								name: 'Opt In',
+								value: 'opt_in',
+								description: 'Subscribe the contact to this topic',
+							},
+							{
+								name: 'Opt Out',
+								value: 'opt_out',
+								description: 'Unsubscribe the contact from this topic',
+							},
+						],
+						description: 'Whether the contact should be opted in or opted out of this topic. Opted-out contacts will not receive emails scoped to this topic.',
 					},
 				],
 			},
 		],
-		description: 'List of topics to update subscription status for. Each topic requires its ID and a boolean subscribed value.',
+		description: 'List of topics to update subscription status for. Each topic requires its ID and a subscription value (opt_in or opt_out).',
 	},
 ];
 
 interface TopicItem {
 	id: string;
-	subscribed: boolean;
+	subscription: string;
 }
 
 export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const audienceId = resolveDynamicIdValue(this, 'audienceIdUpdateTopics', index);
 	const contactId = resolveDynamicIdValue(this, 'contactIdUpdateTopics', index);
 	const topicsInput = this.getNodeParameter('topicsToUpdate', index, { topics: [] }) as {
 		topics: TopicItem[];
@@ -96,14 +93,14 @@ export async function execute(
 	const body: IDataObject = {
 		topics: topicsInput.topics.map((t) => ({
 			id: t.id,
-			subscribed: t.subscribed,
+			subscription: t.subscription,
 		})),
 	};
 
 	const response = await apiRequest.call(
 		this,
 		'PATCH',
-		`/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(contactId)}/topics`,
+		`/contacts/${encodeURIComponent(contactId)}/topics`,
 		body,
 	);
 

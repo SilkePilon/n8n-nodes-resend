@@ -3,20 +3,6 @@ import { apiRequest } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	createDynamicIdField({
-		fieldName: 'audienceIdUpdate',
-		resourceName: 'audience',
-		displayName: 'Audience',
-		required: true,
-		placeholder: 'aud_123456',
-		description: 'The audience containing the contact. Contacts are scoped to audiences.',
-		displayOptions: {
-			show: {
-				resource: ['contacts'],
-				operation: ['update'],
-			},
-		},
-	}),
 	{
 		displayName: 'Update By',
 		name: 'updateBy',
@@ -80,14 +66,14 @@ export const description: INodeProperties[] = [
 		options: [
 			{
 				displayName: 'First Name',
-				name: 'first_name',
+				name: 'firstName',
 				type: 'string',
 				default: '',
 				description: 'The first name of the contact. Can be used in email personalization with {{{FIRST_NAME}}} variable.',
 			},
 			{
 				displayName: 'Last Name',
-				name: 'last_name',
+				name: 'lastName',
 				type: 'string',
 				default: '',
 				description: 'The last name of the contact. Can be used in email personalization with {{{LAST_NAME}}} variable.',
@@ -144,13 +130,11 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const updateBy = this.getNodeParameter('updateBy', index) as string;
 	const updateFields = this.getNodeParameter('contactUpdateFields', index, {}) as {
-		first_name?: string;
-		last_name?: string;
+		firstName?: string;
+		lastName?: string;
 		unsubscribed?: boolean;
 		properties?: { properties: PropertyItem[] };
 	};
-
-	const audienceId = resolveDynamicIdValue(this, 'audienceIdUpdate', index);
 
 	let identifier: string;
 	if (updateBy === 'id') {
@@ -161,11 +145,11 @@ export async function execute(
 
 	const body: IDataObject = {};
 
-	if (updateFields.first_name) {
-		body.first_name = updateFields.first_name;
+	if (updateFields.firstName !== undefined) {
+		body.firstName = updateFields.firstName;
 	}
-	if (updateFields.last_name) {
-		body.last_name = updateFields.last_name;
+	if (updateFields.lastName !== undefined) {
+		body.lastName = updateFields.lastName;
 	}
 	if (updateFields.unsubscribed !== undefined) {
 		body.unsubscribed = updateFields.unsubscribed;
@@ -179,7 +163,7 @@ export async function execute(
 		body.properties = props;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(identifier)}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/contacts/${encodeURIComponent(identifier)}`, body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

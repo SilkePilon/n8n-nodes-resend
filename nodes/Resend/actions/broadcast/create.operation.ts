@@ -103,7 +103,7 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Reply To',
-				name: 'reply_to',
+				name: 'replyTo',
 				type: 'string',
 				default: '',
 				placeholder: 'noreply@example.com',
@@ -122,7 +122,7 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Topic',
-				name: 'topic_id',
+				name: 'topicId',
 				type: 'string',
 				default: '',
 				placeholder: 'topic_123456',
@@ -145,13 +145,13 @@ export async function execute(
 	const html = this.getNodeParameter('broadcastHtml', index) as string;
 	const createOptions = this.getNodeParameter('broadcastCreateOptions', index, {}) as {
 		name?: string;
-		reply_to?: string;
+		replyTo?: string;
 		text?: string;
-		topic_id?: string;
+		topicId?: string;
 	};
 
 	const body: IDataObject = {
-		segment_id: segmentId,
+		segmentId,
 		from,
 		subject,
 		html,
@@ -160,14 +160,14 @@ export async function execute(
 	if (createOptions.name) {
 		body.name = createOptions.name;
 	}
-	if (createOptions.reply_to) {
-		body.reply_to = createOptions.reply_to;
+	if (createOptions.replyTo) {
+		body.replyTo = createOptions.replyTo;
 	}
 	if (createOptions.text) {
 		body.text = createOptions.text;
 	}
-	if (createOptions.topic_id) {
-		body.topic_id = createOptions.topic_id;
+	if (createOptions.topicId) {
+		body.topicId = createOptions.topicId;
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/broadcasts', body);

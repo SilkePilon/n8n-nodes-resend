@@ -4,20 +4,6 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	createDynamicIdField({
-		fieldName: 'audienceIdRemoveSegment',
-		resourceName: 'audience',
-		displayName: 'Audience',
-		required: true,
-		placeholder: 'aud_123456',
-		description: 'The unique identifier of the audience containing the contact. Obtain from the List Audiences operation.',
-		displayOptions: {
-			show: {
-				resource: ['contacts'],
-				operation: ['removeFromSegment'],
-			},
-		},
-	}),
-	createDynamicIdField({
 		fieldName: 'contactIdRemoveSegment',
 		resourceName: 'contact',
 		displayName: 'Contact',
@@ -51,14 +37,13 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const audienceId = resolveDynamicIdValue(this, 'audienceIdRemoveSegment', index);
 	const contactId = resolveDynamicIdValue(this, 'contactIdRemoveSegment', index);
 	const segmentId = resolveDynamicIdValue(this, 'segmentIdRemove', index);
 
 	const response = await apiRequest.call(
 		this,
 		'DELETE',
-		`/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(contactId)}/segments/${encodeURIComponent(segmentId)}`,
+		`/contacts/${encodeURIComponent(contactId)}/segments/${encodeURIComponent(segmentId)}`,
 	);
 
 	return [{ json: response, pairedItem: { item: index } }];

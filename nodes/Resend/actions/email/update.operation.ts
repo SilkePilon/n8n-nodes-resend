@@ -46,7 +46,7 @@ export async function execute(
 		body.scheduled_at = scheduledAt;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/emails/${emailId}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/emails/${encodeURIComponent(emailId)}`, body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

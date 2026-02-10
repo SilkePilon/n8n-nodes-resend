@@ -82,7 +82,7 @@ export async function execute(
 		body.visibility = updateFields.visibility;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/topics/${topicId}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/topics/${encodeURIComponent(topicId)}`, body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }
