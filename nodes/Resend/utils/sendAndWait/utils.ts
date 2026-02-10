@@ -1,4 +1,3 @@
-import { isbot } from 'isbot';
 import {
 	NodeOperationError,
 	SEND_AND_WAIT_OPERATION,
@@ -422,11 +421,6 @@ export async function sendAndWaitWebhook(this: IWebhookFunctions) {
 	const req = this.getRequestObject();
 
 	const responseType = this.getNodeParameter('responseType', 'approval') as 'approval' | 'freeText';
-
-	if (responseType === 'approval' && isbot(req.headers['user-agent'])) {
-		res.send('');
-		return { noWebhookResponse: true };
-	}
 
 	if (responseType === 'freeText') {
 		if (method === 'GET') {

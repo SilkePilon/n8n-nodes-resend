@@ -4,7 +4,7 @@ import type {
 	IDataObject,
 	INodeExecutionData,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeOperationError, sleep } from 'n8n-workflow';
 
 export const RESEND_API_BASE = 'https://api.resend.com';
 
@@ -78,14 +78,11 @@ export async function requestList(
 			json: true,
 		});
 
-	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 	const allItems: IDataObject[] = [];
 	let hasMore = true;
 	let isFirstRequest = true;
 
 	while (hasMore) {
-		// Rate limiting: wait 1 second between requests (Resend allows 2 req/sec)
 		if (!isFirstRequest) {
 			await sleep(1000);
 		}
