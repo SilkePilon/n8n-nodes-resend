@@ -119,10 +119,6 @@ export async function getTopics(this: ILoadOptionsFunctions): Promise<INodePrope
 	return loadDropdownOptions(this, '/topics');
 }
 
-export async function getAudiences(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	return loadDropdownOptions(this, '/audiences');
-}
-
 export async function getBroadcasts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	return loadDropdownOptions(this, '/broadcasts');
 }
@@ -314,13 +310,6 @@ async function wrapForListSearch(
 			value: option.value,
 		}))
 	};
-}
-
-export async function getAudiencesListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getAudiences, filter);
 }
 
 export async function getBroadcastsListSearch(
