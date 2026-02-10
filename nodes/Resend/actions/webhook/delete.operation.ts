@@ -27,5 +27,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'DELETE', `/webhooks/${webhookId}`);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

@@ -79,5 +79,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'PATCH', `/webhooks/${webhookId}`, updateFields);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

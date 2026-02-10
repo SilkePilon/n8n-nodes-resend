@@ -58,5 +58,5 @@ export async function execute(
 		updateFields,
 	);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }
