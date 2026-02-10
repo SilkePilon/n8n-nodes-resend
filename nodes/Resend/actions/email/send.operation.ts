@@ -497,9 +497,10 @@ export async function execute(
 			(requestBody.template as Record<string, unknown>).variables = variables;
 		}
 	} else {
-		const emailFormat = this.getNodeParameter('emailFormat', index) as string;
+		// Default to 'html' if emailFormat wasn't set (e.g., when switching from template mode)
+		const emailFormat = (this.getNodeParameter('emailFormat', index, 'html') as string) || 'html';
 		if (emailFormat === 'html' || emailFormat === 'both') {
-			const html = this.getNodeParameter('html', index) as string;
+			const html = this.getNodeParameter('html', index, '') as string;
 			if (!html) {
 				throw new NodeOperationError(this.getNode(), 'HTML Content is required.', {
 					itemIndex: index,
@@ -508,7 +509,7 @@ export async function execute(
 			requestBody.html = html;
 		}
 		if (emailFormat === 'text' || emailFormat === 'both') {
-			const text = this.getNodeParameter('text', index) as string;
+			const text = this.getNodeParameter('text', index, '') as string;
 			if (!text) {
 				throw new NodeOperationError(this.getNode(), 'Text Content is required.', {
 					itemIndex: index,
