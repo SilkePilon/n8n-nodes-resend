@@ -364,6 +364,13 @@ export const description: INodeProperties[] = [
 				description: 'Custom email headers to include in the message. Useful for tracking, thread management, or custom metadata.',
 			},
 			{
+				displayName: 'Idempotency Key',
+				name: 'idempotencyKey',
+				type: 'string',
+				default: '',
+				description: 'A unique key to ensure the email is sent only once. Useful for retries to prevent duplicate sends.',
+			},
+			{
 				displayName: 'Reply To',
 				name: 'replyTo',
 				type: 'string',
@@ -410,21 +417,14 @@ export const description: INodeProperties[] = [
 				description: 'Key-value tags to categorize and track emails. Useful for analytics and filtering. Example: name="campaign", value="welcome-series".',
 			},
 			{
-				displayName: 'Topic',
+				displayName: 'Topic Name or ID',
 				name: 'topicId',
 				type: 'options',
 				default: '',
 				typeOptions: {
 					loadOptionsMethod: 'getTopics',
 				},
-				description: 'Associate this email with a specific subscription topic. Used for managing email preferences and unsubscribe handling.',
-			},
-			{
-				displayName: 'Idempotency Key',
-				name: 'idempotencyKey',
-				type: 'string',
-				default: '',
-				description: 'A unique key to ensure the email is sent only once. Useful for retries to prevent duplicate sends.',
+				description: 'Associate this email with a specific subscription topic. Used for managing email preferences and unsubscribe handling. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	},

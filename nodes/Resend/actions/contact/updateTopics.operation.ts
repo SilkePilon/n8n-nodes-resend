@@ -38,7 +38,7 @@ export const description: INodeProperties[] = [
 				displayName: 'Topic',
 				values: [
 					{
-						displayName: 'Topic',
+						displayName: 'Topic Name or ID',
 						name: 'id',
 						type: 'options',
 						required: true,

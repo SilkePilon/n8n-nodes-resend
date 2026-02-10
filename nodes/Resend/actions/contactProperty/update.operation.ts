@@ -32,7 +32,7 @@ export const description: INodeProperties[] = [
 		options: [
 			{
 				displayName: 'Fallback Value',
-				name: 'fallback_value',
+				name: 'fallbackValue',
 				type: 'string',
 				default: '',
 				placeholder: 'Acme Corp',
@@ -48,7 +48,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const contactPropertyId = resolveDynamicIdValue(this, 'contactPropertyId', index);
 	const updateFields = this.getNodeParameter('contactPropertyUpdateFields', index, {}) as {
-		fallback_value?: string;
+		fallbackValue?: string;
 	};
 
 	const response = await apiRequest.call(

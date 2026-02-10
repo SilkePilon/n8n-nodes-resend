@@ -32,7 +32,7 @@ export const description: INodeProperties[] = [
 		options: [
 			{
 				displayName: 'Scheduled At',
-				name: 'scheduled_at',
+				name: 'scheduledAt',
 				type: 'string',
 				default: '',
 				placeholder: 'in 1 min',
@@ -48,13 +48,13 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const broadcastId = resolveDynamicIdValue(this, 'broadcastId', index);
 	const sendOptions = this.getNodeParameter('broadcastSendOptions', index, {}) as {
-		scheduled_at?: string;
+		scheduledAt?: string;
 	};
 
 	const body: IDataObject = {};
 
-	if (sendOptions.scheduled_at) {
-		body.scheduled_at = sendOptions.scheduled_at;
+	if (sendOptions.scheduledAt) {
+		body.scheduledAt = sendOptions.scheduledAt;
 	}
 
 	const response = await apiRequest.call(this, 'POST', `/broadcasts/${encodeURIComponent(broadcastId)}/send`, body);

@@ -110,14 +110,14 @@ export const description: INodeProperties[] = [
 								description: 'Key-value tags for email categorization and analytics. Use for tracking campaigns or custom metadata.',
 							},
 							{
-								displayName: 'Topic',
+								displayName: 'Topic Name or ID',
 								name: 'topicId',
 								type: 'options',
 								default: '',
 								typeOptions: {
 									loadOptionsMethod: 'getTopics',
 								},
-								description: 'Topic to scope this email to for subscription preference management.',
+								description: 'Topic to scope this email to for subscription preference management. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 							},
 					]
 					},

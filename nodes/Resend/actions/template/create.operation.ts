@@ -145,14 +145,13 @@ export async function execute(
 	};
 
 	if (templateVariables.variables && templateVariables.variables.length > 0) {
-		const variables: Record<string, { type: string; fallback_value?: string }> = {};
-		for (const v of templateVariables.variables) {
-			variables[v.key] = { type: v.type };
+		body.variables = templateVariables.variables.map((v) => {
+			const variable: Record<string, unknown> = { key: v.key, type: v.type };
 			if (v.fallbackValue) {
-				variables[v.key].fallback_value = v.fallbackValue;
+				variable.fallbackValue = v.fallbackValue;
 			}
-		}
-		body.variables = variables;
+			return variable;
+		});
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/templates', body);

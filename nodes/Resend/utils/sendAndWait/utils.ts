@@ -671,7 +671,7 @@ export async function sendResendEmail(context: IExecuteFunctions, email: IEmail)
 	}
 
 	if (email.replyTo) {
-		requestBody.reply_to = email.replyTo;
+		requestBody.replyTo = email.replyTo;
 	}
 
 	await context.helpers.httpRequestWithAuthentication.call(context, 'resendApi', {

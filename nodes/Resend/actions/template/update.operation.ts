@@ -64,7 +64,7 @@ export const description: INodeProperties[] = [
 			},
 			{
 				displayName: 'Reply To',
-				name: 'reply_to',
+				name: 'replyTo',
 				type: 'string',
 				default: '',
 				description: 'Reply-to email address. For multiple addresses, use comma-separated values.',
@@ -158,7 +158,7 @@ export async function execute(
 		from?: string;
 		html?: string;
 		name?: string;
-		reply_to?: string;
+		replyTo?: string;
 		subject?: string;
 		text?: string;
 	};
@@ -169,14 +169,13 @@ export async function execute(
 	const body: IDataObject = { ...updateFields };
 
 	if (templateVariables.variables && templateVariables.variables.length > 0) {
-		const variables: Record<string, { type: string; fallback_value?: string }> = {};
-		for (const v of templateVariables.variables) {
-			variables[v.key] = { type: v.type };
+		body.variables = templateVariables.variables.map((v) => {
+			const variable: Record<string, unknown> = { key: v.key, type: v.type };
 			if (v.fallbackValue) {
-				variables[v.key].fallback_value = v.fallbackValue;
+				variable.fallbackValue = v.fallbackValue;
 			}
-		}
-		body.variables = variables;
+			return variable;
+		});
 	}
 
 	const response = await apiRequest.call(this, 'PATCH', `/templates/${encodeURIComponent(templateId)}`, body);
