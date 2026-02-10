@@ -76,9 +76,8 @@ export const description: INodeProperties[] = [
 			{
 				displayName: 'Target Segment',
 				name: 'segmentId',
-				type: 'string',
+				type: 'options',
 				default: '',
-				placeholder: 'seg_123456',
 				typeOptions: {
 					loadOptionsMethod: 'getSegments',
 				},
@@ -98,9 +97,8 @@ export const description: INodeProperties[] = [
 			{
 				displayName: 'Topic',
 				name: 'topicId',
-				type: 'string',
+				type: 'options',
 				default: '',
-				placeholder: 'topic_123456',
 				typeOptions: {
 					loadOptionsMethod: 'getTopics',
 				},

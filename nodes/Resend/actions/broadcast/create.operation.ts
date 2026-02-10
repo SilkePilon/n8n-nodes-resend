@@ -123,9 +123,8 @@ export const description: INodeProperties[] = [
 			{
 				displayName: 'Topic',
 				name: 'topicId',
-				type: 'string',
+				type: 'options',
 				default: '',
-				placeholder: 'topic_123456',
 				typeOptions: {
 					loadOptionsMethod: 'getTopics',
 				},

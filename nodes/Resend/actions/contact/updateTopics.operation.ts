@@ -40,14 +40,13 @@ export const description: INodeProperties[] = [
 					{
 						displayName: 'Topic',
 						name: 'id',
-						type: 'string',
+						type: 'options',
 						required: true,
 						default: '',
-						placeholder: 'topic_123456',
 						typeOptions: {
 							loadOptionsMethod: 'getTopics',
 						},
-						description: 'The topic to update subscription for',
+						description: 'The topic to update subscription for. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 					},
 					{
 						displayName: 'Subscription',

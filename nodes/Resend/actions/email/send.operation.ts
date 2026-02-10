@@ -410,10 +410,13 @@ export const description: INodeProperties[] = [
 				description: 'Key-value tags to categorize and track emails. Useful for analytics and filtering. Example: name="campaign", value="welcome-series".',
 			},
 			{
-				displayName: 'Topic ID',
+				displayName: 'Topic',
 				name: 'topicId',
-				type: 'string',
+				type: 'options',
 				default: '',
+				typeOptions: {
+					loadOptionsMethod: 'getTopics',
+				},
 				description: 'Associate this email with a specific subscription topic. Used for managing email preferences and unsubscribe handling.',
 			},
 			{

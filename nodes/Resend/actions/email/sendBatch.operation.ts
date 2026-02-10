@@ -110,11 +110,14 @@ export const description: INodeProperties[] = [
 								description: 'Key-value tags for email categorization and analytics. Use for tracking campaigns or custom metadata.',
 							},
 							{
-								displayName: 'Topic ID',
+								displayName: 'Topic',
 								name: 'topicId',
-								type: 'string',
+								type: 'options',
 								default: '',
-								description: 'Topic identifier for subscription preferences. Obtain from the List Topics operation.',
+								typeOptions: {
+									loadOptionsMethod: 'getTopics',
+								},
+								description: 'Topic to scope this email to for subscription preference management.',
 							},
 					]
 					},
@@ -171,10 +174,12 @@ export const description: INodeProperties[] = [
 					{
 						displayName: 'Template Name or ID',
 						name: 'templateId',
-						type: 'string',
+						type: 'options',
 						default: '',
-						placeholder: '34a080c9-b17d-4187-ad80-5af20266e535',
-						description: 'Template ID or alias to use instead of HTML content. Obtain from List Templates operation.',
+						typeOptions: {
+							loadOptionsMethod: 'getTemplates',
+						},
+						description: 'Template to use instead of HTML content. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 					},
 					{
 						displayName: 'Template Variables',
