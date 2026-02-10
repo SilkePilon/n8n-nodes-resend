@@ -672,5 +672,5 @@ export async function execute(
 		json: true,
 	});
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

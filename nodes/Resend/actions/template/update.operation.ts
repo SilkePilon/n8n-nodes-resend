@@ -181,5 +181,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'PATCH', `/templates/${templateId}`, body);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

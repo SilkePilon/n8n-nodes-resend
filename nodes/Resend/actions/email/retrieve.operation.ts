@@ -27,5 +27,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'GET', `/emails/${emailId}`);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

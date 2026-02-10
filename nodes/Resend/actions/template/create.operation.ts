@@ -157,5 +157,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'POST', '/templates', body);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

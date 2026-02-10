@@ -31,5 +31,5 @@ export async function execute(
 		`/contact-properties/${contactPropertyId}`,
 	);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

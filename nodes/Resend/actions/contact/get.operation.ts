@@ -42,5 +42,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'GET', `/audiences/${encodeURIComponent(audienceId)}/contacts/${encodeURIComponent(contactIdentifier)}`);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

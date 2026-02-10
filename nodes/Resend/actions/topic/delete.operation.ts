@@ -27,5 +27,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'DELETE', `/topics/${topicId}`);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }

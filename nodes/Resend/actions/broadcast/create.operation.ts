@@ -172,5 +172,5 @@ export async function execute(
 
 	const response = await apiRequest.call(this, 'POST', '/broadcasts', body);
 
-	return [{ json: response }];
+	return [{ json: response, pairedItem: { item: index } }];
 }
