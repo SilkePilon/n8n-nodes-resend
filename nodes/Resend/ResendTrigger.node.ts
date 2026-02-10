@@ -190,6 +190,8 @@ export class ResendTrigger implements INodeType {
 					'';
 
 				if (!svixId || !svixTimestamp || !svixSignature) {
+					const res = this.getResponseObject();
+					res.status(401).json({ error: 'Missing Svix signature headers' });
 					return {
 						noWebhookResponse: true,
 					};
@@ -205,6 +207,8 @@ export class ResendTrigger implements INodeType {
 					this.getNode(),
 				);
 			} catch (error) {
+				const res = this.getResponseObject();
+				res.status(401).json({ error: 'Invalid webhook signature' });
 				return {
 					noWebhookResponse: true,
 				};

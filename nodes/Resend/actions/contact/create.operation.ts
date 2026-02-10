@@ -1,22 +1,7 @@
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
-import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
 export const description: INodeProperties[] = [
-	createDynamicIdField({
-		fieldName: 'audienceIdCreate',
-		resourceName: 'audience',
-		displayName: 'Audience',
-		required: true,
-		placeholder: 'aud_123456',
-		description: 'The audience to create the contact in. Contacts must belong to an audience.',
-		displayOptions: {
-			show: {
-				resource: ['contacts'],
-				operation: ['create'],
-			},
-		},
-	}),
 	{
 		displayName: 'Email',
 		name: 'email',
@@ -47,14 +32,14 @@ export const description: INodeProperties[] = [
 		options: [
 			{
 				displayName: 'First Name',
-				name: 'first_name',
+				name: 'firstName',
 				type: 'string',
 				default: '',
 				description: 'The contact\'s first name. Used for personalization in email templates.',
 			},
 			{
 				displayName: 'Last Name',
-				name: 'last_name',
+				name: 'lastName',
 				type: 'string',
 				default: '',
 				description: 'The contact\'s last name. Used for personalization in email templates.',
@@ -107,12 +92,15 @@ export const description: INodeProperties[] = [
 						displayName: 'Segment',
 						values: [
 							{
-								displayName: 'Segment ID',
+								displayName: 'Segment',
 								name: 'id',
-								type: 'string',
+								type: 'options',
 								required: true,
 								default: '',
-								description: 'The unique identifier of the segment to add this contact to',
+								typeOptions: {
+									loadOptionsMethod: 'getSegments',
+								},
+								description: 'The segment to add this contact to. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 							},
 						],
 					},
@@ -133,12 +121,15 @@ export const description: INodeProperties[] = [
 						displayName: 'Topic',
 						values: [
 							{
-								displayName: 'Topic ID',
+								displayName: 'Topic',
 								name: 'id',
-								type: 'string',
+								type: 'options',
 								required: true,
 								default: '',
-								description: 'The unique identifier of the subscription topic',
+								typeOptions: {
+									loadOptionsMethod: 'getTopics',
+								},
+								description: 'The subscription topic. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 							},
 							{
 								displayName: 'Subscription',
@@ -186,23 +177,21 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const email = this.getNodeParameter('email', index) as string;
 	const createFields = this.getNodeParameter('contactCreateFields', index, {}) as {
-		first_name?: string;
-		last_name?: string;
+		firstName?: string;
+		lastName?: string;
 		unsubscribed?: boolean;
 		properties?: { properties: PropertyItem[] };
 		segments?: { segments: SegmentItem[] };
 		topics?: { topics: TopicItem[] };
 	};
 
-	const audienceId = resolveDynamicIdValue(this, 'audienceIdCreate', index);
-
 	const body: IDataObject = { email };
 
-	if (createFields.first_name) {
-		body.first_name = createFields.first_name;
+	if (createFields.firstName) {
+		body.firstName = createFields.firstName;
 	}
-	if (createFields.last_name) {
-		body.last_name = createFields.last_name;
+	if (createFields.lastName) {
+		body.lastName = createFields.lastName;
 	}
 	if (createFields.unsubscribed !== undefined) {
 		body.unsubscribed = createFields.unsubscribed;
@@ -227,7 +216,7 @@ export async function execute(
 		}));
 	}
 
-	const response = await apiRequest.call(this, 'POST', `/audiences/${encodeURIComponent(audienceId)}/contacts`, body);
+	const response = await apiRequest.call(this, 'POST', '/contacts', body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

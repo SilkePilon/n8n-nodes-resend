@@ -25,7 +25,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const topicId = resolveDynamicIdValue(this, 'topicId', index);
 
-	const response = await apiRequest.call(this, 'GET', `/topics/${topicId}`);
+	const response = await apiRequest.call(this, 'GET', `/topics/${encodeURIComponent(topicId)}`);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

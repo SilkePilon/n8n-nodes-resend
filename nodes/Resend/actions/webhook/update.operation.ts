@@ -77,7 +77,7 @@ export async function execute(
 		assertHttpsEndpoint(this.getNode(), updateFields.endpoint);
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/webhooks/${webhookId}`, updateFields);
+	const response = await apiRequest.call(this, 'PATCH', `/webhooks/${encodeURIComponent(webhookId)}`, updateFields);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

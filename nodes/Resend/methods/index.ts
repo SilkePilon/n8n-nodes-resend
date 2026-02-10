@@ -128,84 +128,15 @@ export async function getBroadcasts(this: ILoadOptionsFunctions): Promise<INodeP
 }
 
 /**
- * Contacts are scoped to audiences. This method reads the currently selected
- * audience ID from node parameters and fetches contacts from that audience.
+ * Contacts are now fetched directly from /contacts endpoint.
  */
 export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-	// Helper to safely get string value
-	const getStringValue = (value: unknown) =>
-		typeof value === 'string' && value.trim() ? value : undefined;
-
-	const safeGet = (getter: () => unknown) => {
-		try {
-			return getter();
-		} catch {
-			return undefined;
-		}
-	};
-
-	// Try to get audience ID from various possible parameter names
-	const getParameterValue = (name: string): string | undefined => {
-		const currentParameters = this.getCurrentNodeParameters();
-
-		// Check if it's a resourceLocator object
-		const paramValue = currentParameters?.[name];
-		if (paramValue && typeof paramValue === 'object' && 'value' in paramValue) {
-			return getStringValue((paramValue as { value: unknown }).value);
-		}
-
-		const fromCurrentParameters = getStringValue(paramValue);
-		if (fromCurrentParameters) {
-			return fromCurrentParameters;
-		}
-
-		const fromCurrentNodeParameter = getStringValue(
-			safeGet(() => this.getCurrentNodeParameter(name)),
-		);
-		if (fromCurrentNodeParameter) {
-			return fromCurrentNodeParameter;
-		}
-
-		return undefined;
-	};
-
-	// Check all possible audience field names used across contact operations
-	const audienceFieldNames = [
-		'audienceIdCreate',
-		'audienceIdList',
-		'audienceIdGet',
-		'audienceIdUpdate',
-		'audienceIdDelete',
-		'audienceIdAddSegment',
-		'audienceIdListSegments',
-		'audienceIdRemoveSegment',
-		'audienceIdGetTopics',
-		'audienceIdUpdateTopics',
-		'audienceId',
-	];
-
-	let audienceId: string | undefined;
-	for (const fieldName of audienceFieldNames) {
-		audienceId = getParameterValue(fieldName);
-		if (audienceId) break;
-	}
-
-	if (!audienceId) {
-		// No audience selected yet, return empty list
-		return [];
-	}
-
-	// Skip if it's an expression
-	if (audienceId.startsWith('={{') || audienceId.includes('{{')) {
-		return [];
-	}
-
 	try {
 		const response = await this.helpers.httpRequestWithAuthentication.call(
 			this,
 			'resendApi',
 			{
-				url: `${RESEND_API_BASE}/audiences/${encodeURIComponent(audienceId)}/contacts`,
+				url: `${RESEND_API_BASE}/contacts`,
 				method: 'GET',
 				qs: { limit: 100 },
 				json: true,
@@ -232,7 +163,7 @@ export async function getContacts(this: ILoadOptionsFunctions): Promise<INodePro
 				};
 			});
 	} catch {
-		// If API call fails (e.g., invalid audience ID), return empty list
+		// If API call fails, return empty list
 		return [];
 	}
 }

@@ -56,7 +56,7 @@ export async function requestList(
 	const returnAll = this.getNodeParameter('returnAll', 0, false) as boolean;
 	const limit = this.getNodeParameter('limit', 0, 50) as number;
 
-	const targetLimit = returnAll ? 1000 : (limit ?? 50);
+	const targetLimit = returnAll ? Infinity : (limit ?? 50);
 	const pageSize = Math.min(targetLimit, 100); // Resend API max is 100
 	const qs: Record<string, string | number> = { limit: pageSize };
 
@@ -218,14 +218,15 @@ export function assertHttpsEndpoint(node: INode, endpoint: string): void {
 
 /**
  * Create execution data for list operations.
+ * All list results are produced from a single API call, so they should all
+ * pair back to input item 0 (the item that triggered the list operation).
  */
 export function createListExecutionData(
 	this: IExecuteFunctions,
 	items: IDataObject[],
 ): INodeExecutionData[] {
-	const inputData = this.getInputData();
-	return items.map((item, index) => ({
+	return items.map((item) => ({
 		json: item,
-		pairedItem: { item: index < inputData.length ? index : 0 },
+		pairedItem: { item: 0 },
 	}));
 }

@@ -57,7 +57,7 @@ export async function execute(
 		body.scheduled_at = sendOptions.scheduled_at;
 	}
 
-	const response = await apiRequest.call(this, 'POST', `/broadcasts/${broadcastId}/send`, body);
+	const response = await apiRequest.call(this, 'POST', `/broadcasts/${encodeURIComponent(broadcastId)}/send`, body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

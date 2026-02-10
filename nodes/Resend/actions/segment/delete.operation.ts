@@ -25,7 +25,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const segmentId = resolveDynamicIdValue(this, 'segmentId', index);
 
-	const response = await apiRequest.call(this, 'DELETE', `/segments/${segmentId}`);
+	const response = await apiRequest.call(this, 'DELETE', `/segments/${encodeURIComponent(segmentId)}`);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

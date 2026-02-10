@@ -25,7 +25,7 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const webhookId = resolveDynamicIdValue(this, 'webhookId', index);
 
-	const response = await apiRequest.call(this, 'GET', `/webhooks/${webhookId}`);
+	const response = await apiRequest.call(this, 'GET', `/webhooks/${encodeURIComponent(webhookId)}`);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

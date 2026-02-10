@@ -28,7 +28,7 @@ export async function execute(
 	const response = await apiRequest.call(
 		this,
 		'DELETE',
-		`/contact-properties/${contactPropertyId}`,
+		`/contact-properties/${encodeURIComponent(contactPropertyId)}`,
 	);
 
 	return [{ json: response, pairedItem: { item: index } }];

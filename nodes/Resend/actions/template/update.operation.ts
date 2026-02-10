@@ -179,7 +179,7 @@ export async function execute(
 		body.variables = variables;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/templates/${templateId}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/templates/${encodeURIComponent(templateId)}`, body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

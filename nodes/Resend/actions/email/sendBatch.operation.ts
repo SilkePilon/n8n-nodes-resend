@@ -32,79 +32,6 @@ export const description: INodeProperties[] = [
 						placeholder: 'Add Option',
 						options: [
 							{
-								displayName: 'Attachments',
-								name: 'attachments',
-								type: 'fixedCollection',
-								default: {},
-								options: [
-											{
-												name: 'attachments',
-												displayName: 'Attachment',
-													values:	[
-													{
-														displayName: 'Attachment Type',
-														name: 'attachmentType',
-														type: 'options',
-														default: 'binaryData',
-														options: [
-																	{
-																		name: 'Binary Data',
-																		value: 'binaryData',
-																		description: 'Use binary data from a previous node (e.g., Read File, HTTP Request)',
-																	},
-																	{
-																		name: 'Remote URL',
-																		value: 'url',
-																		description: 'Use a publicly accessible URL to fetch the file for attachment',
-																	},
-																]
-													},
-													{
-														displayName: 'Binary Property',
-														name: 'binaryPropertyName',
-														type: 'string',
-														default: 'data',
-														placeholder: 'data',
-														description: 'Name of the binary property containing the file. Usually "data" from Read File or HTTP Request nodes.',
-													},
-													{
-														displayName: 'Content ID',
-														name: 'content_id',
-														type: 'string',
-														default: '',
-														placeholder: 'image-1',
-														description: 'Content ID for inline images. Reference in HTML as &lt;img src="cid:image-1"&gt;.',
-													},
-													{
-														displayName: 'Content Type',
-														name: 'content_type',
-														type: 'string',
-														default: '',
-														placeholder: 'application/pdf',
-														description: 'MIME type of the attachment (e.g., application/pdf). Auto-detected if not specified.',
-													},
-													{
-														displayName: 'File Name',
-														name: 'filename',
-														type: 'string',
-														default: '',
-														placeholder: 'document.pdf',
-														description: 'Filename shown to the recipient. Required for all attachments.',
-													},
-													{
-														displayName: 'File URL',
-														name: 'fileUrl',
-														type: 'string',
-														default: '',
-														placeholder: 'https://example.com/file.pdf',
-														description: 'Publicly accessible URL to the file. Resend will download and attach it.',
-													},
-													]
-											},
-									],
-								description: 'File attachments. Use Binary Data for files from previous nodes or Remote URL for web files.',
-							},
-							{
 								displayName: 'BCC',
 								name: 'bcc',
 								type: 'string',
@@ -148,7 +75,7 @@ export const description: INodeProperties[] = [
 							},
 							{
 								displayName: 'Reply To',
-								name: 'reply_to',
+								name: 'replyTo',
 								type: 'string',
 								default: '',
 								description: 'Email address where replies should be sent. Can be different from the sender address.',
@@ -183,11 +110,14 @@ export const description: INodeProperties[] = [
 								description: 'Key-value tags for email categorization and analytics. Use for tracking campaigns or custom metadata.',
 							},
 							{
-								displayName: 'Topic ID',
-								name: 'topic_id',
-								type: 'string',
+								displayName: 'Topic',
+								name: 'topicId',
+								type: 'options',
 								default: '',
-								description: 'Topic identifier for subscription preferences. Obtain from the List Topics operation.',
+								typeOptions: {
+									loadOptionsMethod: 'getTopics',
+								},
+								description: 'Topic to scope this email to for subscription preference management.',
 							},
 					]
 					},
@@ -244,10 +174,12 @@ export const description: INodeProperties[] = [
 					{
 						displayName: 'Template Name or ID',
 						name: 'templateId',
-						type: 'string',
+						type: 'options',
 						default: '',
-						placeholder: '34a080c9-b17d-4187-ad80-5af20266e535',
-						description: 'Template ID or alias to use instead of HTML content. Obtain from List Templates operation.',
+						typeOptions: {
+							loadOptionsMethod: 'getTemplates',
+						},
+						description: 'Template to use instead of HTML content. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 					},
 					{
 						displayName: 'Template Variables',
@@ -350,15 +282,6 @@ export const description: INodeProperties[] = [
 	},
 ];
 
-interface AttachmentInput {
-	attachmentType: 'binaryData' | 'url';
-	binaryPropertyName?: string;
-	filename?: string;
-	fileUrl?: string;
-	content_id?: string;
-	content_type?: string;
-}
-
 interface EmailInput {
 	from: string;
 	to: string;
@@ -370,13 +293,12 @@ interface EmailInput {
 	templateId?: string;
 	templateVariables?: { variables?: Array<{ key: string; value?: unknown }> };
 	additionalOptions?: {
-		attachments?: { attachments: AttachmentInput[] };
 		bcc?: string;
 		cc?: string;
 		headers?: { headers: Array<{ name: string; value?: string }> };
-		reply_to?: string;
+		replyTo?: string;
 		tags?: { tags: Array<{ name: string; value?: string }> };
-		topic_id?: string;
+		topicId?: string;
 	};
 }
 
@@ -384,7 +306,6 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const items = this.getInputData();
 	const emailsData = this.getNodeParameter('emails', index) as { emails: EmailInput[] };
 	const batchOptions = this.getNodeParameter('batchOptions', index, {}) as {
 		idempotency_key?: string;
@@ -422,82 +343,12 @@ export async function execute(
 		}
 
 		// Handle Reply To
-		const replyToValue = additionalOptions.reply_to;
+		const replyToValue = additionalOptions.replyTo;
 		if (replyToValue) {
 			const replyToList = normalizeEmailList(replyToValue);
 			if (replyToList.length) {
-				emailObj.reply_to = replyToList;
+				emailObj.replyTo = replyToList;
 			}
-		}
-
-		// Handle Attachments
-		const attachments = additionalOptions.attachments;
-		if (attachments?.attachments?.length) {
-			emailObj.attachments = attachments.attachments
-				.map((attachment) => {
-					const contentId = attachment.content_id;
-					const contentType = attachment.content_type;
-					const attachmentType = attachment.attachmentType ?? 'binaryData';
-
-					if (attachmentType === 'binaryData') {
-						const binaryPropertyName = attachment.binaryPropertyName || 'data';
-						const binaryData = items[index].binary?.[binaryPropertyName];
-						if (!binaryData) {
-							throw new NodeOperationError(
-								this.getNode(),
-								`Binary property "${binaryPropertyName}" not found in item ${index}`,
-								{ itemIndex: index },
-							);
-						}
-						if (!attachment.filename) {
-							throw new NodeOperationError(
-								this.getNode(),
-								'File Name is required for batch email attachments.',
-								{ itemIndex: index },
-							);
-						}
-
-						const attachmentEntry: Record<string, unknown> = {
-							filename: attachment.filename,
-							content: binaryData.data,
-						};
-						if (contentId) {
-							attachmentEntry.content_id = contentId;
-						}
-						if (contentType) {
-							attachmentEntry.content_type = contentType;
-						}
-						return attachmentEntry;
-					} else if (attachmentType === 'url') {
-						if (!attachment.filename) {
-							throw new NodeOperationError(
-								this.getNode(),
-								'File Name is required for URL attachments.',
-								{ itemIndex: index },
-							);
-						}
-						if (!attachment.fileUrl) {
-							throw new NodeOperationError(
-								this.getNode(),
-								'File URL is required for URL attachments.',
-								{ itemIndex: index },
-							);
-						}
-						const attachmentEntry: Record<string, unknown> = {
-							filename: attachment.filename,
-							path: attachment.fileUrl,
-						};
-						if (contentId) {
-							attachmentEntry.content_id = contentId;
-						}
-						if (contentType) {
-							attachmentEntry.content_type = contentType;
-						}
-						return attachmentEntry;
-					}
-					return null;
-				})
-				.filter((attachment): attachment is Record<string, unknown> => attachment !== null);
 		}
 
 		// Handle Headers
@@ -526,9 +377,9 @@ export async function execute(
 		}
 
 		// Handle Topic ID
-		const topicId = additionalOptions.topic_id;
+		const topicId = additionalOptions.topicId;
 		if (topicId) {
-			emailObj.topic_id = topicId;
+			emailObj.topicId = topicId;
 		}
 
 		// Handle content

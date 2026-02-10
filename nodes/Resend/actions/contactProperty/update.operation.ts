@@ -54,7 +54,7 @@ export async function execute(
 	const response = await apiRequest.call(
 		this,
 		'PATCH',
-		`/contact-properties/${contactPropertyId}`,
+		`/contact-properties/${encodeURIComponent(contactPropertyId)}`,
 		updateFields,
 	);
 

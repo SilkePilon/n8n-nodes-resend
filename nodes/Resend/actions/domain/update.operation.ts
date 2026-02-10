@@ -32,14 +32,14 @@ export const description: INodeProperties[] = [
 		options: [
 			{
 				displayName: 'Click Tracking',
-				name: 'click_tracking',
+				name: 'clickTracking',
 				type: 'boolean',
 				default: false,
 				description: 'Whether to track clicks within the body of each HTML email',
 			},
 			{
 				displayName: 'Open Tracking',
-				name: 'open_tracking',
+				name: 'openTracking',
 				type: 'boolean',
 				default: false,
 				description: 'Whether to track the open rate of each email',
@@ -66,24 +66,24 @@ export async function execute(
 ): Promise<INodeExecutionData[]> {
 	const domainId = resolveDynamicIdValue(this, 'domainId', index);
 	const updateOptions = this.getNodeParameter('domainUpdateOptions', index, {}) as {
-		click_tracking?: boolean;
-		open_tracking?: boolean;
+		clickTracking?: boolean;
+		openTracking?: boolean;
 		tls?: string;
 	};
 
 	const body: IDataObject = {};
 
-	if (updateOptions.click_tracking !== undefined) {
-		body.click_tracking = updateOptions.click_tracking;
+	if (updateOptions.clickTracking !== undefined) {
+		body.clickTracking = updateOptions.clickTracking;
 	}
-	if (updateOptions.open_tracking !== undefined) {
-		body.open_tracking = updateOptions.open_tracking;
+	if (updateOptions.openTracking !== undefined) {
+		body.openTracking = updateOptions.openTracking;
 	}
 	if (updateOptions.tls) {
 		body.tls = updateOptions.tls;
 	}
 
-	const response = await apiRequest.call(this, 'PATCH', `/domains/${domainId}`, body);
+	const response = await apiRequest.call(this, 'PATCH', `/domains/${encodeURIComponent(domainId)}`, body);
 
 	return [{ json: response, pairedItem: { item: index } }];
 }
