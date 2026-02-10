@@ -658,14 +658,10 @@ export async function execute(
 			.filter((attachment): attachment is Record<string, unknown> => attachment !== null);
 	}
 
-	const credentials = await this.getCredentials('resendApi');
-	const apiKey = credentials.apiKey as string;
-
-	const response = await this.helpers.httpRequest({
+	const response = await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
 		url: `${RESEND_API_BASE}/emails`,
 		method: 'POST',
 		headers: {
-			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
 		body: requestBody,

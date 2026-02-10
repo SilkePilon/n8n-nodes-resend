@@ -4,7 +4,6 @@ import { NodeOperationError } from 'n8n-workflow';
 import * as email from './email';
 import * as templates from './template';
 import * as domains from './domain';
-import * as apiKeys from './apiKey';
 import * as broadcasts from './broadcast';
 import * as segments from './segment';
 import * as topics from './topic';
@@ -33,9 +32,6 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 					break;
 				case 'domains':
 					executionData = await domains.execute.call(this, i, operation);
-					break;
-				case 'apiKeys':
-					executionData = await apiKeys.execute.call(this, i, operation);
 					break;
 				case 'broadcasts':
 					executionData = await broadcasts.execute.call(this, i, operation);

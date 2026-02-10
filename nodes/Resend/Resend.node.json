@@ -2,10 +2,7 @@
 	"node": "n8n-nodes-resend.resend",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Communication", "HITL"],
-	"subcategories": {
-		"HITL": ["Human in the Loop"]
-	},
+	"categories": ["Communication"],
 	"resources": {
 		"primaryDocumentation": [
 			{

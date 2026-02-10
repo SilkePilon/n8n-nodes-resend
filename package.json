@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-resend",
-  "version": "2.1.9",
+  "version": "2.2.0",
   "description": "Resend integration for n8n with full API coverage: Email, Broadcasts, Templates, Domains, Contacts, Segments, Topics, Webhooks, and more",
   "keywords": [
     "n8n-community-node-package",
@@ -43,7 +43,8 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ResendApi.credentials.js"
+      "dist/credentials/ResendApi.credentials.js",
+      "dist/credentials/ResendWebhookSigningSecretApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Resend/Resend.node.js",
@@ -57,7 +58,6 @@
     "eslint": "^9.39.2",
     "eslint-plugin-n8n-nodes-base": "^1.16.5",
     "gulp": "^5.0.0",
-    "n8n-workflow": "^2.6.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.1.2",
     "typescript": "^5.9.3"

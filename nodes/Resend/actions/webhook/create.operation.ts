@@ -42,7 +42,7 @@ export async function execute(
 	const endpoint = this.getNodeParameter('webhookEndpoint', index) as string;
 	const events = this.getNodeParameter('webhookEvents', index) as string[];
 
-	assertHttpsEndpoint(endpoint);
+	assertHttpsEndpoint(this.getNode(), endpoint);
 
 	const body: IDataObject = {
 		endpoint,

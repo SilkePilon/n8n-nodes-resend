@@ -1,11 +1,10 @@
 import type { INodeType, INodeTypeDescription, IWebhookFunctions } from 'n8n-workflow';
-import { NodeConnectionType } from 'n8n-workflow';
+import { NodeConnectionTypes } from 'n8n-workflow';
 
 import { router } from './actions/router';
 import * as email from './actions/email';
 import * as templates from './actions/template';
 import * as domains from './actions/domain';
-import * as apiKeys from './actions/apiKey';
 import * as broadcasts from './actions/broadcast';
 import * as segments from './actions/segment';
 import * as topics from './actions/topic';
@@ -15,7 +14,6 @@ import * as webhooks from './actions/webhook';
 import * as audiences from './actions/audience';
 import * as receivingEmails from './actions/receivingEmail';
 import {
-	getApiKeys,
 	getAudiences,
 	getBroadcasts,
 	getContactProperties,
@@ -28,7 +26,6 @@ import {
 	getTemplates,
 	getTopics,
 	getWebhooks,
-	getApiKeysListSearch,
 	getAudiencesListSearch,
 	getBroadcastsListSearch,
 	getContactPropertiesListSearch,
@@ -60,9 +57,9 @@ export class Resend implements INodeType {
 		version: 1,
 		usableAsTool: true,
 		description:
-			'Send emails, manage contacts, create broadcasts, handle templates, domains, API keys, segments, topics, and webhooks using the Resend email platform',
+			'Send emails, manage contacts, create broadcasts, handle templates, domains, segments, topics, and webhooks using the Resend email platform',
 		subtitle:
-			'={{(() => { const resourceLabels = { apiKeys: "api key", audiences: "audience", broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
+			'={{(() => { const resourceLabels = { audiences: "audience", broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
 		defaults: {
 			name: 'Resend',
 		},
@@ -74,8 +71,8 @@ export class Resend implements INodeType {
 		],
 		waitingNodeTooltip: SEND_AND_WAIT_WAITING_TOOLTIP,
 		webhooks: sendAndWaitWebhooksDescription,
-		inputs: ['main' as NodeConnectionType],
-		outputs: ['main' as NodeConnectionType],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		properties: [
 			// Resource selection
 			{
@@ -84,11 +81,6 @@ export class Resend implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{
-						name: 'API Key',
-						value: 'apiKeys',
-						description: 'Create, list, or delete API keys for authenticating with the Resend API',
-					},
 					{
 						name: 'Audience',
 						value: 'audiences',
@@ -151,7 +143,6 @@ export class Resend implements INodeType {
 			...email.descriptions,
 			...templates.descriptions,
 			...domains.descriptions,
-			...apiKeys.descriptions,
 			...broadcasts.descriptions,
 			...segments.descriptions,
 			...topics.descriptions,
@@ -165,7 +156,6 @@ export class Resend implements INodeType {
 
 	methods = {
 		loadOptions: {
-			getApiKeys,
 			getAudiences,
 			getBroadcasts,
 			getContactProperties,
@@ -180,7 +170,6 @@ export class Resend implements INodeType {
 			getWebhooks,
 		},
 		listSearch: {
-			getApiKeys: getApiKeysListSearch,
 			getAudiences: getAudiencesListSearch,
 			getBroadcasts: getBroadcastsListSearch,
 			getContactProperties: getContactPropertiesListSearch,
