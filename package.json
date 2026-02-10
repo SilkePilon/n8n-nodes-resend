@@ -30,7 +30,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc && gulp build:icons",
+    "build": "npm run clean && tsc && gulp build:icons && auto-changelog",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials",
