@@ -27,6 +27,9 @@ A community node for [n8n](https://n8n.io) that integrates with the [Resend](htt
 
 ## API Coverage
 
+> [!WARNING]
+> Audiences are deprecated in favor of Segments and won't be supported in this node. Please use Segments for contact grouping and targeting.
+
 Comprehensive coverage of the Resend API (v1.1.0). The table below shows which endpoints are currently implemented:
 
 | API Resource           | Endpoint              | Status  | Operations                                                                                                       |
