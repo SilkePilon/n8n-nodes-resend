@@ -1,0 +1,126 @@
+name: 💡 Feature Request
+description: Suggest a new feature or enhancement for n8n-nodes-resend.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Your ideas help make this project better for everyone.
+
+        > **Before opening a new request**, please [search existing issues](https://github.com/resend/n8n-nodes-resend/issues?q=label%3Aenhancement) to check if someone has already suggested it. If so, give it a 👍 to show your support!
+
+  - type: checkboxes
+    id: existing-request
+    attributes:
+      label: Pre-flight checklist
+      description: Please confirm the following before submitting.
+      options:
+        - label: I have searched the [existing feature requests](https://github.com/resend/n8n-nodes-resend/issues?q=label%3Aenhancement) and this has not been suggested yet.
+          required: true
+        - label: I am using the latest version of `n8n-nodes-resend`.
+          required: false
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature area
+      description: Which area does this feature relate to?
+      multiple: true
+      options:
+        - Email
+        - Broadcast
+        - Contact
+        - Contact Property
+        - Domain
+        - Segment
+        - Template
+        - Topic
+        - Webhook
+        - Receiving Email
+        - Trigger Node
+        - New Resource / API endpoint
+        - Developer Experience (DX)
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Type of request
+      description: What kind of feature are you requesting?
+      options:
+        - "New feature — Something that doesn't exist yet"
+        - "Enhancement — Improve an existing feature"
+        - "New API coverage — Support a new Resend API endpoint"
+        - "UX improvement — Better defaults, labels, or descriptions"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: |
+        Is your feature request related to a problem? Please describe.
+        A clear and concise description of what the problem is.
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the solution you'd like. Be as specific as possible.
+      placeholder: |
+        I'd like the node to...
+
+        For example:
+        - Add a new operation "X" under the "Email" resource
+        - Support the `replyTo` field as an optional parameter
+        - Show a dropdown of domains fetched from the Resend API
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        I've tried working around this by...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: importance
+    attributes:
+      label: How important is this feature to you?
+      options:
+        - "Nice to have — Would improve my experience"
+        - "Important — I need this for my project"
+        - "Critical — Blocking my adoption / workflow"
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-reference
+    attributes:
+      label: Resend API reference
+      description: |
+        If this relates to a specific Resend API endpoint, please link to the relevant documentation.
+      placeholder: "https://resend.com/docs/api-reference/..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context, mockups, screenshots, or workflow examples about the feature request.
+      placeholder: Add any other context here...
+    validations:
+      required: false

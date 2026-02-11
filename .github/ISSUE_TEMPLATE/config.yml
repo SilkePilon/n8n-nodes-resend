@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ❓ Ask a Question
+    url: https://community.n8n.io/
+    about: Ask questions and get help from the n8n community.
+  - name: 📖 Resend API Documentation
+    url: https://resend.com/docs/introduction
+    about: Check the official Resend API docs for API-related questions.
+  - name: 🔒 Report a Security Vulnerability
+    url: https://github.com/resend/n8n-nodes-resend/security/policy
+    about: Please report security vulnerabilities responsibly.
