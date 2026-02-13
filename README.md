@@ -238,21 +238,25 @@ The **Resend Trigger** node receives webhooks for real-time email events. Signat
 
 > **Note:** The trigger node requires the **Resend Webhook Signing Secret** credential (separate from the Resend API credential). See the [Credentials](#credentials) section for setup instructions.
 
-| Event                    | Description                  |
-| ------------------------ | ---------------------------- |
-| `email.sent`             | Email sent to recipient      |
-| `email.delivered`        | Email delivered successfully |
-| `email.delivery_delayed` | Email delivery delayed       |
-| `email.opened`           | Recipient opened the email   |
-| `email.clicked`          | Link clicked in email        |
-| `email.bounced`          | Email bounced                |
-| `email.complained`       | Spam complaint received      |
-| `contact.created`        | New contact added            |
-| `contact.updated`        | Contact modified             |
-| `contact.deleted`        | Contact removed              |
-| `domain.created`         | New domain added             |
-| `domain.updated`         | Domain modified              |
-| `domain.deleted`         | Domain removed               |
+| Event                    | Description                          |
+| ------------------------ | ------------------------------------ |
+| `email.sent`             | Email sent to recipient              |
+| `email.delivered`        | Email delivered successfully         |
+| `email.delivery_delayed` | Email delivery delayed               |
+| `email.opened`           | Recipient opened the email           |
+| `email.clicked`          | Link clicked in email                |
+| `email.bounced`          | Email bounced                        |
+| `email.complained`       | Spam complaint received              |
+| `email.failed`           | Email failed to send due to an error |
+| `email.received`         | Inbound email received by Resend     |
+| `email.scheduled`        | Email scheduled to be sent           |
+| `email.suppressed`       | Email suppressed by Resend           |
+| `contact.created`        | New contact added                    |
+| `contact.updated`        | Contact modified                     |
+| `contact.deleted`        | Contact removed                      |
+| `domain.created`         | New domain added                     |
+| `domain.updated`         | Domain modified                      |
+| `domain.deleted`         | Domain removed                       |
 
 ## Limitations
 
