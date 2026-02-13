@@ -78,7 +78,7 @@ export class ResendTrigger implements INodeType {
 		description:
 			'Triggers workflows when Resend email events occur, such as email sent, delivered, opened, clicked, bounced, or complained. Includes secure webhook signature verification.',
 		subtitle:
-			'={{(() => { const events = $parameter["events"] ?? []; const actionLabels = { created: "create", deleted: "delete", updated: "update", sent: "send", opened: "open", clicked: "click", bounced: "bounce", complained: "complain", delivered: "deliver", delivery_delayed: "delay" }; return events.map((event) => { const [resource, action] = event.split("."); if (!resource || !action) { return event; } const actionLabel = actionLabels[action] ?? action.replace(/_/g, " "); return actionLabel + ": " + resource; }).join(", "); })() }}',
+			'={{(() => { const events = $parameter["events"] ?? []; const actionLabels = { created: "create", deleted: "delete", updated: "update", sent: "send", opened: "open", clicked: "click", bounced: "bounce", complained: "complain", delivered: "deliver", delivery_delayed: "delay", failed: "fail", received: "receive", scheduled: "schedule", suppressed: "suppress" }; return events.map((event) => { const [resource, action] = event.split("."); if (!resource || !action) { return event; } const actionLabel = actionLabels[action] ?? action.replace(/_/g, " "); return actionLabel + ": " + resource; }).join(", "); })() }}',
 		defaults: {
 			name: 'Resend Trigger',
 		},
@@ -140,8 +140,12 @@ export class ResendTrigger implements INodeType {
 					{ name: 'Email Complained', value: 'email.complained' },
 					{ name: 'Email Delivered', value: 'email.delivered' },
 					{ name: 'Email Delivery Delayed', value: 'email.delivery_delayed' },
+					{ name: 'Email Failed', value: 'email.failed' },
 					{ name: 'Email Opened', value: 'email.opened' },
+					{ name: 'Email Received', value: 'email.received' },
+					{ name: 'Email Scheduled', value: 'email.scheduled' },
 					{ name: 'Email Sent', value: 'email.sent' },
+					{ name: 'Email Suppressed', value: 'email.suppressed' },
 				],
 				description: 'Select the Resend event types to listen for',
 			},
