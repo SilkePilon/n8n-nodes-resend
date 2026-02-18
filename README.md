@@ -18,6 +18,7 @@
   <a href="#human-in-the-loop">Human in the Loop</a> |
   <a href="#resources">Resources</a> |
   <a href="#trigger-events">Trigger Events</a> |
+  <a href="#limitations">Limitations</a> |
   <a href="#development">Development</a>
 </p>
 
@@ -32,8 +33,11 @@ The official node for [n8n](https://n8n.io) that integrates with the [Resend](ht
 
 The table below shows which endpoints are currently implemented:
 
-| API Resource                 | Endpoint                | Status  | Operations                                                                                                       |
-| ---------------------------- | ----------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+<details>
+<summary><strong>View all endpoints</strong></summary>
+
+| API Resource           | Endpoint              | Status  | Operations                                                                                                       |
+| ---------------------- | --------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
 | **Email**              | `/emails`             | ✅ Full | Send, Send Batch, Send and Wait, List, Get, Update, Cancel, List Attachments, Get Attachment                     |
 | **Receiving Emails**   | `/emails/receiving`   | ✅ Full | List, Get, List Attachments, Get Attachment                                                                      |
 | **Domains**            | `/domains`            | ✅ Full | Create, List, Get, Update, Delete, Verify                                                                        |
@@ -44,6 +48,8 @@ The table below shows which endpoints are currently implemented:
 | **Topics**             | `/topics`             | ✅ Full | Create, List, Get, Update, Delete                                                                                |
 | **Contact Properties** | `/contact-properties` | ✅ Full | Create, List, Get, Update, Delete                                                                                |
 | **Webhooks**           | `/webhooks`           | ✅ Full | Create, List, Get, Update, Delete                                                                                |
+
+</details>
 
 ## Installation
 
@@ -56,7 +62,7 @@ The table below shows which endpoints are currently implemented:
 
 This package uses two separate credentials:
 
-##### Resend API
+### Resend API
 
 1. Get your API key from [Resend Dashboard](https://resend.com/api-keys)
 2. In n8n, go to **Credentials** > **Add credential**
@@ -64,7 +70,7 @@ This package uses two separate credentials:
 
 This credential is used by the main **Resend** node for all API operations.
 
-##### Resend Webhook Signing Secret
+### Resend Webhook Signing Secret
 
 1. Create a webhook endpoint in your [Resend Dashboard](https://resend.com/webhooks)
 2. Copy the signing secret (starts with `whsec_`)
@@ -86,13 +92,15 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 
 ### How to Use
 
+The workflow pauses at the email step and resumes automatically once the recipient clicks a button or submits the response form.
+
 1. In the node panel, go to **Human in the Loop** > **Resend**
 2. Or select **Email** resource > **Send and Wait for Response** operation
 
 ### Configuration Options
 
-| Option                         | Description                                              |
-| ------------------------------ | -------------------------------------------------------- |
+| Option                   | Description                                              |
+| ------------------------ | -------------------------------------------------------- |
 | **Response Type**        | Choose between Approval (buttons) or Free Text (form)    |
 | **Approval Type**        | Single button (Approve only) or Double (Approve/Decline) |
 | **Button Labels**        | Customize the button text                                |
@@ -250,8 +258,11 @@ The **Resend Trigger** node receives webhooks for real-time email events. Signat
 
 > **Note:** The trigger node requires the **Resend Webhook Signing Secret** credential (separate from the Resend API credential). See the [Credentials](#credentials) section for setup instructions.
 
-| Event                      | Description                          |
-| -------------------------- | ------------------------------------ |
+<details>
+<summary><strong>View all events</strong></summary>
+
+| Event                    | Description                          |
+| ------------------------ | ------------------------------------ |
 | `email.sent`             | Email sent to recipient              |
 | `email.delivered`        | Email delivered successfully         |
 | `email.delivery_delayed` | Email delivery delayed               |
@@ -269,6 +280,8 @@ The **Resend Trigger** node receives webhooks for real-time email events. Signat
 | `domain.created`         | New domain added                     |
 | `domain.updated`         | Domain modified                      |
 | `domain.deleted`         | Domain removed                       |
+
+</details>
 
 ## Limitations
 
@@ -288,12 +301,6 @@ npm run lint
 ## License
 
 [MIT](LICENSE.md)
-
-## Acknowledgments
-
-Enhanced with contributions from [jannispkz/n8n-nodes-resend-complete](https://github.com/jannispkz/n8n-nodes-resend-complete).
-
----
 
 <p align="center">
   <a href="https://github.com/resend/n8n-nodes-resend">GitHub</a> |
