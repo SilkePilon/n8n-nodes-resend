@@ -23,17 +23,17 @@
 
 ---
 
-A community node for [n8n](https://n8n.io) that integrates with the [Resend](https://resend.com) email API. Send emails, manage contacts, handle domains, and receive webhooks.
+The official node for [n8n](https://n8n.io) that integrates with the [Resend](https://resend.com) API. Send emails, manage contacts, handle domains, and receive webhooks.
 
 ## API Coverage
 
 > [!WARNING]
 > Audiences are deprecated in favor of Segments and won't be supported in this node. Please use Segments for contact grouping and targeting.
 
-Comprehensive coverage of the Resend API (v1.1.0). The table below shows which endpoints are currently implemented:
+The table below shows which endpoints are currently implemented:
 
-| API Resource           | Endpoint              | Status  | Operations                                                                                                       |
-| ---------------------- | --------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| API Resource                 | Endpoint                | Status  | Operations                                                                                                       |
+| ---------------------------- | ----------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
 | **Email**              | `/emails`             | ✅ Full | Send, Send Batch, Send and Wait, List, Get, Update, Cancel, List Attachments, Get Attachment                     |
 | **Receiving Emails**   | `/emails/receiving`   | ✅ Full | List, Get, List Attachments, Get Attachment                                                                      |
 | **Domains**            | `/domains`            | ✅ Full | Create, List, Get, Update, Delete, Verify                                                                        |
@@ -47,34 +47,16 @@ Comprehensive coverage of the Resend API (v1.1.0). The table below shows which e
 
 ## Installation
 
-### Community Nodes (Recommended)
-
-1. Go to **Settings** > **Community Nodes**
-2. Click **Install a community node**
-3. Enter `n8n-nodes-resend`
-4. Restart n8n
-
-### Manual Installation
-
-```bash
-cd ~/.n8n
-npm install n8n-nodes-resend
-```
-
-### Docker
-
-```bash
-docker run -it --rm \
-  -p 5678:5678 \
-  -e N8N_NODES_INCLUDE=n8n-nodes-resend \
-  n8nio/n8n
-```
+1. Make a new workflow or open an existing one
+2. Open the nodes panel by selecting **+** or pressing **Tab**
+3. Search for **Resend**
+4. Select **Install** to install the node for your instance
 
 ## Credentials
 
 This package uses two separate credentials:
 
-### Resend API
+##### Resend API
 
 1. Get your API key from [Resend Dashboard](https://resend.com/api-keys)
 2. In n8n, go to **Credentials** > **Add credential**
@@ -82,7 +64,7 @@ This package uses two separate credentials:
 
 This credential is used by the main **Resend** node for all API operations.
 
-### Resend Webhook Signing Secret
+##### Resend Webhook Signing Secret
 
 1. Create a webhook endpoint in your [Resend Dashboard](https://resend.com/webhooks)
 2. Copy the signing secret (starts with `whsec_`)
@@ -109,8 +91,8 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 
 ### Configuration Options
 
-| Option                   | Description                                              |
-| ------------------------ | -------------------------------------------------------- |
+| Option                         | Description                                              |
+| ------------------------------ | -------------------------------------------------------- |
 | **Response Type**        | Choose between Approval (buttons) or Free Text (form)    |
 | **Approval Type**        | Single button (Approve only) or Double (Approve/Decline) |
 | **Button Labels**        | Customize the button text                                |
@@ -121,7 +103,8 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 
 ## Resources
 
-### Email
+<details>
+<summary><strong>Email</strong></summary>
 
 | Operation        | Description                                       |
 | ---------------- | ------------------------------------------------- |
@@ -135,7 +118,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | List Attachments | List attachments for a sent email                 |
 | Get Attachment   | Get a specific attachment from a sent email       |
 
-### Receiving Email
+</details>
+
+<details>
+<summary><strong>Receiving Email</strong></summary>
 
 | Operation        | Description                                     |
 | ---------------- | ----------------------------------------------- |
@@ -144,7 +130,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | List Attachments | List attachments for a received email           |
 | Get Attachment   | Get a specific attachment from a received email |
 
-### Contact
+</details>
+
+<details>
+<summary><strong>Contact</strong></summary>
 
 | Operation           | Description                              |
 | ------------------- | ---------------------------------------- |
@@ -159,7 +148,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Get Topics          | Get topic subscriptions for a contact    |
 | Update Topics       | Update topic subscriptions for a contact |
 
-### Contact Property
+</details>
+
+<details>
+<summary><strong>Contact Property</strong></summary>
 
 | Operation | Description                      |
 | --------- | -------------------------------- |
@@ -169,7 +161,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a property                |
 | List      | List all contact properties      |
 
-### Segment
+</details>
+
+<details>
+<summary><strong>Segment</strong></summary>
 
 | Operation | Description                                          |
 | --------- | ---------------------------------------------------- |
@@ -178,7 +173,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a segment                                     |
 | List      | List all segments                                    |
 
-### Topic
+</details>
+
+<details>
+<summary><strong>Topic</strong></summary>
 
 | Operation | Description                 |
 | --------- | --------------------------- |
@@ -188,7 +186,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a topic              |
 | List      | List all topics             |
 
-### Broadcast
+</details>
+
+<details>
+<summary><strong>Broadcast</strong></summary>
 
 | Operation | Description                   |
 | --------- | ----------------------------- |
@@ -199,7 +200,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a broadcast            |
 | List      | List all broadcasts           |
 
-### Template
+</details>
+
+<details>
+<summary><strong>Template</strong></summary>
 
 | Operation | Description                    |
 | --------- | ------------------------------ |
@@ -211,7 +215,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Publish   | Publish a template             |
 | Duplicate | Duplicate an existing template |
 
-### Domain
+</details>
+
+<details>
+<summary><strong>Domain</strong></summary>
 
 | Operation | Description                 |
 | --------- | --------------------------- |
@@ -222,7 +229,10 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a domain             |
 | List      | List all domains            |
 
-### Webhook
+</details>
+
+<details>
+<summary><strong>Webhook</strong></summary>
 
 | Operation | Description               |
 | --------- | ------------------------- |
@@ -232,14 +242,16 @@ The **Send and Wait for Response** operation enables human-in-the-loop workflows
 | Delete    | Remove a webhook          |
 | List      | List all webhooks         |
 
+</details>
+
 ## Trigger Events
 
 The **Resend Trigger** node receives webhooks for real-time email events. Signatures are automatically verified using Svix.
 
 > **Note:** The trigger node requires the **Resend Webhook Signing Secret** credential (separate from the Resend API credential). See the [Credentials](#credentials) section for setup instructions.
 
-| Event                    | Description                          |
-| ------------------------ | ------------------------------------ |
+| Event                      | Description                          |
+| -------------------------- | ------------------------------------ |
 | `email.sent`             | Email sent to recipient              |
 | `email.delivered`        | Email delivered successfully         |
 | `email.delivery_delayed` | Email delivery delayed               |

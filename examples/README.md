@@ -1,6 +1,6 @@
 # n8n-nodes-resend — Example Workflows
 
-Ready-to-import n8n workflow examples demonstrating real-world use cases for the Resend n8n community node.
+Ready-to-import n8n workflow examples demonstrating real-world use cases for the Resend n8n node.
 
 ## How to Import
 
@@ -101,7 +101,7 @@ Listens for `email.opened` and `email.clicked` Resend events, formats the event 
 
 All workflows require:
 
-- **n8n-nodes-resend** community node installed in your n8n instance
+- **n8n-nodes-resend** node installed in your n8n instance
 - A **Resend account** at [resend.com](https://resend.com)
 - A **verified sending domain** in Resend (required for all outbound email operations)
 - **Resend API Key** configured as a credential in n8n (`Settings → Credentials → New → Resend`)
