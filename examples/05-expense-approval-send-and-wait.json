@@ -1,0 +1,275 @@
+{
+  "name": "05 – Expense Approval via Email (Send & Wait)",
+  "nodes": [
+    {
+      "id": "sticky-overview-05",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, -420],
+      "parameters": {
+        "content": "## ✅ Expense Approval via Email\n\n**What this workflow does:**\n1. Employee submits an expense via an n8n form\n2. The workflow emails the manager an HTML approval request with **Approve** and **Decline** buttons\n3. Workflow execution **pauses** until the manager clicks a button\n4. Based on the response, the employee receives either an approval or rejection email\n\n**This is Resend's Send & Wait operation** — it emails someone, then waits for their click-based response before continuing.\n\n**Use cases:**\n- Expense approvals\n- Interview scheduling confirmations\n- Contract or proposal sign-offs\n- Event RSVPs with acceptance tracking\n- Content review and publishing approvals\n\n> Inspired by Gmail approval workflows (e.g. \"Email manager, wait for reply\"), rebuilt using Resend's native send-and-wait integration for reliable button-click tracking.",
+        "height": 480,
+        "width": 580,
+        "color": 1
+      }
+    },
+    {
+      "id": "sticky-setup-05",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [320, -420],
+      "parameters": {
+        "content": "## ⚙️ Setup Required\n\n**Step 1 – Resend credential**\nAdd your Resend API key to all three Resend nodes.\n\n**Step 2 – Sender address**\nChange `approvals@yourcompany.com` and `noreply@yourcompany.com` in the Resend nodes to your verified domain addresses.\n\n**Step 3 – Manager email**\nIn the \"Send Approval Request\" node, update the `To` field. Currently it reads from the form field \"Manager Email\". You can also hardcode a specific manager's address.\n\n**Step 4 – Approval timeout (optional)**\nIn \"Send Approval Request\", set the **Options → Limit Wait Time** to define a maximum wait period (e.g. 48 hours). After the timeout, the workflow continues down the \"false\" path by default.\n\n**Step 5 – Customize email templates**\nEdit the approval request message and the confirmation emails to match your company's tone and policy.\n\n> 💡 The Send & Wait node creates unique, one-time-use approval URLs embedded in the email buttons. No external service required.",
+        "height": 520,
+        "width": 560,
+        "color": 3
+      }
+    },
+    {
+      "id": "sticky-how-it-works-05",
+      "name": "How Send & Wait Works",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, 460],
+      "parameters": {
+        "content": "## 🔄 How Send & Wait Works\n\n1. The **Send & Wait** node sends the email and **suspends execution**\n2. When the recipient clicks **Approve** → workflow resumes, `$json.data.approved = true`\n3. When the recipient clicks **Decline** → workflow resumes, `$json.data.approved = false`\n4. The **IF** node routes to the Approval or Rejection email based on this value\n\nThe workflow can wait indefinitely (or until a configured timeout).",
+        "height": 220,
+        "width": 540,
+        "color": 4
+      }
+    },
+    {
+      "id": "n05-form",
+      "name": "Expense Submission Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-240, 100],
+      "webhookId": "resend-example-expense-form",
+      "parameters": {
+        "formTitle": "Expense Approval Request",
+        "formDescription": "Submit your expense for manager approval. You'll receive an email confirmation once it's reviewed.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Your Name",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "Jane Smith"
+            },
+            {
+              "fieldLabel": "Your Email",
+              "fieldType": "email",
+              "requiredField": true,
+              "placeholder": "jane@company.com"
+            },
+            {
+              "fieldLabel": "Manager Email",
+              "fieldType": "email",
+              "requiredField": true,
+              "placeholder": "manager@company.com"
+            },
+            {
+              "fieldLabel": "Amount",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "$250.00"
+            },
+            {
+              "fieldLabel": "Category",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  { "option": "Travel" },
+                  { "option": "Software / Tools" },
+                  { "option": "Office Supplies" },
+                  { "option": "Training / Education" },
+                  { "option": "Meals & Entertainment" },
+                  { "option": "Other" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Description",
+              "fieldType": "textarea",
+              "requiredField": true,
+              "placeholder": "Brief explanation of the expense and business purpose"
+            }
+          ]
+        },
+        "responseMode": "formPage",
+        "responseText": "Your expense request has been submitted! Your manager will be notified shortly.",
+        "options": {}
+      }
+    },
+    {
+      "id": "n05-send-and-wait",
+      "name": "Send Approval Request",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [100, 100],
+      "parameters": {
+        "resource": "email",
+        "operation": "sendAndWait",
+        "sendFrom": "approvals@yourcompany.com",
+        "sendTo": "={{$json[\"Manager Email\"]}}",
+        "subject": "=Action Required: Expense Approval for {{$json[\"Your Name\"]}} ({{$json[\"Amount\"]}})",
+        "message": "=Hi,\n\n{{$json[\"Your Name\"]}} has submitted an expense request that requires your approval.\n\nDetails:\n- Employee: {{$json[\"Your Name\"]}}\n- Amount: {{$json[\"Amount\"]}}\n- Category: {{$json[\"Category\"]}}\n- Description: {{$json[\"Description\"]}}\n\nPlease review and click one of the buttons below to approve or decline.",
+        "responseType": "approval",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "✅ Approve",
+            "buttonApprovalStyle": "primary",
+            "disapproveLabel": "❌ Decline",
+            "buttonDisapprovalStyle": "secondary"
+          }
+        },
+        "options": {}
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n05-if",
+      "name": "Was Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [420, 100],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "approval-check",
+              "leftValue": "={{$json.data.approved}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "n05-approved-email",
+      "name": "Send Approval Confirmation",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [700, -80],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "noreply@yourcompany.com",
+        "to": "={{$node[\"Expense Submission Form\"].json[\"Your Email\"]}}",
+        "subject": "=✅ Your expense has been approved — {{$node[\"Expense Submission Form\"].json[\"Amount\"]}}",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden\"><div style=\"background:#16a34a;padding:28px 36px\"><h1 style=\"color:#fff;margin:0;font-size:22px\">✅ Expense Approved</h1></div><div style=\"padding:36px\"><p style=\"color:#444;font-size:16px;margin-top:0\">Hi {{$node[\"Expense Submission Form\"].json[\"Your Name\"]}},</p><p style=\"color:#555;font-size:15px;line-height:1.7\">Great news — your expense has been <strong>approved</strong> by your manager.</p><div style=\"background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin:20px 0\"><table style=\"width:100%;font-size:14px;color:#444\"><tr><td style=\"padding:6px 0;font-weight:600\">Amount</td><td style=\"padding:6px 0\">{{$node[\"Expense Submission Form\"].json[\"Amount\"]}}</td></tr><tr><td style=\"padding:6px 0;font-weight:600\">Category</td><td style=\"padding:6px 0\">{{$node[\"Expense Submission Form\"].json[\"Category\"]}}</td></tr><tr><td style=\"padding:6px 0;font-weight:600\">Description</td><td style=\"padding:6px 0\">{{$node[\"Expense Submission Form\"].json[\"Description\"]}}</td></tr><tr><td style=\"padding:6px 0;font-weight:600\">Approved on</td><td style=\"padding:6px 0\">{{$now.toFormat('MMMM d, yyyy')}}</td></tr></table></div><p style=\"color:#555;font-size:14px\">Please submit your receipt to finance for reimbursement. Reimbursements are processed within 5 business days.</p></div></div></body></html>",
+        "additionalOptions": {}
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n05-declined-email",
+      "name": "Send Rejection Notice",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [700, 280],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "noreply@yourcompany.com",
+        "to": "={{$node[\"Expense Submission Form\"].json[\"Your Email\"]}}",
+        "subject": "=❌ Your expense request was declined — {{$node[\"Expense Submission Form\"].json[\"Amount\"]}}",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden\"><div style=\"background:#dc2626;padding:28px 36px\"><h1 style=\"color:#fff;margin:0;font-size:22px\">❌ Expense Not Approved</h1></div><div style=\"padding:36px\"><p style=\"color:#444;font-size:16px;margin-top:0\">Hi {{$node[\"Expense Submission Form\"].json[\"Your Name\"]}},</p><p style=\"color:#555;font-size:15px;line-height:1.7\">We're sorry — your expense request has been <strong>declined</strong> by your manager.</p><div style=\"background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:20px;margin:20px 0\"><table style=\"width:100%;font-size:14px;color:#444\"><tr><td style=\"padding:6px 0;font-weight:600\">Amount</td><td style=\"padding:6px 0\">{{$node[\"Expense Submission Form\"].json[\"Amount\"]}}</td></tr><tr><td style=\"padding:6px 0;font-weight:600\">Category</td><td style=\"padding:6px 0\">{{$node[\"Expense Submission Form\"].json[\"Category\"]}}</td></tr><tr><td style=\"padding:6px 0;font-weight:600\">Description</td><td style=\"padding:6px 0\">{{$node[\"Expense Submission Form\"].json[\"Description\"]}}</td></tr></table></div><p style=\"color:#555;font-size:14px;line-height:1.7\">If you believe this was declined in error, please reach out to your manager directly or submit a revised request with additional context.</p></div></div></body></html>",
+        "additionalOptions": {}
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Expense Submission Form": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Approval Request": {
+      "main": [
+        [
+          {
+            "node": "Was Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was Approved?": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Rejection Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "55555555-aaaa-bbbb-cccc-000000000005",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "resend-ex-05",
+  "tags": [
+    {
+      "id": "tag-resend-examples",
+      "name": "resend-example"
+    }
+  ]
+}

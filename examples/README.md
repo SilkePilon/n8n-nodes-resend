@@ -1,212 +1,125 @@
-# Resend Node Example Workflows
+# n8n-nodes-resend — Example Workflows
 
-This folder contains example n8n workflows demonstrating the capabilities of the Resend node. These examples show real-world use cases including email automation, contact management, trigger-based workflows, and human-in-the-loop approval processes.
+Ready-to-import n8n workflow examples demonstrating real-world use cases for the Resend n8n community node.
 
-## How to Import Workflows
-
-### Method 1: Import from File (Recommended)
+## How to Import
 
 1. Open your n8n instance
-2. Click the **+** button or go to **Workflows** menu
-3. Click **Create new workflow** (or use an existing one)
-4. Click the **three dots menu** (⋮) in the top-right corner
-5. Select **Import from File...**
-6. Choose the `.json` file you want to import
-7. The workflow will be loaded into the editor
-
-### Method 2: Copy and Paste
-
-1. Open the `.json` file in a text editor
-2. Select and copy the entire JSON content (Ctrl+C / Cmd+C)
-3. In n8n, create a new workflow or open an existing one
-4. Paste the content (Ctrl+V / Cmd+V) directly into the workflow editor canvas
-5. The nodes will appear on the canvas
-
-### Method 3: Import from URL
-
-If you're hosting these files online:
-
-1. Click the **three dots menu** (⋮) in the top-right corner
-2. Select **Import from URL...**
-3. Paste the raw URL to the JSON file
-4. Click **Import**
-
-## After Importing
-
-After importing a workflow, you'll need to:
-
-1. **Configure Credentials**: Click on each Resend node and select or create your Resend API credentials
-2. **Update Email Addresses**: Replace placeholder email addresses (like `your@email.com`) with real addresses
-3. **Adjust Webhook URLs**: For trigger workflows, copy the webhook URL and configure it in your Resend dashboard
-4. **Test the Workflow**: Use "Execute Workflow" to test before activating
+2. Go to **Workflows → New Workflow → More options (⋮) → Import from file**
+3. Select the `.json` file and click **Import**
+4. Follow the **Setup** instructions in each workflow's sticky notes
 
 ---
 
-## Example Workflows
+## Examples
 
-### 1. Trigger: Email Event Tracking (`trigger-email-events.json`)
+### 01 — Contact Form → Create Contact & Send Welcome Email
 
-**Description**: Monitors email delivery events (sent, delivered, opened, clicked, bounced) and logs them to a Google Sheet for analytics and reporting.
+**File:** `01-contact-form-welcome-email.json`
 
-**Use Case**: Track email engagement metrics, identify delivery issues, build marketing analytics dashboards.
+An n8n form captures new subscriber sign-ups, creates the contact in Resend's audience, and immediately sends a personalized branded welcome email.
 
-**Nodes Used**:
+**Nodes used:** n8n Form Trigger → Resend (Create Contact) → Resend (Send Email)
 
-- Resend Trigger (monitors email events)
-- Switch (routes events by type)
-- Google Sheets (logs events)
+**Resend operations:** `contacts › create`, `email › send`
 
-**Key Features**:
-
-- Secure webhook signature verification
-- Filters for specific event types
-- Structured data logging
+**Use cases:** Newsletter sign-up, product waitlist, community onboarding
 
 ---
 
-### 2. Trigger: Contact Sync on Events (`trigger-contact-sync.json`)
+### 02 — Email Bounce & Complaint Auto-Handler
 
-**Description**: Automatically syncs contact changes from Resend to external systems when contacts are created, updated, or deleted.
+**File:** `02-bounce-complaint-handler.json`
 
-**Use Case**: Keep your CRM, database, or marketing tools in sync with your Resend contacts.
+Listens for `email.bounced` and `email.complained` Resend webhook events, routes them by type, automatically marks the contact as unsubscribed in Resend, and sends an internal Slack-style alert email to your team.
 
-**Nodes Used**:
+**Nodes used:** Resend Trigger → Switch → Resend (Update Contact) × 2 → Resend (Send Alert Email) × 2
 
-- Resend Trigger (contact.created, contact.updated, contact.deleted events)
-- Switch (routes by event type)
-- HTTP Request (syncs to external API)
+**Resend operations:** `resendTrigger (email.bounced, email.complained)`, `contacts › update`, `email › send`
 
-**Key Features**:
-
-- Real-time contact synchronization
-- Event-type routing
-- External system integration
+**Use cases:** Deliverability protection, list hygiene, compliance (CAN-SPAM, GDPR)
 
 ---
 
-### 3. Human-in-the-Loop: Approval Workflow (`human-in-loop-approval.json`)
+### 03 — Weekly Newsletter Broadcast
 
-**Description**: Implements an approval workflow where content or requests are sent via email for manager approval. The workflow pauses until the recipient clicks Approve or Decline.
+**File:** `03-weekly-newsletter-broadcast.json`
 
-**Use Case**: Document approval, expense requests, content publishing approval, access requests.
+Runs every Monday at 9 AM, creates a broadcast campaign in Resend targeting a specific segment, and immediately sends it. Subject line is dynamically dated.
 
-**Nodes Used**:
+**Nodes used:** Schedule Trigger → Resend (Create Broadcast) → Resend (Send Broadcast)
 
-- Manual Trigger (initiates approval)
-- Resend (Send and Wait for Approval)
-- IF (routes based on approval decision)
-- Slack or HTTP Request (notifies of outcome)
+**Resend operations:** `broadcasts › create`, `broadcasts › send`
 
-**Key Features**:
-
-- Dual button (Approve/Decline) options
-- Automatic workflow pause and resume
-- Customizable button labels and styling
-- Configurable timeout
+**Use cases:** Weekly newsletter, product digest, recurring announcements
 
 ---
 
-### 4. Human-in-the-Loop: Free Text Response (`human-in-loop-freetext.json`)
+### 04 — Lead Drip Campaign (3-Email Sequence)
 
-**Description**: Sends an email requesting feedback or input, with a link to a form where the recipient can provide a free-text response. Perfect for collecting qualitative feedback.
+**File:** `04-lead-nurturing-drip-campaign.json`
 
-**Use Case**: Customer feedback collection, survey responses, support ticket updates, interview scheduling.
+When a new lead arrives via webhook (e.g., from a form or CRM), the workflow creates a contact in Resend and schedules three emails: an immediate welcome, a value-focused email in 3 days, and a call-to-action email in 7 days — all via Resend's native email scheduling.
 
-**Nodes Used**:
+**Nodes used:** Webhook → Resend (Create Contact) → Resend (Send Now) → Resend (Send in 3 days) → Resend (Send in 7 days)
 
-- Schedule Trigger (daily/weekly triggers)
-- Resend (Send and Wait for Free Text)
-- Code (processes response)
-- Notion or Airtable (stores responses)
+**Resend operations:** `contacts › create`, `email › send` (× 3, with `scheduledAt`)
 
-**Key Features**:
-
-- Form-based response collection
-- Automatic response processing
-- Integration with databases
+**Use cases:** SaaS trial onboarding, lead nurturing, post-purchase sequence
 
 ---
 
-### 5. Broadcast Campaign Automation (`broadcast-automation.json`)
+### 05 — Expense Approval via Email (Send & Wait)
 
-**Description**: Creates and schedules broadcast email campaigns using templates, with automatic segment targeting and scheduling.
+**File:** `05-expense-approval-send-and-wait.json`
 
-**Use Case**: Newsletter distribution, marketing campaigns, product announcements.
+An employee submits an expense via an n8n form. The workflow emails the manager an approval request with **Approve** / **Decline** buttons. Execution pauses until the manager clicks a button, then sends the appropriate confirmation email to the employee.
 
-**Nodes Used**:
+**Nodes used:** n8n Form Trigger → Resend (Send & Wait) → IF → Resend (Approval Email) / Resend (Rejection Email)
 
-- Schedule Trigger (weekly trigger)
-- Resend (Broadcast: create, send)
-- Resend (Segment: list)
+**Resend operations:** `email › sendAndWait`, `email › send`
 
-**Key Features**:
-
-- Template-based content
-- Scheduled sending
-- Segment targeting
-- Broadcast status tracking
+**Use cases:** Expense approvals, interview scheduling, contract sign-offs, event RSVPs
 
 ---
 
-### 6. Domain & Webhook Management (`domain-webhook-setup.json`)
+### 06 — Email Engagement Tracker (Open & Click Events)
 
-**Description**: Automates domain verification and webhook configuration for new Resend accounts or domain additions.
+**File:** `06-email-engagement-tracker.json`
 
-**Use Case**: Onboarding automation, multi-tenant email setup, infrastructure management.
+Listens for `email.opened` and `email.clicked` Resend events, formats the event data, and logs every interaction as a new row in a Google Sheet for analytics and follow-up.
 
-**Nodes Used**:
+**Nodes used:** Resend Trigger → Set (format data) → Google Sheets (append row)
 
-- Manual Trigger
-- Resend (Domain: create, verify)
-- Resend (Webhook: create, list)
+**Resend operations:** `resendTrigger (email.opened, email.clicked)`
 
-**Key Features**:
-
-- Domain DNS verification
-- Webhook endpoint registration
-- Event subscription configuration
+**Use cases:** Email analytics, engagement-based lead scoring, re-engagement tracking
 
 ---
 
 ## Prerequisites
 
-Before using these workflows, ensure you have:
+All workflows require:
 
-1. **Resend Account**: Sign up at [resend.com](https://resend.com)
-2. **API Key**: Generate from your Resend dashboard
-3. **Verified Domain** (for sending): Add and verify your sending domain
-4. **n8n-nodes-resend Installed**: Install this community node in your n8n instance
+- **n8n-nodes-resend** community node installed in your n8n instance
+- A **Resend account** at [resend.com](https://resend.com)
+- A **verified sending domain** in Resend (required for all outbound email operations)
+- **Resend API Key** configured as a credential in n8n (`Settings → Credentials → New → Resend`)
 
-## Credential Setup
+For trigger-based workflows (02, 06):
 
-1. In n8n, go to **Credentials** → **Add Credential**
-2. Search for "Resend API"
-3. Enter your Resend API key
-4. Test the connection and save
+- **Resend Webhook Signing Secret** credential configured in n8n
+- Webhook URL from n8n registered in your [Resend Webhooks dashboard](https://resend.com/webhooks)
 
-## Webhook Configuration (for Trigger Workflows)
+For workflow 06:
 
-For workflows using the **Resend Trigger** node:
+- A **Google Sheets** credential configured in n8n with a target spreadsheet
 
-1. Note the webhook URL shown in the trigger node
-2. Go to your [Resend Dashboard](https://resend.com/webhooks)
-3. Click **Add Webhook**
-4. Paste the n8n webhook URL
-5. Select the events you want to receive
-6. Copy the **Signing Secret** (starts with `whsec_`)
-7. Paste the signing secret into the trigger node's configuration
+---
 
 ## Tips
 
-- **Test Mode**: Use the "Listen for test event" mode when building workflows
-- **Production Mode**: Activate the workflow and use the production URL for live data
-- **Error Handling**: Consider adding Error Trigger nodes to handle failures gracefully
-- **Rate Limits**: Be aware of Resend API rate limits for high-volume operations
-
-## Support
-
-For issues with:
-
-- **These examples**: Open an issue in this repository
-- **Resend API**: Check [Resend Documentation](https://resend.com/docs)
-- **n8n**: Visit [n8n Documentation](https://docs.n8n.io)
+- All workflows are **inactive by default** — review and configure before activating
+- Update placeholder values (`hello@yourcompany.com`, segment IDs, etc.) before use
+- Use **Test mode** in the Resend Trigger node while building — it shows events in the editor
+- Resend's `scheduledAt` field accepts natural language like `"in 3 days"` or ISO 8601 strings

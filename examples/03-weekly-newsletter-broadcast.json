@@ -1,0 +1,151 @@
+{
+  "name": "03 – Weekly Newsletter Broadcast (Scheduled)",
+  "nodes": [
+    {
+      "id": "sticky-overview-03",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-200, -400],
+      "parameters": {
+        "content": "## 📰 Weekly Newsletter Broadcast\n\n**What this workflow does:**\n1. Triggers every **Monday at 9:00 AM** (your timezone)\n2. Creates a broadcast campaign in Resend targeting a specific segment\n3. Immediately sends the broadcast to all contacts in that segment\n\n**Resend Broadcasts** work differently from individual emails:\n- They target a segment (a group of contacts)\n- Contacts who are unsubscribed are automatically excluded\n- You must include `{{{RESEND_UNSUBSCRIBE_URL}}}` in the HTML\n- Personalization uses `{{{FIRST_NAME|fallback}}}` syntax (Resend mustache)\n\n> Inspired by scheduled Gmail newsletter workflows, rebuilt using Resend's Broadcasts API for proper unsubscribe handling and list management.",
+        "height": 380,
+        "width": 560,
+        "color": 1
+      }
+    },
+    {
+      "id": "sticky-setup-03",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [340, -400],
+      "parameters": {
+        "content": "## ⚙️ Setup Required\n\n**Step 1 – Resend credential**\nAdd your Resend API key to both Resend nodes.\n\n**Step 2 – Segment ID**\nIn the \"Create Newsletter Broadcast\" node, replace `YOUR_SEGMENT_ID_HERE` with the ID of the segment you want to send to. Find segment IDs in your [Resend audience](https://resend.com/audiences).\n\n**Step 3 – Sender address**\nChange `newsletter@yourcompany.com` to your verified Resend domain address.\n\n**Step 4 – Customize HTML content**\nUpdate the `broadcastHtml` content with your actual newsletter HTML. Keep these variables:\n- `{{{FIRST_NAME|there}}}` — personalized first name\n- `{{{RESEND_UNSUBSCRIBE_URL}}}` — **required** unsubscribe link\n\n**Step 5 – Adjust the schedule**\nEdit the Schedule Trigger to change the day/time to suit your send schedule.\n\n**Step 6 – Activate**\nActivate the workflow for the schedule to take effect.",
+        "height": 500,
+        "width": 560,
+        "color": 3
+      }
+    },
+    {
+      "id": "sticky-variables-03",
+      "name": "Broadcast Variables",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-200, 360],
+      "parameters": {
+        "content": "## 📋 Resend Broadcast Variable Syntax\n\n```\n{{{FIRST_NAME|fallback}}}   → Contact's first name (or \"fallback\" if empty)\n{{{LAST_NAME|there}}}       → Contact's last name\n{{{RESEND_UNSUBSCRIBE_URL}}} → Auto-generated unsubscribe link (required)\n```\n\nThese variables are resolved by Resend when the broadcast is sent, not by n8n.",
+        "height": 200,
+        "width": 500,
+        "color": 4
+      }
+    },
+    {
+      "id": "n03-schedule",
+      "name": "Every Monday 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-200, 100],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n03-create-broadcast",
+      "name": "Create Newsletter Broadcast",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [100, 100],
+      "parameters": {
+        "resource": "broadcasts",
+        "operation": "create",
+        "segmentId": {
+          "__rl": true,
+          "value": "YOUR_SEGMENT_ID_HERE",
+          "mode": "id"
+        },
+        "broadcastFrom": "newsletter@yourcompany.com",
+        "broadcastSubject": "=🗞️ Weekly Updates — {{$now.toFormat('MMMM d, yyyy')}}",
+        "broadcastHtml": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:600px;margin:0 auto;background:#fff\"><div style=\"background:#1a1a2e;padding:32px 40px\"><h1 style=\"color:#fff;margin:0;font-size:24px\">Weekly Update</h1><p style=\"color:#a0a0c0;margin:4px 0 0\">Your weekly digest</p></div><div style=\"padding:40px\"><p style=\"color:#444;font-size:16px\">Hi {{{FIRST_NAME|there}}},</p><p style=\"color:#555;font-size:15px;line-height:1.7\">Here's your weekly roundup of what's been happening. We've been busy building, shipping, and learning — and we're excited to share it all with you.</p><h2 style=\"color:#1a1a2e;font-size:18px;border-bottom:2px solid #e5e7eb;padding-bottom:8px\">📌 This Week's Highlights</h2><p style=\"color:#555;font-size:15px;line-height:1.7\">• Update your newsletter content here<br>• Add your latest blog posts, product updates, or industry news<br>• Keep it concise — 3 to 5 items works best</p><h2 style=\"color:#1a1a2e;font-size:18px;border-bottom:2px solid #e5e7eb;padding-bottom:8px\">🚀 Featured This Week</h2><div style=\"background:#f0f0ff;border-radius:8px;padding:20px;margin:16px 0\"><p style=\"margin:0;color:#444;font-size:15px\">Add your featured content, announcement, or call-to-action here.</p><div style=\"margin-top:16px\"><a href=\"https://yourcompany.com\" style=\"background:#6366f1;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px\">Read More →</a></div></div></div><div style=\"background:#f9f9fb;padding:20px 40px;border-top:1px solid #eee\"><p style=\"color:#aaa;font-size:12px;margin:0\">You're receiving this because you subscribed. <a href=\"{{{RESEND_UNSUBSCRIBE_URL}}}\" style=\"color:#6366f1\">Unsubscribe</a></p></div></div></body></html>",
+        "broadcastCreateOptions": {
+          "name": "=Weekly Newsletter {{$now.toFormat('yyyy-MM-dd')}}"
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n03-send-broadcast",
+      "name": "Send Newsletter Broadcast",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [420, 100],
+      "parameters": {
+        "resource": "broadcasts",
+        "operation": "send",
+        "broadcastId": {
+          "__rl": true,
+          "value": "={{$json.id}}",
+          "mode": "id"
+        },
+        "broadcastSendOptions": {}
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Monday 9 AM": {
+      "main": [
+        [
+          {
+            "node": "Create Newsletter Broadcast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Newsletter Broadcast": {
+      "main": [
+        [
+          {
+            "node": "Send Newsletter Broadcast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33333333-aaaa-bbbb-cccc-000000000003",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "resend-ex-03",
+  "tags": [
+    {
+      "id": "tag-resend-examples",
+      "name": "resend-example"
+    }
+  ]
+}
