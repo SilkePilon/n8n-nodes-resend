@@ -1,0 +1,173 @@
+{
+  "name": "01 – Contact Form → Create Contact & Send Welcome Email",
+  "nodes": [
+    {
+      "id": "sticky-overview-01",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, -340],
+      "parameters": {
+        "content": "## 📧 Contact Form → Welcome Email\n\n**What this workflow does:**\n1. Displays an n8n-hosted sign-up form\n2. On submission, creates the person as a contact in your Resend audience\n3. Instantly sends them a personalized welcome email\n\n**Trigger:** Form submission\n**Pattern:** Webhook → Create Record → Send Email\n\n> Inspired by Gmail \"Send welcome email on sign-up\" workflows, rebuilt for Resend with native contact management.",
+        "height": 320,
+        "width": 480,
+        "color": 1
+      }
+    },
+    {
+      "id": "sticky-setup-01",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [220, -340],
+      "parameters": {
+        "content": "## ⚙️ Setup Required\n\n**Step 1 – Resend credential**\nAdd your Resend API key to both Resend nodes (\"Create Resend Contact\" and \"Send Welcome Email\").\n\n**Step 2 – Verified sender address**\nIn the \"Send Welcome Email\" node, change `hello@yourcompany.com` to an address from your verified Resend domain.\n\n**Step 3 – Customize the form**\nEdit \"New Subscriber Sign Up\" to add/remove fields and update the form title and description.\n\n**Step 4 – Customize the email**\nEdit the HTML in \"Send Welcome Email\" to match your brand colors and content.\n\n> ℹ️ `continueOnFail` is ON for Create Contact so the welcome email still sends even if the contact already exists.",
+        "height": 460,
+        "width": 560,
+        "color": 3
+      }
+    },
+    {
+      "id": "n01-form",
+      "name": "New Subscriber Sign Up",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-240, 100],
+      "webhookId": "resend-example-signup-form",
+      "parameters": {
+        "formTitle": "Join Our Community",
+        "formDescription": "Sign up to receive updates, tips, and exclusive content straight to your inbox.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "First Name",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "John"
+            },
+            {
+              "fieldLabel": "Last Name",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Doe"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true,
+              "placeholder": "john@example.com"
+            },
+            {
+              "fieldLabel": "Company",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Acme Inc (optional)"
+            }
+          ]
+        },
+        "responseMode": "formPage",
+        "responseText": "You're in! 🎉 Check your inbox for your welcome email.",
+        "options": {}
+      }
+    },
+    {
+      "id": "n01-create-contact",
+      "name": "Create Resend Contact",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [80, 100],
+      "parameters": {
+        "resource": "contacts",
+        "operation": "create",
+        "email": "={{$json[\"Email\"]}}",
+        "contactCreateFields": {
+          "firstName": "={{$json[\"First Name\"]}}",
+          "lastName": "={{$json[\"Last Name\"]}}"
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "n01-send-welcome",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [380, 100],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "hello@yourcompany.com",
+        "to": "={{$node[\"New Subscriber Sign Up\"].json[\"Email\"]}}",
+        "subject": "=Welcome to our community, {{$node[\"New Subscriber Sign Up\"].json[\"First Name\"]}}! 🎉",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:600px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)\"><div style=\"background:#6366f1;padding:32px 40px\"><h1 style=\"color:#fff;margin:0;font-size:28px\">Welcome aboard, {{$node[\"New Subscriber Sign Up\"].json[\"First Name\"]}}! 👋</h1></div><div style=\"padding:40px\"><p style=\"color:#444;font-size:16px;line-height:1.7;margin-top:0\">We're thrilled you've joined our community. Here's what's waiting for you:</p><ul style=\"color:#555;font-size:15px;line-height:2.2;padding-left:20px\"><li>✅ Weekly tips and insights directly in your inbox</li><li>✅ Early access to new features and announcements</li><li>✅ A welcoming community of like-minded people</li></ul><div style=\"margin:32px 0\"><a href=\"https://yourcompany.com/get-started\" style=\"display:inline-block;background:#6366f1;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px\">Get Started →</a></div><p style=\"color:#888;font-size:13px\">Have a question? Just reply to this email — we read every message.</p></div><div style=\"background:#f9f9fb;padding:20px 40px;border-top:1px solid #eee\"><p style=\"color:#aaa;font-size:12px;margin:0\">You signed up with {{$node[\"New Subscriber Sign Up\"].json[\"Email\"]}}. <a href=\"#\" style=\"color:#6366f1\">Unsubscribe</a></p></div></div></body></html>",
+        "additionalOptions": {
+          "tags": {
+            "tags": [
+              {
+                "name": "source",
+                "value": "signup-form"
+              },
+              {
+                "name": "type",
+                "value": "welcome"
+              }
+            ]
+          }
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "New Subscriber Sign Up": {
+      "main": [
+        [
+          {
+            "node": "Create Resend Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Resend Contact": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "11111111-aaaa-bbbb-cccc-000000000001",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "resend-ex-01",
+  "tags": [
+    {
+      "id": "tag-resend-examples",
+      "name": "resend-example"
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "name": "06 – Email Engagement Tracker (Open & Click Events → Google Sheets)",
+  "nodes": [
+    {
+      "id": "sticky-overview-06",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, -420],
+      "parameters": {
+        "content": "## 📊 Email Engagement Tracker\n\n**What this workflow does:**\n1. Listens for `email.opened` and `email.clicked` events from Resend\n2. Formats each event into a structured row of data\n3. Appends the engagement event to a Google Sheet for analytics and tracking\n\n**Data logged per event:**\n- Timestamp\n- Event type (opened / clicked)\n- Recipient email\n- Resend Email ID\n- Email subject\n- Click URL (for click events)\n\n**Use cases:**\n- Email campaign performance analytics\n- Lead scoring (contacts who click = hot leads)\n- Re-engagement targeting (identify who opened but never clicked)\n- Deliverability monitoring dashboards\n\n> Inspired by Gmail + Google Sheets email tracking workflows, rebuilt for Resend's structured webhook event system.",
+        "height": 440,
+        "width": 580,
+        "color": 1
+      }
+    },
+    {
+      "id": "sticky-setup-06",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [340, -420],
+      "parameters": {
+        "content": "## ⚙️ Setup Required\n\n**Step 1 – Resend Webhook Signing Secret credential**\nCreate a \"Resend Webhook Signing Secret\" credential in n8n. Add it to the Resend Trigger node.\n\n**Step 2 – Register the webhook in Resend**\nActivate the workflow, copy the **production webhook URL** from the Resend Trigger node, then register it in your [Resend Webhooks dashboard](https://resend.com/webhooks).\nSelect: `email.opened` and `email.clicked`.\n\n**Step 3 – Google Sheets credential**\nCreate a Google Sheets OAuth2 credential in n8n. Add it to the Google Sheets node.\n\n**Step 4 – Create your tracking spreadsheet**\nCreate a Google Sheet with these column headers in row 1:\n```\nTimestamp | Event | Recipient | Email ID | Subject | Clicked URL\n```\n\n**Step 5 – Connect the spreadsheet**\nIn the Google Sheets node, select your spreadsheet and sheet (or paste the Sheet ID).\n\n> 💡 Use **Test mode** in the Resend Trigger while building — click \"Listen for test event\" to capture live events in the n8n editor.",
+        "height": 540,
+        "width": 560,
+        "color": 3
+      }
+    },
+    {
+      "id": "sticky-schema-06",
+      "name": "Google Sheet Schema",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, 400],
+      "parameters": {
+        "content": "## 📋 Required Google Sheet Columns\n\nCreate a sheet with these headers (exact names, row 1):\n\n| A | B | C | D | E | F |\n|---|---|---|---|---|---|\n| `Timestamp` | `Event` | `Recipient` | `Email ID` | `Subject` | `Clicked URL` |\n\n`Clicked URL` will be empty for `email.opened` events — only populated for `email.clicked` events.",
+        "height": 200,
+        "width": 560,
+        "color": 4
+      }
+    },
+    {
+      "id": "n06-trigger",
+      "name": "Resend Engagement Events",
+      "type": "n8n-nodes-resend.resendTrigger",
+      "typeVersion": 1,
+      "position": [-240, 100],
+      "webhookId": "resend-example-engagement-tracker",
+      "parameters": {
+        "path": "resend-engagement",
+        "events": ["email.opened", "email.clicked"]
+      },
+      "credentials": {
+        "resendWebhookSigningSecretApi": {
+          "id": "2",
+          "name": "Resend webhook signing secret"
+        }
+      }
+    },
+    {
+      "id": "n06-set",
+      "name": "Format Event Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [80, 100],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-timestamp",
+              "name": "Timestamp",
+              "value": "={{$now.toFormat('yyyy-MM-dd HH:mm:ss')}}",
+              "type": "string"
+            },
+            {
+              "id": "field-event",
+              "name": "Event",
+              "value": "={{$json.type}}",
+              "type": "string"
+            },
+            {
+              "id": "field-recipient",
+              "name": "Recipient",
+              "value": "={{$json.data.to[0]}}",
+              "type": "string"
+            },
+            {
+              "id": "field-email-id",
+              "name": "Email ID",
+              "value": "={{$json.data.email_id}}",
+              "type": "string"
+            },
+            {
+              "id": "field-subject",
+              "name": "Subject",
+              "value": "={{$json.data.subject}}",
+              "type": "string"
+            },
+            {
+              "id": "field-clicked-url",
+              "name": "Clicked URL",
+              "value": "={{$json.data.click ? $json.data.click.link : \"\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "n06-sheets",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [360, 100],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$json.Timestamp}}",
+            "Event": "={{$json.Event}}",
+            "Recipient": "={{$json.Recipient}}",
+            "Email ID": "={{$json[\"Email ID\"]}}",
+            "Subject": "={{$json.Subject}}",
+            "Clicked URL": "={{$json[\"Clicked URL\"]}}"
+          },
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event",
+              "displayName": "Event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recipient",
+              "displayName": "Recipient",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ID",
+              "displayName": "Email ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Clicked URL",
+              "displayName": "Clicked URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Resend Engagement Events": {
+      "main": [
+        [
+          {
+            "node": "Format Event Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Event Data": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "66666666-aaaa-bbbb-cccc-000000000006",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "resend-ex-06",
+  "tags": [
+    {
+      "id": "tag-resend-examples",
+      "name": "resend-example"
+    }
+  ]
+}

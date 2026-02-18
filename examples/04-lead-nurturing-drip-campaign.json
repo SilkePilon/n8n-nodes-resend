@@ -1,0 +1,275 @@
+{
+  "name": "04 – Lead Nurturing Drip Campaign (3-Email Sequence)",
+  "nodes": [
+    {
+      "id": "sticky-overview-04",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, -420],
+      "parameters": {
+        "content": "## 🌱 Lead Nurturing Drip Campaign\n\n**What this workflow does:**\nWhen a new lead is received via webhook (CRM, form, or external app), it:\n1. Creates the lead as a contact in your Resend audience\n2. Sends an **immediate welcome email** (Email 1)\n3. Schedules a **value-focused follow-up** in 3 days (Email 2)\n4. Schedules a **call-to-action email** in 7 days (Email 3)\n\n**All three emails are queued in Resend's scheduler in one workflow run** — no waiting, no cron jobs, no retries needed.\n\n**Trigger:** HTTP POST to webhook URL (from CRM, Typeform, Webflow, etc.)\n\nExpected payload:\n```json\n{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane@company.com\",\n  \"company\": \"Acme Inc\",\n  \"source\": \"pricing-page\"\n}\n```",
+        "height": 500,
+        "width": 580,
+        "color": 1
+      }
+    },
+    {
+      "id": "sticky-setup-04",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [300, -420],
+      "parameters": {
+        "content": "## ⚙️ Setup Required\n\n**Step 1 – Resend credential**\nAdd your Resend API key to all Resend nodes.\n\n**Step 2 – Sender address**\nChange `hello@yourcompany.com` in all three email nodes to your verified domain.\n\n**Step 3 – Configure the webhook**\nActivate the workflow and copy the webhook URL. Send your lead data via POST to this URL from your CRM, form tool, or app.\n\nExpected POST body fields: `email`, `firstName`, `lastName`, `company`, `source`\n\nAdapt `$json.body.fieldName` expressions if your payload uses different keys.\n\n**Step 4 – Customize email content**\nEdit the HTML in each of the three \"Send Email\" nodes:\n- **Email 1** — Welcome & intro (sent immediately)\n- **Email 2** — Value content / tips / resources (queued for 3 days)\n- **Email 3** — CTA / trial offer / book a call (queued for 7 days)\n\n> ℹ️ `scheduledAt` accepts natural language: `\"in 3 days\"`, `\"in 7 days\"`, or ISO 8601 timestamps.",
+        "height": 540,
+        "width": 560,
+        "color": 3
+      }
+    },
+    {
+      "id": "sticky-drip-note-04",
+      "name": "Drip Sequence Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, 440],
+      "parameters": {
+        "content": "## 📅 Email Sequence Timeline\n\n| Email | When | Purpose |\n|-------|------|----------|\n| Email 1 – Welcome | Immediately | Greet & introduce |\n| Email 2 – Value | Day 3 | Share tips/resources |\n| Email 3 – CTA | Day 7 | Book a call / start trial |\n\nAll three emails are scheduled in a single workflow run using Resend's `scheduledAt` parameter. No extra infrastructure needed.",
+        "height": 200,
+        "width": 560,
+        "color": 4
+      }
+    },
+    {
+      "id": "n04-webhook",
+      "name": "New Lead Received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-240, 100],
+      "webhookId": "resend-example-new-lead",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-lead",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "n04-create-contact",
+      "name": "Create Lead Contact",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [80, 100],
+      "parameters": {
+        "resource": "contacts",
+        "operation": "create",
+        "email": "={{$json.body.email}}",
+        "contactCreateFields": {
+          "firstName": "={{$json.body.firstName}}",
+          "lastName": "={{$json.body.lastName}}",
+          "properties": {
+            "properties": [
+              {
+                "key": "company",
+                "value": "={{$json.body.company}}"
+              },
+              {
+                "key": "lead_source",
+                "value": "={{$json.body.source}}"
+              },
+              {
+                "key": "signup_date",
+                "value": "={{$now.toFormat('yyyy-MM-dd')}}"
+              }
+            ]
+          }
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "n04-email1",
+      "name": "Email 1 – Welcome (Now)",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [380, 100],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "hello@yourcompany.com",
+        "to": "={{$node[\"New Lead Received\"].json.body.email}}",
+        "subject": "=Welcome, {{$node[\"New Lead Received\"].json.body.firstName}} — you're in the right place",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:580px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden\"><div style=\"background:#0f172a;padding:32px 40px\"><h1 style=\"color:#fff;margin:0;font-size:26px\">Welcome, {{$node[\"New Lead Received\"].json.body.firstName}}! 👋</h1></div><div style=\"padding:40px\"><p style=\"color:#444;font-size:16px;line-height:1.7;margin-top:0\">I saw you checking out our pricing page — great to have you here.</p><p style=\"color:#555;font-size:15px;line-height:1.7\">We help teams like <strong>{{$node[\"New Lead Received\"].json.body.company || \"yours\"}}</strong> [describe your core value proposition in one sentence here].</p><p style=\"color:#555;font-size:15px;line-height:1.7\">Over the next few days, I'll share some practical tips to help you get started. But if you'd rather skip ahead and just talk to someone, I'm here.</p><div style=\"margin:28px 0\"><a href=\"https://yourcompany.com/book-a-call\" style=\"display:inline-block;background:#0f172a;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px\">Book a 15-min call →</a></div><p style=\"color:#666;font-size:14px\">— The Team at YourCompany</p></div><div style=\"background:#f9fafb;padding:16px 40px;border-top:1px solid #eee\"><p style=\"color:#aaa;font-size:12px;margin:0\">You're receiving this because you signed up at yourcompany.com. <a href=\"#\" style=\"color:#6366f1\">Unsubscribe</a></p></div></div></body></html>",
+        "additionalOptions": {
+          "tags": {
+            "tags": [
+              { "name": "sequence", "value": "lead-nurture" },
+              { "name": "step", "value": "1-welcome" }
+            ]
+          }
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n04-email2",
+      "name": "Email 2 – Value Content (Day 3)",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [700, 100],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "hello@yourcompany.com",
+        "to": "={{$node[\"New Lead Received\"].json.body.email}}",
+        "subject": "=3 things most {{$node[\"New Lead Received\"].json.body.company ? $node[\"New Lead Received\"].json.body.company : \"teams\"}} get wrong (and how to fix them)",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:580px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden\"><div style=\"background:#1e3a5f;padding:32px 40px\"><h1 style=\"color:#fff;margin:0;font-size:22px\">📚 Resources just for you, {{$node[\"New Lead Received\"].json.body.firstName}}</h1></div><div style=\"padding:40px\"><p style=\"color:#444;font-size:16px;line-height:1.7;margin-top:0\">Following up on my last email — wanted to share some practical resources:</p><div style=\"border-left:4px solid #6366f1;padding:12px 20px;margin:20px 0;background:#f5f3ff\"><p style=\"margin:0;color:#444;font-size:15px\"><strong>📄 Resource 1:</strong> <a href=\"https://yourcompany.com/blog/post-1\" style=\"color:#6366f1\">Link to your best blog post or guide</a></p></div><div style=\"border-left:4px solid #6366f1;padding:12px 20px;margin:20px 0;background:#f5f3ff\"><p style=\"margin:0;color:#444;font-size:15px\"><strong>🎥 Resource 2:</strong> <a href=\"https://yourcompany.com/video\" style=\"color:#6366f1\">Link to a product demo or tutorial video</a></p></div><div style=\"border-left:4px solid #6366f1;padding:12px 20px;margin:20px 0;background:#f5f3ff\"><p style=\"margin:0;color:#444;font-size:15px\"><strong>💡 Resource 3:</strong> <a href=\"https://yourcompany.com/case-study\" style=\"color:#6366f1\">Customer case study or success story</a></p></div><p style=\"color:#666;font-size:14px;margin-top:24px\">Questions so far? Just hit reply.</p><p style=\"color:#666;font-size:14px\">— The Team at YourCompany</p></div><div style=\"background:#f9fafb;padding:16px 40px;border-top:1px solid #eee\"><p style=\"color:#aaa;font-size:12px;margin:0\">Sent to {{$node[\"New Lead Received\"].json.body.email}}. <a href=\"#\" style=\"color:#6366f1\">Unsubscribe</a></p></div></div></body></html>",
+        "additionalOptions": {
+          "scheduledAt": "in 3 days",
+          "tags": {
+            "tags": [
+              { "name": "sequence", "value": "lead-nurture" },
+              { "name": "step", "value": "2-value" }
+            ]
+          }
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n04-email3",
+      "name": "Email 3 – CTA Offer (Day 7)",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [1020, 100],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "hello@yourcompany.com",
+        "to": "={{$node[\"New Lead Received\"].json.body.email}}",
+        "subject": "=Ready to get started, {{$node[\"New Lead Received\"].json.body.firstName}}? Here's a special offer",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<!DOCTYPE html><html><body style=\"margin:0;padding:0;background:#f6f6f9;font-family:sans-serif\"><div style=\"max-width:580px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden\"><div style=\"background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:32px 40px\"><h1 style=\"color:#fff;margin:0;font-size:24px\">🎯 One last thing, {{$node[\"New Lead Received\"].json.body.firstName}}...</h1></div><div style=\"padding:40px\"><p style=\"color:#444;font-size:16px;line-height:1.7;margin-top:0\">You've been exploring for a week now and I wanted to reach out one more time.</p><div style=\"background:#f5f3ff;border:2px solid #6366f1;border-radius:10px;padding:24px;margin:24px 0;text-align:center\"><h2 style=\"color:#4f46e5;margin-top:0\">Start your free trial today</h2><p style=\"color:#555;font-size:15px\">Get full access for 14 days — no credit card required.</p><a href=\"https://yourcompany.com/signup\" style=\"display:inline-block;background:#6366f1;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-top:8px\">Start Free Trial →</a></div><p style=\"color:#555;font-size:15px;line-height:1.7\">Not ready yet? That's totally fine. You can always come back when the time is right — your account is waiting for you.</p><p style=\"color:#666;font-size:14px\">— The Team at YourCompany</p></div><div style=\"background:#f9fafb;padding:16px 40px;border-top:1px solid #eee\"><p style=\"color:#aaa;font-size:12px;margin:0\">Sent to {{$node[\"New Lead Received\"].json.body.email}}. <a href=\"#\" style=\"color:#6366f1\">Unsubscribe</a></p></div></div></body></html>",
+        "additionalOptions": {
+          "scheduledAt": "in 7 days",
+          "tags": {
+            "tags": [
+              { "name": "sequence", "value": "lead-nurture" },
+              { "name": "step", "value": "3-cta" }
+            ]
+          }
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n04-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1340, 100],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Lead enrolled in nurture sequence\" }"
+      }
+    }
+  ],
+  "connections": {
+    "New Lead Received": {
+      "main": [
+        [
+          {
+            "node": "Create Lead Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Lead Contact": {
+      "main": [
+        [
+          {
+            "node": "Email 1 – Welcome (Now)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email 1 – Welcome (Now)": {
+      "main": [
+        [
+          {
+            "node": "Email 2 – Value Content (Day 3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email 2 – Value Content (Day 3)": {
+      "main": [
+        [
+          {
+            "node": "Email 3 – CTA Offer (Day 7)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email 3 – CTA Offer (Day 7)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "44444444-aaaa-bbbb-cccc-000000000004",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "resend-ex-04",
+  "tags": [
+    {
+      "id": "tag-resend-examples",
+      "name": "resend-example"
+    }
+  ]
+}

@@ -1,0 +1,289 @@
+{
+  "name": "02 – Email Bounce & Complaint Auto-Handler",
+  "nodes": [
+    {
+      "id": "sticky-overview-02",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, -400],
+      "parameters": {
+        "content": "## 🛡️ Bounce & Complaint Auto-Handler\n\n**What this workflow does:**\n1. Listens for `email.bounced` and `email.complained` events from Resend\n2. Routes each event type to its own handler\n3. Automatically marks the recipient as **unsubscribed** in Resend (protecting deliverability)\n4. Sends an internal alert email to your team\n\n**Why this matters:**\n- Hard bounces damage domain reputation if you keep sending\n- Spam complaints can get your account suspended\n- Automating list hygiene is a deliverability best practice\n\n> Inspired by Gmail-based bounce monitoring workflows, redesigned for Resend's native webhook events.",
+        "height": 400,
+        "width": 580,
+        "color": 1
+      }
+    },
+    {
+      "id": "sticky-setup-02",
+      "name": "Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [330, -400],
+      "parameters": {
+        "content": "## ⚙️ Setup Required\n\n**Step 1 – Resend Webhook Signing Secret credential**\nCreate a \"Resend Webhook Signing Secret\" credential in n8n and add it to the Resend Trigger node.\n\n**Step 2 – Register the webhook in Resend**\nActivate this workflow, copy the **production webhook URL** shown in the Resend Trigger node, then paste it in your [Resend Webhooks dashboard](https://resend.com/webhooks).\nSelect events: `email.bounced` and `email.complained`.\n\n**Step 3 – Resend API credential**\nAdd your Resend API key to all four Resend action nodes.\n\n**Step 4 – Alert recipient**\nIn both \"Send Bounce Alert\" and \"Send Complaint Alert\" nodes, change `from` and `to` to your verified domain and team inbox.\n\n> 💡 Use **Test mode** in the Resend Trigger while building — click \"Listen for test event\" to see live events in the editor.",
+        "height": 480,
+        "width": 560,
+        "color": 3
+      }
+    },
+    {
+      "id": "sticky-flow-02",
+      "name": "Flow Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, 380],
+      "parameters": {
+        "content": "## 📝 Bounce vs. Complaint\n\n**Bounce (`email.bounced`)**\nThe email could not be delivered (e.g. invalid address, full mailbox). Update contact as unsubscribed to stop future sends.\n\n**Complaint (`email.complained`)**\nThe recipient marked the email as spam. This is more serious — treat it as high-priority and escalate if complaints exceed 0.1%.",
+        "height": 240,
+        "width": 540,
+        "color": 7
+      }
+    },
+    {
+      "id": "n02-trigger",
+      "name": "Resend Email Events",
+      "type": "n8n-nodes-resend.resendTrigger",
+      "typeVersion": 1,
+      "position": [-240, 100],
+      "webhookId": "resend-example-bounce-handler",
+      "parameters": {
+        "path": "resend-bounce-complaint",
+        "events": ["email.bounced", "email.complained"]
+      },
+      "credentials": {
+        "resendWebhookSigningSecretApi": {
+          "id": "2",
+          "name": "Resend webhook signing secret"
+        }
+      }
+    },
+    {
+      "id": "n02-switch",
+      "name": "Route by Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [80, 100],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bounce-check",
+                    "leftValue": "={{$json.type}}",
+                    "rightValue": "email.bounced",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Bounced"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "complaint-check",
+                    "leftValue": "={{$json.type}}",
+                    "rightValue": "email.complained",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Complained"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      }
+    },
+    {
+      "id": "n02-unsubscribe-bounce",
+      "name": "Unsubscribe Contact (Bounce)",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [380, -60],
+      "parameters": {
+        "resource": "contacts",
+        "operation": "update",
+        "updateBy": "email",
+        "contactEmail": "={{$json.data.to[0]}}",
+        "contactUpdateFields": {
+          "unsubscribed": true
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "n02-unsubscribe-complaint",
+      "name": "Unsubscribe Contact (Complaint)",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [380, 260],
+      "parameters": {
+        "resource": "contacts",
+        "operation": "update",
+        "updateBy": "email",
+        "contactEmail": "={{$json.data.to[0]}}",
+        "contactUpdateFields": {
+          "unsubscribed": true
+        }
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "n02-alert-bounce",
+      "name": "Send Bounce Alert",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [700, -60],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "alerts@yourcompany.com",
+        "to": "team@yourcompany.com",
+        "subject": "=⚠️ Email Bounced: {{$node[\"Resend Email Events\"].json.data.to[0]}}",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<div style=\"font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px\"><h2 style=\"color:#e25c00;margin-top:0\">⚠️ Email Bounce Detected</h2><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><tr style=\"background:#fff7ed\"><td style=\"padding:10px 12px;border:1px solid #fed7aa;font-weight:600\">Bounced Address</td><td style=\"padding:10px 12px;border:1px solid #fed7aa\">{{$node[\"Resend Email Events\"].json.data.to[0]}}</td></tr><tr><td style=\"padding:10px 12px;border:1px solid #e5e7eb;font-weight:600\">Email Subject</td><td style=\"padding:10px 12px;border:1px solid #e5e7eb\">{{$node[\"Resend Email Events\"].json.data.subject}}</td></tr><tr style=\"background:#f9fafb\"><td style=\"padding:10px 12px;border:1px solid #e5e7eb;font-weight:600\">Email ID</td><td style=\"padding:10px 12px;border:1px solid #e5e7eb\">{{$node[\"Resend Email Events\"].json.data.email_id}}</td></tr><tr><td style=\"padding:10px 12px;border:1px solid #e5e7eb;font-weight:600\">Event Time</td><td style=\"padding:10px 12px;border:1px solid #e5e7eb\">{{$node[\"Resend Email Events\"].json.data.created_at}}</td></tr></table><p style=\"color:#666;font-size:13px;margin-top:20px\">✅ The contact has been automatically marked as unsubscribed in Resend.</p></div>",
+        "additionalOptions": {}
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "id": "n02-alert-complaint",
+      "name": "Send Complaint Alert",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [700, 260],
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "from": "alerts@yourcompany.com",
+        "to": "team@yourcompany.com",
+        "subject": "=🚨 Spam Complaint Received: {{$node[\"Resend Email Events\"].json.data.to[0]}}",
+        "useTemplate": false,
+        "emailFormat": "html",
+        "html": "=<div style=\"font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px\"><h2 style=\"color:#dc2626;margin-top:0\">🚨 Spam Complaint – Immediate Attention Required</h2><p style=\"color:#444;font-size:15px\">A recipient has marked one of your emails as spam. This is a high-priority deliverability issue.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><tr style=\"background:#fef2f2\"><td style=\"padding:10px 12px;border:1px solid #fca5a5;font-weight:600\">Complaint From</td><td style=\"padding:10px 12px;border:1px solid #fca5a5\">{{$node[\"Resend Email Events\"].json.data.to[0]}}</td></tr><tr><td style=\"padding:10px 12px;border:1px solid #e5e7eb;font-weight:600\">Email Subject</td><td style=\"padding:10px 12px;border:1px solid #e5e7eb\">{{$node[\"Resend Email Events\"].json.data.subject}}</td></tr><tr style=\"background:#f9fafb\"><td style=\"padding:10px 12px;border:1px solid #e5e7eb;font-weight:600\">Email ID</td><td style=\"padding:10px 12px;border:1px solid #e5e7eb\">{{$node[\"Resend Email Events\"].json.data.email_id}}</td></tr><tr><td style=\"padding:10px 12px;border:1px solid #e5e7eb;font-weight:600\">Event Time</td><td style=\"padding:10px 12px;border:1px solid #e5e7eb\">{{$node[\"Resend Email Events\"].json.data.created_at}}</td></tr></table><div style=\"background:#fef2f2;border-left:4px solid #dc2626;padding:16px;margin-top:20px\"><strong style=\"color:#dc2626\">Action Required:</strong><ul style=\"color:#555;margin:8px 0 0\"><li>Review your recent campaigns for misleading subject lines or content</li><li>Check your audience segmentation and consent records</li><li>If complaint rate exceeds 0.1%, pause sending immediately</li></ul></div><p style=\"color:#666;font-size:13px;margin-top:16px\">✅ The contact has been automatically unsubscribed in Resend.</p></div>",
+        "additionalOptions": {}
+      },
+      "credentials": {
+        "resendApi": {
+          "id": "1",
+          "name": "Resend account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Resend Email Events": {
+      "main": [
+        [
+          {
+            "node": "Route by Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Event Type": {
+      "main": [
+        [
+          {
+            "node": "Unsubscribe Contact (Bounce)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unsubscribe Contact (Complaint)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unsubscribe Contact (Bounce)": {
+      "main": [
+        [
+          {
+            "node": "Send Bounce Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unsubscribe Contact (Complaint)": {
+      "main": [
+        [
+          {
+            "node": "Send Complaint Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "22222222-aaaa-bbbb-cccc-000000000002",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "resend-ex-02",
+  "tags": [
+    {
+      "id": "tag-resend-examples",
+      "name": "resend-example"
+    }
+  ]
+}
