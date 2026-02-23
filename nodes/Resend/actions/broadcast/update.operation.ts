@@ -115,11 +115,21 @@ export async function execute(
 	const broadcastId = resolveDynamicIdValue(this, 'broadcastId', index);
 	const updateFields = this.getNodeParameter('broadcastUpdateFields', index, {}) as IDataObject;
 
+	const body: IDataObject = {};
+	if (updateFields.from) body.from = updateFields.from;
+	if (updateFields.html) body.html = updateFields.html;
+	if (updateFields.name) body.name = updateFields.name;
+	if (updateFields.replyTo) body.reply_to = updateFields.replyTo;
+	if (updateFields.subject) body.subject = updateFields.subject;
+	if (updateFields.segmentId) body.segment_id = updateFields.segmentId;
+	if (updateFields.text) body.text = updateFields.text;
+	if (updateFields.topicId) body.topic_id = updateFields.topicId;
+
 	const response = await apiRequest.call(
 		this,
 		'PATCH',
 		`/broadcasts/${encodeURIComponent(broadcastId)}`,
-		updateFields,
+		body,
 	);
 
 	return [{ json: response, pairedItem: { item: index } }];

@@ -188,10 +188,10 @@ export async function execute(
 	const body: IDataObject = { email };
 
 	if (createFields.firstName) {
-		body.firstName = createFields.firstName;
+		body.first_name = createFields.firstName;
 	}
 	if (createFields.lastName) {
-		body.lastName = createFields.lastName;
+		body.last_name = createFields.lastName;
 	}
 	if (createFields.unsubscribed !== undefined) {
 		body.unsubscribed = createFields.unsubscribed;

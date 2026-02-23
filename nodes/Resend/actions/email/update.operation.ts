@@ -43,7 +43,7 @@ export async function execute(
 
 	const body: IDataObject = {};
 	if (scheduledAt) {
-		body.scheduledAt = scheduledAt;
+		body.scheduled_at = scheduledAt;
 	}
 
 	const response = await apiRequest.call(this, 'PATCH', `/emails/${encodeURIComponent(emailId)}`, body);

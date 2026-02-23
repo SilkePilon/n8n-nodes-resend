@@ -146,10 +146,10 @@ export async function execute(
 	const body: IDataObject = {};
 
 	if (updateFields.firstName !== undefined) {
-		body.firstName = updateFields.firstName;
+		body.first_name = updateFields.firstName;
 	}
 	if (updateFields.lastName !== undefined) {
-		body.lastName = updateFields.lastName;
+		body.last_name = updateFields.lastName;
 	}
 	if (updateFields.unsubscribed !== undefined) {
 		body.unsubscribed = updateFields.unsubscribed;

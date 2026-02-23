@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamicFields';
 
@@ -51,11 +51,14 @@ export async function execute(
 		fallbackValue?: string;
 	};
 
+	const body: IDataObject = {};
+	if (updateFields.fallbackValue !== undefined) body.fallback_value = updateFields.fallbackValue;
+
 	const response = await apiRequest.call(
 		this,
 		'PATCH',
 		`/contact-properties/${encodeURIComponent(contactPropertyId)}`,
-		updateFields,
+		body,
 	);
 
 	return [{ json: response, pairedItem: { item: index } }];
