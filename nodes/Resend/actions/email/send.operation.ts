@@ -550,7 +550,7 @@ export async function execute(
 	if (additionalOptions.replyTo) {
 		const replyToList = normalizeEmailList(additionalOptions.replyTo);
 		if (replyToList.length) {
-			requestBody.replyTo = replyToList;
+			requestBody.reply_to = replyToList;
 		}
 	}
 
@@ -579,12 +579,12 @@ export async function execute(
 
 	// Handle Topic ID
 	if (additionalOptions.topicId) {
-		requestBody.topicId = additionalOptions.topicId;
+		requestBody.topic_id = additionalOptions.topicId;
 	}
 
 	// Handle Scheduled At
 	if (additionalOptions.scheduledAt) {
-		requestBody.scheduledAt = additionalOptions.scheduledAt;
+		requestBody.scheduled_at = additionalOptions.scheduledAt;
 	}
 
 	// Validate attachments + scheduledAt
@@ -631,10 +631,10 @@ export async function execute(
 						content: binaryData.data,
 					};
 					if (contentId) {
-						attachmentEntry.contentId = contentId;
+						attachmentEntry.content_id = contentId;
 					}
 					if (contentType) {
-						attachmentEntry.contentType = contentType;
+						attachmentEntry.content_type = contentType;
 					}
 					return attachmentEntry;
 				} else if (attachment.attachmentType === 'url') {
@@ -657,10 +657,10 @@ export async function execute(
 						path: attachment.fileUrl,
 					};
 					if (contentId) {
-						attachmentEntry.contentId = contentId;
+						attachmentEntry.content_id = contentId;
 					}
 					if (contentType) {
-						attachmentEntry.contentType = contentType;
+						attachmentEntry.content_type = contentType;
 					}
 					return attachmentEntry;
 				}

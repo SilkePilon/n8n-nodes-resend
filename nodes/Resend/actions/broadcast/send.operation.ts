@@ -54,7 +54,7 @@ export async function execute(
 	const body: IDataObject = {};
 
 	if (sendOptions.scheduledAt) {
-		body.scheduledAt = sendOptions.scheduledAt;
+		body.scheduled_at = sendOptions.scheduledAt;
 	}
 
 	const response = await apiRequest.call(this, 'POST', `/broadcasts/${encodeURIComponent(broadcastId)}/send`, body);

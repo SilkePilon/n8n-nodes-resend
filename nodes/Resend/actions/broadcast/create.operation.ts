@@ -150,7 +150,7 @@ export async function execute(
 	};
 
 	const body: IDataObject = {
-		segmentId,
+		segment_id: segmentId,
 		from,
 		subject,
 		html,
@@ -160,13 +160,13 @@ export async function execute(
 		body.name = createOptions.name;
 	}
 	if (createOptions.replyTo) {
-		body.replyTo = createOptions.replyTo;
+		body.reply_to = createOptions.replyTo;
 	}
 	if (createOptions.text) {
 		body.text = createOptions.text;
 	}
 	if (createOptions.topicId) {
-		body.topicId = createOptions.topicId;
+		body.topic_id = createOptions.topicId;
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/broadcasts', body);

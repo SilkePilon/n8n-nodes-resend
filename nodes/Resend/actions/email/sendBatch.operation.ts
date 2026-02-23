@@ -347,7 +347,7 @@ export async function execute(
 		if (replyToValue) {
 			const replyToList = normalizeEmailList(replyToValue);
 			if (replyToList.length) {
-				emailObj.replyTo = replyToList;
+				emailObj.reply_to = replyToList;
 			}
 		}
 
@@ -379,7 +379,7 @@ export async function execute(
 		// Handle Topic ID
 		const topicId = additionalOptions.topicId;
 		if (topicId) {
-			emailObj.topicId = topicId;
+			emailObj.topic_id = topicId;
 		}
 
 		// Handle content

@@ -62,7 +62,7 @@ export async function execute(
 	const body: IDataObject = { key, type };
 
 	if (fallbackValue) {
-		body.fallbackValue = fallbackValue;
+		body.fallback_value = fallbackValue;
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/contact-properties', body);
