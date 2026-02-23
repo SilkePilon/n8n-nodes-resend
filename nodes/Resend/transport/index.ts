@@ -167,13 +167,14 @@ export async function apiRequest(
 export async function requestList(
 	this: IExecuteFunctions,
 	endpoint: string,
+	extraQs?: IDataObject,
 ): Promise<IDataObject[]> {
 	const returnAll = this.getNodeParameter('returnAll', 0, false) as boolean;
 	const limit = this.getNodeParameter('limit', 0, 50) as number;
 
 	const targetLimit = returnAll ? Infinity : (limit ?? 50);
 	const pageSize = Math.min(targetLimit, 100);
-	const qs: Record<string, string | number> = { limit: pageSize };
+	const qs: Record<string, string | number> = { limit: pageSize, ...extraQs };
 
 	const requestPage = async () => {
 		try {
