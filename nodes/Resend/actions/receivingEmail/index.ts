@@ -1,4 +1,4 @@
-import type { INodeProperties } from 'n8n-workflow';
+import { INodeProperties } from 'n8n-workflow';
 
 import * as get from './get.operation';
 import * as list from './list.operation';
@@ -8,7 +8,7 @@ import * as getAttachment from './getAttachment.operation';
 export { get, list, listAttachments, getAttachment };
 export { execute } from './execute';
 
-export const descriptions: INodeProperties[] = [
+export const operations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
@@ -47,6 +47,10 @@ export const descriptions: INodeProperties[] = [
 		],
 		default: 'list',
 	},
+];
+
+export const descriptions: INodeProperties[] = [
+	...operations,
 	...list.description,
 	...get.description,
 	...listAttachments.description,

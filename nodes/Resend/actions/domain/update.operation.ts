@@ -74,10 +74,10 @@ export async function execute(
 	const body: IDataObject = {};
 
 	if (updateOptions.clickTracking !== undefined) {
-		body.clickTracking = updateOptions.clickTracking;
+		body.click_tracking = updateOptions.clickTracking;
 	}
 	if (updateOptions.openTracking !== undefined) {
-		body.openTracking = updateOptions.openTracking;
+		body.open_tracking = updateOptions.openTracking;
 	}
 	if (updateOptions.tls) {
 		body.tls = updateOptions.tls;

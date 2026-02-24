@@ -1,14 +1,14 @@
-import type { INodeProperties } from 'n8n-workflow';
+import { INodeProperties } from 'n8n-workflow';
 
 import * as create from './create.operation';
 import * as get from './get.operation';
 import * as list from './list.operation';
-import * as deleteSegment from './delete.operation';
+import * as del from './delete.operation';
 
-export { create, get, list, deleteSegment };
+export { create, get, list, del as delete };
 export { execute } from './execute';
 
-export const descriptions: INodeProperties[] = [
+export const operations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
@@ -47,8 +47,12 @@ export const descriptions: INodeProperties[] = [
 		],
 		default: 'list',
 	},
+];
+
+export const descriptions: INodeProperties[] = [
+	...operations,
 	...create.description,
 	...get.description,
 	...list.description,
-	...deleteSegment.description,
+	...del.description,
 ];

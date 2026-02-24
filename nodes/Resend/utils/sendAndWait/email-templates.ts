@@ -95,51 +95,16 @@ export const ACTION_RECORDED_PAGE = `
 
 </html>`;
 
-export function createEmailBodyWithN8nAttribution(
+export function createEmailBody(
 	message: string,
 	buttons: string,
-	instanceId?: string,
+	options?: { instanceId?: string },
 ) {
-	const utm_campaign = instanceId ? `&utm_campaign=${instanceId}` : '';
-	const n8nWebsiteLink = `https://n8n.io/?utm_source=n8n-internal&utm_medium=send-and-wait${utm_campaign}`;
-	return `
-<!DOCTYPE html>
-<html lang='en'>
-
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>n8n Approval Request</title>
-</head>
-
-<body
-	style="font-family: Arial, sans-serif; font-size: 12px; background-color: #fbfcfe; margin: 0; padding: 0;">
-	<table width="100%" cellpadding="0" cellspacing="0"
-		style="background-color:#fbfcfe; border: 1px solid #dbdfe7; border-radius: 8px;">
-		<tr>
-			<td align="center" style="padding: 24px 0;">
-				<table width="448" cellpadding="0" cellspacing="0" border="0"
-					style="width: 100%; max-width: 448px; background-color: #ffffff; border: 1px solid #dbdfe7; border-radius: 8px; padding: 24px; box-shadow: 0px 4px 16px rgba(99, 77, 255, 0.06);">
-					<tr>
-						<td
-							style="text-align: center; padding-top: 8px; font-family: Arial, sans-serif; font-size: 14px; color: #7e8186;">
-							<p style="white-space: pre-line;">${message}</p>
-						</td>
-					</tr>
-					<tr>
-						<td align="center" style="padding-top: 12px;">
-								${buttons}
-						</td>
-					</tr>
-				</table>
-
-				<!-- Divider -->
-				<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
-					<tr>
-						<td style="border-top: 0px solid #dbdfe7;"></td>
-					</tr>
-				</table>
-
+	let footerHtml = '';
+	if (options?.instanceId !== undefined) {
+		const utm_campaign = options.instanceId ? `&utm_campaign=${options.instanceId}` : '';
+		const n8nWebsiteLink = `https://n8n.io/?utm_source=n8n-internal&utm_medium=send-and-wait${utm_campaign}`;
+		footerHtml = `
 				<!-- Footer -->
 				<table width="100%" cellpadding="0" cellspacing="0" border="0"
 					style="text-align: center; color: #7e8186; font-family: Arial, sans-serif; font-size: 12px;">
@@ -150,17 +115,8 @@ export function createEmailBodyWithN8nAttribution(
 								style="color: #7e8186; text-decoration: none;">Automated with n8n</a>
 						</td>
 					</tr>
-				</table>
-			</td>
-		</tr>
-	</table>
-</body>
-
-</html>
-	`;
-}
-
-export function createEmailBodyWithoutN8nAttribution(message: string, buttons: string) {
+				</table>`;
+	}
 	return `
 <!DOCTYPE html>
 <html lang='en'>
@@ -199,7 +155,7 @@ export function createEmailBodyWithoutN8nAttribution(message: string, buttons: s
 					</tr>
 				</table>
 
-
+				${footerHtml}
 			</td>
 		</tr>
 	</table>
@@ -207,4 +163,18 @@ export function createEmailBodyWithoutN8nAttribution(message: string, buttons: s
 
 </html>
 	`;
+}
+
+/** @deprecated Use createEmailBody instead */
+export function createEmailBodyWithN8nAttribution(
+	message: string,
+	buttons: string,
+	instanceId?: string,
+) {
+	return createEmailBody(message, buttons, { instanceId: instanceId ?? '' });
+}
+
+/** @deprecated Use createEmailBody instead */
+export function createEmailBodyWithoutN8nAttribution(message: string, buttons: string) {
+	return createEmailBody(message, buttons);
 }

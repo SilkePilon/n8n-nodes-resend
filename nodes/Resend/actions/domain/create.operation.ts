@@ -110,13 +110,13 @@ export async function execute(
 		body.region = additionalOptions.region;
 	}
 	if (additionalOptions.customReturnPath) {
-		body.customReturnPath = additionalOptions.customReturnPath;
+		body.custom_return_path = additionalOptions.customReturnPath;
 	}
 	if (additionalOptions.openTracking !== undefined) {
-		body.openTracking = additionalOptions.openTracking;
+		body.open_tracking = additionalOptions.openTracking;
 	}
 	if (additionalOptions.clickTracking !== undefined) {
-		body.clickTracking = additionalOptions.clickTracking;
+		body.click_tracking = additionalOptions.clickTracking;
 	}
 	if (additionalOptions.tls) {
 		body.tls = additionalOptions.tls;
