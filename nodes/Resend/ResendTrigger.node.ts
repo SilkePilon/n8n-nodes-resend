@@ -1,5 +1,4 @@
 import {
-	IHookFunctions,
 	IWebhookFunctions,
 	IWebhookResponseData,
 	INode,
@@ -11,6 +10,13 @@ import {
 import { createHmac, timingSafeEqual } from 'crypto';
 
 const WEBHOOK_TOLERANCE_MS = 5 * 60 * 1000;
+
+function getHeaderValue(headers: Record<string, unknown>, name: string): string {
+	const exactMatch = headers[name];
+	const titleCaseMatch = headers[name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('-')];
+	const raw = exactMatch ?? titleCaseMatch;
+	return (Array.isArray(raw) ? raw[0] : raw) as string || '';
+}
 
 function parseSvixTimestamp(timestamp: string): number | null {
 	const numeric = Number(timestamp);
@@ -172,26 +178,9 @@ export class ResendTrigger implements INodeType {
 							: JSON.stringify(bodyData ?? {});
 
 				// Extract Svix headers with proper type handling
-				const svixId =
-					(Array.isArray(headers['svix-id']) ? headers['svix-id'][0] : headers['svix-id']) ||
-					(Array.isArray(headers['Svix-Id']) ? headers['Svix-Id'][0] : headers['Svix-Id']) ||
-					'';
-				const svixTimestamp =
-					(Array.isArray(headers['svix-timestamp'])
-						? headers['svix-timestamp'][0]
-						: headers['svix-timestamp']) ||
-					(Array.isArray(headers['Svix-Timestamp'])
-						? headers['Svix-Timestamp'][0]
-						: headers['Svix-Timestamp']) ||
-					'';
-				const svixSignature =
-					(Array.isArray(headers['svix-signature'])
-						? headers['svix-signature'][0]
-						: headers['svix-signature']) ||
-					(Array.isArray(headers['Svix-Signature'])
-						? headers['Svix-Signature'][0]
-						: headers['Svix-Signature']) ||
-					'';
+				const svixId = getHeaderValue(headers, 'svix-id');
+				const svixTimestamp = getHeaderValue(headers, 'svix-timestamp');
+				const svixSignature = getHeaderValue(headers, 'svix-signature');
 
 				if (!svixId || !svixTimestamp || !svixSignature) {
 					const res = this.getResponseObject();
@@ -237,23 +226,4 @@ export class ResendTrigger implements INodeType {
 			};
 		}
 	}
-	public webhookMethods = {
-		default: {
-			async checkExists(this: IHookFunctions): Promise<boolean> {
-				// For Resend webhooks, we don't need to check if the webhook exists
-				// since Resend manages webhooks independently
-				return true;
-			},
-			async create(this: IHookFunctions): Promise<boolean> {
-				// For Resend webhooks, the webhook URL needs to be manually configured
-				// in the Resend dashboard. We don't create it programmatically.
-				return true;
-			},
-			async delete(this: IHookFunctions): Promise<boolean> {
-				// For Resend webhooks, the webhook URL needs to be manually removed
-				// from the Resend dashboard. We don't delete it programmatically.
-				return true;
-			},
-		},
-	};
 }

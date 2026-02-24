@@ -4,7 +4,7 @@ import { createDynamicIdField, resolveDynamicIdValue } from '../../utils/dynamic
 
 export const description: INodeProperties[] = [
 	createDynamicIdField({
-		fieldName: 'emailIdForAttachment',
+		fieldName: 'emailId',
 		resourceName: 'email',
 		displayName: 'Email',
 		required: true,
@@ -38,7 +38,7 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const emailId = resolveDynamicIdValue(this, 'emailIdForAttachment', index);
+	const emailId = resolveDynamicIdValue(this, 'emailId', index);
 	const attachmentId = this.getNodeParameter('attachmentId', index) as string;
 
 	const response = await apiRequest.call(

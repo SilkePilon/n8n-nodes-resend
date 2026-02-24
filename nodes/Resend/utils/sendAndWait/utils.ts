@@ -18,8 +18,7 @@ import {
 	ACTION_RECORDED_PAGE,
 	BUTTON_STYLE_PRIMARY,
 	BUTTON_STYLE_SECONDARY,
-	createEmailBodyWithN8nAttribution,
-	createEmailBodyWithoutN8nAttribution,
+	createEmailBody,
 } from './email-templates';
 import type { IEmail, SendAndWaitConfig } from './interfaces';
 import { RESEND_API_BASE, handleResendApiError } from '../../transport';
@@ -566,9 +565,9 @@ export function createEmail(context: IExecuteFunctions): IEmail {
 	let emailBody: string;
 	if (config.appendAttribution !== false) {
 		const instanceId = context.getInstanceId();
-		emailBody = createEmailBodyWithN8nAttribution(config.message, buttons.join('\n'), instanceId);
+		emailBody = createEmailBody(config.message, buttons.join('\n'), { instanceId: instanceId ?? '' });
 	} else {
-		emailBody = createEmailBodyWithoutN8nAttribution(config.message, buttons.join('\n'));
+		emailBody = createEmailBody(config.message, buttons.join('\n'));
 	}
 
 	const email: IEmail = {

@@ -415,3 +415,35 @@ export function createListExecutionData(
 		pairedItem: { item: 0 },
 	}));
 }
+
+interface ItemOperation {
+	execute(this: IExecuteFunctions, index: number): Promise<INodeExecutionData[]>;
+}
+
+interface ListOperation {
+	execute(this: IExecuteFunctions): Promise<INodeExecutionData[]>;
+}
+
+export function createOperationRouter(
+	itemOps: Record<string, ItemOperation>,
+	listOps: Record<string, ListOperation> = {},
+): (this: IExecuteFunctions, index: number, operation: string) => Promise<INodeExecutionData[]> {
+	return async function execute(
+		this: IExecuteFunctions,
+		index: number,
+		operation: string,
+	): Promise<INodeExecutionData[]> {
+		const listOp = listOps[operation];
+		if (listOp) {
+			return listOp.execute.call(this);
+		}
+		const itemOp = itemOps[operation];
+		if (itemOp) {
+			return itemOp.execute.call(this, index);
+		}
+		throw new NodeOperationError(
+			this.getNode(),
+			`Unsupported operation: ${operation}`,
+		);
+	};
+}

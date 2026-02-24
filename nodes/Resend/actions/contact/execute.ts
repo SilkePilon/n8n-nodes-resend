@@ -1,5 +1,4 @@
-import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { createOperationRouter } from '../../transport';
 
 import * as create from './create.operation';
 import * as get from './get.operation';
@@ -12,36 +11,17 @@ import * as removeFromSegment from './removeFromSegment.operation';
 import * as getTopics from './getTopics.operation';
 import * as updateTopics from './updateTopics.operation';
 
-export async function execute(
-	this: IExecuteFunctions,
-	index: number,
-	operation: string,
-): Promise<INodeExecutionData[]> {
-	switch (operation) {
-		case 'create':
-			return create.execute.call(this, index);
-		case 'get':
-			return get.execute.call(this, index);
-		case 'list':
-			return list.execute.call(this);
-		case 'update':
-			return update.execute.call(this, index);
-		case 'delete':
-			return del.execute.call(this, index);
-		case 'addToSegment':
-			return addToSegment.execute.call(this, index);
-		case 'listSegments':
-			return listSegments.execute.call(this, index);
-		case 'removeFromSegment':
-			return removeFromSegment.execute.call(this, index);
-		case 'getTopics':
-			return getTopics.execute.call(this, index);
-		case 'updateTopics':
-			return updateTopics.execute.call(this, index);
-		default:
-			throw new NodeOperationError(
-				this.getNode(),
-				`Unsupported operation: ${operation}`,
-			);
-	}
-}
+export const execute = createOperationRouter(
+	{
+		create,
+		get,
+		update,
+		delete: del,
+		addToSegment,
+		listSegments,
+		removeFromSegment,
+		getTopics,
+		updateTopics,
+	},
+	{ list },
+);

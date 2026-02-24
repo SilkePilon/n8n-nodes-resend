@@ -336,79 +336,22 @@ async function wrapForListSearch(
 	};
 }
 
-export async function getBroadcastsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getBroadcasts, filter);
+function createListSearch(
+	loadOptionsMethod: (this: ILoadOptionsFunctions) => Promise<INodePropertyOptions[]>,
+): (this: ILoadOptionsFunctions, filter?: string) => Promise<INodeListSearchResult> {
+	return function (this: ILoadOptionsFunctions, filter?: string) {
+		return wrapForListSearch(this, loadOptionsMethod, filter);
+	};
 }
 
-export async function getContactPropertiesListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getContactProperties, filter);
-}
-
-export async function getContactsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getContacts, filter);
-}
-
-export async function getDomainsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getDomains, filter);
-}
-
-export async function getEmailsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getEmails, filter);
-}
-
-export async function getReceivedEmailsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getReceivedEmails, filter);
-}
-
-export async function getSegmentsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getSegments, filter);
-}
-
-export async function getTemplatesListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getTemplates, filter);
-}
-
-export async function getTopicsListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getTopics, filter);
-}
-
-export async function getWebhooksListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getWebhooks, filter);
-}
-
-export async function getTemplateVariablesListSearch(
-	this: ILoadOptionsFunctions,
-	filter?: string,
-): Promise<INodeListSearchResult> {
-	return wrapForListSearch(this, getTemplateVariables, filter);
-}
+export const getBroadcastsListSearch = createListSearch(getBroadcasts);
+export const getContactPropertiesListSearch = createListSearch(getContactProperties);
+export const getContactsListSearch = createListSearch(getContacts);
+export const getDomainsListSearch = createListSearch(getDomains);
+export const getEmailsListSearch = createListSearch(getEmails);
+export const getReceivedEmailsListSearch = createListSearch(getReceivedEmails);
+export const getSegmentsListSearch = createListSearch(getSegments);
+export const getTemplatesListSearch = createListSearch(getTemplates);
+export const getTopicsListSearch = createListSearch(getTopics);
+export const getWebhooksListSearch = createListSearch(getWebhooks);
+export const getTemplateVariablesListSearch = createListSearch(getTemplateVariables);

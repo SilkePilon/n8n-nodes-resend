@@ -12,6 +12,19 @@ import * as contactProperties from './contactProperty';
 import * as webhooks from './webhook';
 import * as receivingEmails from './receivingEmail';
 
+const resourceModules: Record<string, { execute: typeof email.execute }> = {
+	email,
+	templates,
+	domains,
+	broadcasts,
+	segments,
+	topics,
+	contacts,
+	contactProperties,
+	webhooks,
+	receivingEmails,
+};
+
 export async function router(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 	const items = this.getInputData();
 	const returnData: INodeExecutionData[] = [];
@@ -20,46 +33,16 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 		try {
 			const resource = this.getNodeParameter('resource', i) as string;
 			const operation = this.getNodeParameter('operation', i) as string;
-			let executionData: INodeExecutionData[] = [];
 
-			switch (resource) {
-				case 'email':
-					executionData = await email.execute.call(this, i, operation);
-					break;
-				case 'templates':
-					executionData = await templates.execute.call(this, i, operation);
-					break;
-				case 'domains':
-					executionData = await domains.execute.call(this, i, operation);
-					break;
-				case 'broadcasts':
-					executionData = await broadcasts.execute.call(this, i, operation);
-					break;
-				case 'segments':
-					executionData = await segments.execute.call(this, i, operation);
-					break;
-				case 'topics':
-					executionData = await topics.execute.call(this, i, operation);
-					break;
-				case 'contacts':
-					executionData = await contacts.execute.call(this, i, operation);
-					break;
-				case 'contactProperties':
-					executionData = await contactProperties.execute.call(this, i, operation);
-					break;
-				case 'webhooks':
-					executionData = await webhooks.execute.call(this, i, operation);
-					break;
-				case 'receivingEmails':
-					executionData = await receivingEmails.execute.call(this, i, operation);
-					break;
-				default:
-					throw new NodeOperationError(
-						this.getNode(),
-						`Unknown resource: ${resource}`,
-					);
+			const mod = resourceModules[resource];
+			if (!mod) {
+				throw new NodeOperationError(
+					this.getNode(),
+					`Unknown resource: ${resource}`,
+				);
 			}
 
+			const executionData = await mod.execute.call(this, i, operation);
 			returnData.push(...executionData);
 		} catch (error) {
 			if (this.continueOnFail()) {
