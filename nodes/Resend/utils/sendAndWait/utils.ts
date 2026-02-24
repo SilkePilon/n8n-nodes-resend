@@ -565,7 +565,7 @@ export function createEmail(context: IExecuteFunctions): IEmail {
 	let emailBody: string;
 	if (config.appendAttribution !== false) {
 		const instanceId = context.getInstanceId();
-		emailBody = createEmailBody(config.message, buttons.join('\n'), { instanceId });
+		emailBody = createEmailBody(config.message, buttons.join('\n'), { instanceId: instanceId ?? '' });
 	} else {
 		emailBody = createEmailBody(config.message, buttons.join('\n'));
 	}
