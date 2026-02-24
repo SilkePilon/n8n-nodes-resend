@@ -90,11 +90,59 @@ function extractResendError(error: unknown): ResendApiError | undefined {
 	return undefined;
 }
 
+interface ResponseHeaders {
+	'ratelimit-limit'?: string;
+	'ratelimit-remaining'?: string;
+	'ratelimit-reset'?: string;
+	'retry-after'?: string;
+	'x-resend-daily-quota'?: string;
+	'x-resend-monthly-quota'?: string;
+}
+
+function extractResponseHeaders(error: unknown): ResponseHeaders {
+	if (!error || typeof error !== 'object') return {};
+	const cause = (error as Record<string, unknown>).cause;
+	if (!cause || typeof cause !== 'object') return {};
+	const response = (cause as Record<string, unknown>).response;
+	if (!response || typeof response !== 'object') return {};
+	const headers = (response as Record<string, unknown>).headers;
+	if (!headers || typeof headers !== 'object') return {};
+	return headers as ResponseHeaders;
+}
+
 function sanitizeErrorMessage(message: string): string {
 	return message
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/`/g, "'");
+}
+
+function buildQuotaDescription(resendError: ResendApiError, headers: ResponseHeaders): string {
+	const base = sanitizeErrorMessage(resendError.message);
+
+	if (resendError.name === 'daily_quota_exceeded') {
+		const retryAfter = headers['retry-after'] ?? headers['ratelimit-reset'];
+		const resetNote = retryAfter ? ` Resets in approximately ${retryAfter} second(s).` : '';
+		return `${base} Upgrade your plan to remove the daily sending limit, or wait until your quota resets.${resetNote}`;
+	}
+
+	if (resendError.name === 'monthly_quota_exceeded') {
+		return `${base} Upgrade your plan to increase your monthly email quota.`;
+	}
+
+	// Generic rate-limit (e.g. rate_limit_exceeded)
+	const retryAfter = headers['retry-after'] ?? headers['ratelimit-reset'];
+	const remaining = headers['ratelimit-remaining'];
+	const limit = headers['ratelimit-limit'];
+	const parts: string[] = [base];
+	if (limit !== undefined && remaining !== undefined) {
+		parts.push(`Limit: ${limit} req/s, remaining: ${remaining}.`);
+	}
+	if (retryAfter) {
+		parts.push(`Retry after ${retryAfter} second(s).`);
+	}
+	parts.push('Consider reducing concurrent requests or adding a queue mechanism.');
+	return parts.join(' ');
 }
 
 export function handleResendApiError(
@@ -105,15 +153,52 @@ export function handleResendApiError(
 	const resendError = extractResendError(error);
 
 	if (resendError) {
+		const headers = extractResponseHeaders(error);
+		const statusCode = resendError.statusCode;
+
+		// 429 – rate limit or sending quota exceeded
+		if (statusCode === 429) {
+			const description = buildQuotaDescription(resendError, headers);
+			throw new NodeApiError(node, {
+				message: description,
+				name: resendError.name,
+				statusCode,
+			} as unknown as JsonObject, {
+				message: `${formatResendErrorTitle(resendError.name)} (429)`,
+				description,
+				httpCode: '429',
+				...(itemIndex !== undefined ? { itemIndex } : {}),
+			});
+		}
+
+		// 403 – contact quota exceeded (validation_error with quota message)
+		if (
+			statusCode === 403 &&
+			resendError.name === 'validation_error' &&
+			resendError.message.toLowerCase().includes('contacts quota')
+		) {
+			const description = `${sanitizeErrorMessage(resendError.message)} Upgrade your Marketing plan to increase your contact limit and resume sending broadcasts.`;
+			throw new NodeApiError(node, {
+				message: description,
+				name: resendError.name,
+				statusCode,
+			} as unknown as JsonObject, {
+				message: `Contact Quota Exceeded (403)`,
+				description,
+				httpCode: '403',
+				...(itemIndex !== undefined ? { itemIndex } : {}),
+			});
+		}
+
 		const sanitizedMessage = sanitizeErrorMessage(resendError.message);
 		throw new NodeApiError(node, {
 			message: sanitizedMessage,
 			name: resendError.name,
-			statusCode: resendError.statusCode,
+			statusCode,
 		} as unknown as JsonObject, {
-			message: `${formatResendErrorTitle(resendError.name)} (${resendError.statusCode})`,
+			message: `${formatResendErrorTitle(resendError.name)} (${statusCode})`,
 			description: sanitizedMessage,
-			httpCode: String(resendError.statusCode),
+			httpCode: String(statusCode),
 			...(itemIndex !== undefined ? { itemIndex } : {}),
 		});
 	}
