@@ -1,9 +1,15 @@
-import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { apiRequest } from '../../transport';
 
 export const description: INodeProperties[] = [
 	{
-		displayName: 'After adding a domain, you must configure DNS records (SPF, DKIM, DMARC) and verify the domain before sending emails.',
+		displayName:
+			'After adding a domain, you must configure DNS records (SPF, DKIM, DMARC) and verify the domain before sending emails.',
 		name: 'domainNotice',
 		type: 'notice',
 		default: '',
@@ -27,7 +33,8 @@ export const description: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		description: 'The domain name to add to Resend (e.g., example.com). After adding, you must configure DNS records to verify ownership before sending emails.',
+		description:
+			'The domain name to add to Resend (e.g., example.com). After adding, you must configure DNS records to verify ownership before sending emails.',
 	},
 	{
 		displayName: 'Additional Options',
@@ -43,18 +50,58 @@ export const description: INodeProperties[] = [
 		},
 		options: [
 			{
+				displayName: 'Capabilities',
+				name: 'capabilities',
+				type: 'fixedCollection',
+				default: {},
+				description:
+					'Configure the domain capabilities for sending and receiving emails. At least one capability must be enabled.',
+				options: [
+					{
+						displayName: 'Capabilities',
+						name: 'capabilitiesValues',
+						values: [
+							{
+								displayName: 'Sending',
+								name: 'sending',
+								type: 'options',
+								options: [
+									{ name: 'Enabled', value: 'enabled' },
+									{ name: 'Disabled', value: 'disabled' },
+								],
+								default: 'enabled',
+								description: 'Whether this domain can be used to send emails',
+							},
+							{
+								displayName: 'Receiving',
+								name: 'receiving',
+								type: 'options',
+								options: [
+									{ name: 'Enabled', value: 'enabled' },
+									{ name: 'Disabled', value: 'disabled' },
+								],
+								default: 'disabled',
+								description: 'Whether this domain can receive inbound emails',
+							},
+						],
+					},
+				],
+			},
+			{
 				displayName: 'Click Tracking',
 				name: 'clickTracking',
 				type: 'boolean',
 				default: false,
-				description: 'Whether to track clicks within the body of each HTML email sent from this domain',
+				description:
+					'Whether to track clicks within the body of each HTML email sent from this domain',
 			},
 			{
 				displayName: 'Custom Return Path',
 				name: 'customReturnPath',
 				type: 'string',
 				default: 'send',
-				description: 'Custom subdomain for email bounce handling (Return-Path address). Defaults to "send". This subdomain needs to be configured in your DNS.',
+				description:
+					'Custom subdomain for email bounce handling (Return-Path address). Defaults to "send". This subdomain needs to be configured in your DNS.',
 			},
 			{
 				displayName: 'Open Tracking',
@@ -74,7 +121,8 @@ export const description: INodeProperties[] = [
 					{ name: 'Asia Pacific Northeast 1', value: 'ap-northeast-1' },
 				],
 				default: 'us-east-1',
-				description: 'The AWS region where emails will be sent from. Choose a region closest to your recipients for better deliverability.',
+				description:
+					'The AWS region where emails will be sent from. Choose a region closest to your recipients for better deliverability.',
 			},
 			{
 				displayName: 'TLS',
@@ -85,7 +133,8 @@ export const description: INodeProperties[] = [
 					{ name: 'Enforced', value: 'enforced' },
 				],
 				default: 'opportunistic',
-				description: 'TLS setting for email delivery. Opportunistic attempts secure connection but falls back to unencrypted. Enforced requires TLS.',
+				description:
+					'TLS setting for email delivery. Opportunistic attempts secure connection but falls back to unencrypted. Enforced requires TLS.',
 			},
 		],
 	},
@@ -102,6 +151,12 @@ export async function execute(
 		openTracking?: boolean;
 		clickTracking?: boolean;
 		tls?: string;
+		capabilities?: {
+			capabilitiesValues?: {
+				sending?: string;
+				receiving?: string;
+			};
+		};
 	};
 
 	const body: IDataObject = { name };
@@ -120,6 +175,13 @@ export async function execute(
 	}
 	if (additionalOptions.tls) {
 		body.tls = additionalOptions.tls;
+	}
+	if (additionalOptions.capabilities?.capabilitiesValues) {
+		const caps = additionalOptions.capabilities.capabilitiesValues;
+		body.capabilities = {
+			sending: caps.sending ?? 'enabled',
+			receiving: caps.receiving ?? 'disabled',
+		};
 	}
 
 	const response = await apiRequest.call(this, 'POST', '/domains', body);

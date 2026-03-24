@@ -12,6 +12,8 @@ import * as contacts from './actions/contact';
 import * as contactProperties from './actions/contactProperty';
 import * as webhooks from './actions/webhook';
 import * as receivingEmails from './actions/receivingEmail';
+import * as workflows from './actions/workflow';
+import * as events from './actions/event';
 import {
 	getBroadcasts,
 	getContactProperties,
@@ -56,7 +58,7 @@ export class Resend implements INodeType {
 		description:
 			'Send emails, manage contacts, create broadcasts, handle templates, domains, segments, topics, and webhooks using the Resend email platform',
 		subtitle:
-			'={{(() => { const resourceLabels = { broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
+			'={{(() => { const resourceLabels = { broadcasts: "broadcast", contacts: "contact", contactProperties: "contact property", domains: "domain", email: "email", receivingEmails: "received email", workflows: "workflow", events: "event", segments: "segment", templates: "template", topics: "topic", webhooks: "webhook" }; const operationLabels = { retrieve: "get", sendBatch: "send batch", listAttachments: "list attachments", getAttachment: "get attachment", addToSegment: "add to segment", listSegments: "list segments", removeFromSegment: "remove from segment", getTopics: "get topics", updateTopics: "update topics", listRuns: "list runs", getRun: "get run", listRunSteps: "list run steps", getRunStep: "get run step" }; const resource = $parameter["resource"]; const operation = $parameter["operation"]; const resourceLabel = resourceLabels[resource] ?? resource; const operationLabel = operationLabels[operation] ?? operation; return operationLabel + ": " + resourceLabel; })() }}',
 		defaults: {
 			name: 'Resend',
 		},
@@ -81,52 +83,74 @@ export class Resend implements INodeType {
 					{
 						name: 'Broadcast',
 						value: 'broadcasts',
-						description: 'Create, send, update, or delete email broadcasts to reach multiple contacts at once',
+						description:
+							'Create, send, update, or delete email broadcasts to reach multiple contacts at once',
 					},
 					{
 						name: 'Contact',
 						value: 'contacts',
-						description: 'Add, update, delete, or list contacts (email subscribers) and manage their segment and topic memberships',
+						description:
+							'Add, update, delete, or list contacts (email subscribers) and manage their segment and topic memberships',
 					},
 					{
 						name: 'Contact Property',
 						value: 'contactProperties',
-						description: 'Create, update, delete, or list custom contact properties (metadata fields) for storing additional contact information',
+						description:
+							'Create, update, delete, or list custom contact properties (metadata fields) for storing additional contact information',
 					},
 					{
 						name: 'Domain',
 						value: 'domains',
-						description: 'Add, verify, update, or delete sending domains for email authentication and deliverability',
+						description:
+							'Add, verify, update, or delete sending domains for email authentication and deliverability',
 					},
 					{
 						name: 'Email',
 						value: 'email',
-						description: 'Send single or batch emails, retrieve sent emails, cancel scheduled emails, or manage email attachments',
+						description:
+							'Send single or batch emails, retrieve sent emails, cancel scheduled emails, or manage email attachments',
+					},
+					{
+						name: 'Event',
+						value: 'events',
+						description:
+							'Create, send, retrieve, update, or delete events for triggering workflows (private alpha)',
 					},
 					{
 						name: 'Receiving Email',
 						value: 'receivingEmails',
-						description: 'List and retrieve received emails and their attachments from inbound email processing',
+						description:
+							'List and retrieve received emails and their attachments from inbound email processing',
 					},
 					{
 						name: 'Segment',
 						value: 'segments',
-						description: 'Create, update, delete, or list contact segments for grouping contacts based on criteria',
+						description:
+							'Create, update, delete, or list contact segments for grouping contacts based on criteria',
 					},
 					{
 						name: 'Template',
 						value: 'templates',
-						description: 'Create, update, publish, duplicate, or delete reusable email templates with dynamic variables',
+						description:
+							'Create, update, publish, duplicate, or delete reusable email templates with dynamic variables',
 					},
 					{
 						name: 'Topic',
 						value: 'topics',
-						description: 'Create, update, delete, or list subscription topics for managing email preferences',
+						description:
+							'Create, update, delete, or list subscription topics for managing email preferences',
 					},
 					{
 						name: 'Webhook',
 						value: 'webhooks',
-						description: 'Create, update, delete, or list webhooks for receiving real-time notifications about email events',
+						description:
+							'Create, update, delete, or list webhooks for receiving real-time notifications about email events',
+					},
+					{
+						name: 'Workflow',
+						value: 'workflows',
+						description:
+							'Create, update, delete, or list automated email workflows and monitor runs (private alpha)',
 					},
 				],
 				default: 'email',
@@ -142,6 +166,8 @@ export class Resend implements INodeType {
 			...contactProperties.descriptions,
 			...webhooks.descriptions,
 			...receivingEmails.descriptions,
+			...workflows.descriptions,
+			...events.descriptions,
 		],
 	};
 
