@@ -17,8 +17,12 @@ export const webhookEventOptions: INodePropertyOptions[] = [
 	{ name: 'Email Complained', value: 'email.complained' },
 	{ name: 'Email Delivered', value: 'email.delivered' },
 	{ name: 'Email Delivery Delayed', value: 'email.delivery_delayed' },
+	{ name: 'Email Failed', value: 'email.failed' },
 	{ name: 'Email Opened', value: 'email.opened' },
+	{ name: 'Email Received', value: 'email.received' },
+	{ name: 'Email Scheduled', value: 'email.scheduled' },
 	{ name: 'Email Sent', value: 'email.sent' },
+	{ name: 'Email Suppressed', value: 'email.suppressed' },
 ];
 
 export const operations: INodeProperties[] = [
@@ -36,7 +40,8 @@ export const operations: INodeProperties[] = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a new webhook endpoint to receive real-time notifications for email events like delivered, opened, clicked, bounced',
+				description:
+					'Create a new webhook endpoint to receive real-time notifications for email events like delivered, opened, clicked, bounced',
 				action: 'Create a webhook endpoint',
 			},
 			{
@@ -48,7 +53,8 @@ export const operations: INodeProperties[] = [
 			{
 				name: 'Get',
 				value: 'get',
-				description: 'Retrieve details of a webhook including its URL, subscribed events, and status',
+				description:
+					'Retrieve details of a webhook including its URL, subscribed events, and status',
 				action: 'Get webhook details',
 			},
 			{
@@ -60,7 +66,7 @@ export const operations: INodeProperties[] = [
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update a webhook\'s URL or the events it is subscribed to',
+				description: "Update a webhook's URL or the events it is subscribed to",
 				action: 'Update a webhook',
 			},
 		],

@@ -45,7 +45,9 @@ function extractResendError(error: unknown): ResendApiError | undefined {
 		try {
 			const parsed = JSON.parse(trimmed) as unknown;
 			if (isResendShape(parsed)) return parsed;
-		} catch { /* not JSON */ }
+		} catch {
+			/* not JSON */
+		}
 		return undefined;
 	};
 
@@ -111,10 +113,7 @@ function extractResponseHeaders(error: unknown): ResponseHeaders {
 }
 
 function sanitizeErrorMessage(message: string): string {
-	return message
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/`/g, "'");
+	return message.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`/g, "'");
 }
 
 function buildQuotaDescription(resendError: ResendApiError, headers: ResponseHeaders): string {
@@ -145,11 +144,7 @@ function buildQuotaDescription(resendError: ResendApiError, headers: ResponseHea
 	return parts.join(' ');
 }
 
-export function handleResendApiError(
-	node: INode,
-	error: unknown,
-	itemIndex?: number,
-): never {
+export function handleResendApiError(node: INode, error: unknown, itemIndex?: number): never {
 	const resendError = extractResendError(error);
 
 	if (resendError) {
@@ -159,16 +154,20 @@ export function handleResendApiError(
 		// 429 – rate limit or sending quota exceeded
 		if (statusCode === 429) {
 			const description = buildQuotaDescription(resendError, headers);
-			throw new NodeApiError(node, {
-				message: description,
-				name: resendError.name,
-				statusCode,
-			} as unknown as JsonObject, {
-				message: `${formatResendErrorTitle(resendError.name)} (429)`,
-				description,
-				httpCode: '429',
-				...(itemIndex !== undefined ? { itemIndex } : {}),
-			});
+			throw new NodeApiError(
+				node,
+				{
+					message: description,
+					name: resendError.name,
+					statusCode,
+				} as unknown as JsonObject,
+				{
+					message: `${formatResendErrorTitle(resendError.name)} (429)`,
+					description,
+					httpCode: '429',
+					...(itemIndex !== undefined ? { itemIndex } : {}),
+				},
+			);
 		}
 
 		// 403 – contact quota exceeded (validation_error with quota message)
@@ -178,29 +177,37 @@ export function handleResendApiError(
 			resendError.message.toLowerCase().includes('contacts quota')
 		) {
 			const description = `${sanitizeErrorMessage(resendError.message)} Upgrade your Marketing plan to increase your contact limit and resume sending broadcasts.`;
-			throw new NodeApiError(node, {
-				message: description,
-				name: resendError.name,
-				statusCode,
-			} as unknown as JsonObject, {
-				message: `Contact Quota Exceeded (403)`,
-				description,
-				httpCode: '403',
-				...(itemIndex !== undefined ? { itemIndex } : {}),
-			});
+			throw new NodeApiError(
+				node,
+				{
+					message: description,
+					name: resendError.name,
+					statusCode,
+				} as unknown as JsonObject,
+				{
+					message: `Contact Quota Exceeded (403)`,
+					description,
+					httpCode: '403',
+					...(itemIndex !== undefined ? { itemIndex } : {}),
+				},
+			);
 		}
 
 		const sanitizedMessage = sanitizeErrorMessage(resendError.message);
-		throw new NodeApiError(node, {
-			message: sanitizedMessage,
-			name: resendError.name,
-			statusCode,
-		} as unknown as JsonObject, {
-			message: `${formatResendErrorTitle(resendError.name)} (${statusCode})`,
-			description: sanitizedMessage,
-			httpCode: String(statusCode),
-			...(itemIndex !== undefined ? { itemIndex } : {}),
-		});
+		throw new NodeApiError(
+			node,
+			{
+				message: sanitizedMessage,
+				name: resendError.name,
+				statusCode,
+			} as unknown as JsonObject,
+			{
+				message: `${formatResendErrorTitle(resendError.name)} (${statusCode})`,
+				description: sanitizedMessage,
+				httpCode: String(statusCode),
+				...(itemIndex !== undefined ? { itemIndex } : {}),
+			},
+		);
 	}
 
 	if (error instanceof NodeApiError || error instanceof NodeOperationError) {
@@ -226,6 +233,7 @@ export async function apiRequest(
 		method,
 		headers: {
 			'Content-Type': 'application/json',
+			'User-Agent': 'n8n-nodes-resend',
 		},
 		json: true,
 	};
@@ -239,11 +247,7 @@ export async function apiRequest(
 	}
 
 	try {
-		return await this.helpers.httpRequestWithAuthentication.call(
-			this,
-			'resendApi',
-			options,
-		);
+		return await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', options);
 	} catch (error) {
 		handleResendApiError(this.getNode(), error);
 	}
@@ -266,6 +270,9 @@ export async function requestList(
 			return await this.helpers.httpRequestWithAuthentication.call(this, 'resendApi', {
 				url: `${RESEND_API_BASE}${endpoint}`,
 				method: 'GET',
+				headers: {
+					'User-Agent': 'n8n-nodes-resend',
+				},
 				qs,
 				json: true,
 			});
@@ -364,7 +371,9 @@ export function parseTemplateVariables(
 }
 
 export function buildTemplateSendVariables(
-	variablesInput: { variables?: Array<{ key: string | { mode?: string; value?: unknown }; value?: unknown }> } | undefined,
+	variablesInput:
+		| { variables?: Array<{ key: string | { mode?: string; value?: unknown }; value?: unknown }> }
+		| undefined,
 ): Record<string, unknown> | undefined {
 	if (!variablesInput?.variables?.length) {
 		return undefined;
@@ -441,9 +450,6 @@ export function createOperationRouter(
 		if (itemOp) {
 			return itemOp.execute.call(this, index);
 		}
-		throw new NodeOperationError(
-			this.getNode(),
-			`Unsupported operation: ${operation}`,
-		);
+		throw new NodeOperationError(this.getNode(), `Unsupported operation: ${operation}`);
 	};
 }

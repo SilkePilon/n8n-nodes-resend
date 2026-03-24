@@ -11,6 +11,8 @@ import * as contacts from './contact';
 import * as contactProperties from './contactProperty';
 import * as webhooks from './webhook';
 import * as receivingEmails from './receivingEmail';
+import * as workflows from './workflow';
+import * as events from './event';
 
 const resourceModules: Record<string, { execute: typeof email.execute }> = {
 	email,
@@ -23,6 +25,8 @@ const resourceModules: Record<string, { execute: typeof email.execute }> = {
 	contactProperties,
 	webhooks,
 	receivingEmails,
+	workflows,
+	events,
 };
 
 export async function router(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -36,10 +40,7 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 
 			const mod = resourceModules[resource];
 			if (!mod) {
-				throw new NodeOperationError(
-					this.getNode(),
-					`Unknown resource: ${resource}`,
-				);
+				throw new NodeOperationError(this.getNode(), `Unknown resource: ${resource}`);
 			}
 
 			const executionData = await mod.execute.call(this, i, operation);
